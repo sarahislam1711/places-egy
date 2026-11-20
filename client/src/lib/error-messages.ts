@@ -20,6 +20,13 @@ function prettifyEnumField(rawField: string): string {
 export function humanizeError(message: string): string {
   if (!message) return "Something went wrong. Please try again.";
 
+  // The server's own refusal of a listing (server/listing-gate.ts) already says
+  // exactly what to fix. Show it as is: it can contain numbers such as 1,401
+  // that the generic 401/429 checks below would misread.
+  if (message.startsWith("Listing not saved.")) {
+    return message.replace(/\s*\|\s*/g, "\n");
+  }
+
   // "invalid input value for enum subtype_enum: \"Business Park \""
   const enumMatch = message.match(/invalid input value for enum (\w+):\s*"([^"]*)"/i);
   if (enumMatch) {

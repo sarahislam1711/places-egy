@@ -647,7 +647,7 @@ function ListingFormDialog({
           {saveMutation.error && (
             <div className="rounded-md border border-destructive/30 bg-destructive/5 text-destructive px-4 py-3 text-sm">
               <p className="font-semibold mb-1">Save failed</p>
-              <p className="text-xs">{humanizeError((saveMutation.error as Error).message)}</p>
+              <p className="text-xs whitespace-pre-line">{humanizeError((saveMutation.error as Error).message)}</p>
             </div>
           )}
 
