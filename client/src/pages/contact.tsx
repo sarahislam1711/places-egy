@@ -8,6 +8,7 @@ import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { breadcrumbSchema, contactPageSchema } from "@/lib/schema";
 import { trackEvent } from "@/lib/analytics";
 import { useDocumentMeta } from "@/lib/use-document-meta";
+import { LeadForm } from "@/components/LeadForm";
 
 const PHONE = "01063618217";
 
@@ -111,6 +112,31 @@ export default function Contact() {
                 </Link>
               </div>
             </div>
+          </div>
+
+          {/* Requirements form. Many company tenants won't call or WhatsApp a
+              broker cold but will send a brief; this page used to offer only
+              Call / WhatsApp / Email. Goes to the same leads table, admin
+              notification and welcome email as every other form. */}
+          <div
+            id="requirements"
+            className="bg-white rounded-2xl border border-border/40 p-6 md:p-8 mb-10 md:mb-16 max-w-2xl mx-auto"
+          >
+            <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-2 text-center">
+              Send us your requirements
+            </h2>
+            <p className="text-sm text-muted-foreground mb-6 text-center">
+              Tell us the area, size, budget and move-in date. An advisor will reply with a shortlist of
+              available units, usually the same day.
+            </p>
+            <LeadForm
+              leadSource="contact_page"
+              submitLabel="Send my requirements"
+              successTitle="Thanks, we've got it."
+              successBody="A PLACES advisor will contact you shortly with matching units. For anything urgent, WhatsApp us."
+              messageLabel="What are you looking for?"
+              messagePlaceholder="e.g. 200–300 m², finished, rent, budget 250K EGP/month, move in by March"
+            />
           </div>
 
         </div>

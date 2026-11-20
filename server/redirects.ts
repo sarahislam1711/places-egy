@@ -191,6 +191,17 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   "/ar/blog/ready-to-move-vs-core-and-shell-offices-egypt":
     "/ar/blog/ready-to-move-vs-core-and-shell-offices-in-egypt-تختار-مكتب-جاهز-ولا-تجهزه-بنف",
   "/ar/blog/business-park-mixed-use": "/ar/blog/بيزنس-بارك-و-المشروع-متعدد-الاستخداما",
+
+  // Old URLs GSC still reported as 404 on 2026-11-19 (crawled 15–17 Nov, so
+  // something still links to them). Each goes to its closest live page.
+  // No Arabic twin exists for the yield post, so it lands on the English one.
+  "/ar/blog/office-investment-yield-new-cairo": "/blog/office-investment-yield-new-cairo",
+  "/ar/blog/blog-north-90-street-offices-new-cairo": "/ar/blog/مكاتب-التسعين-الشمالى",
+  "/blog/where-to-buy-office-cairo-guide": "/blog/offices-for-sale-new-cairo",
+  // Exact entry so this doesn't hop through the /resources/blog prefix rule
+  // into the old 404 above.
+  "/resources/blog/where-to-buy-office-cairo-guide": "/blog/offices-for-sale-new-cairo",
+  "/developers/palm-hills-1": "/developers/palm-hills",
 };
 
 // Prefix redirects for path roots that have moved. Anything matching the

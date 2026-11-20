@@ -11,7 +11,7 @@ import { ListingCard } from "@/components/listings/ListingCard";
 import { SafeListingsMap, canDrawMaps } from "@/components/listings/SafeMap";
 import { supabase, type Listing } from "@/lib/supabase";
 import { FURNISHING_OPTIONS, getEnumLabel } from "@/lib/enums";
-import { formatEgpShort, priceInEgp } from "@/lib/currency";
+import { formatEgpShort, priceInEgp, useUsdEgpRate } from "@/lib/currency";
 import { DEVELOPER_DISPLAY_NAMES } from "@/lib/projects";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { breadcrumbSchema, itemListSchema } from "@/lib/schema";
@@ -136,6 +136,10 @@ export default function ListingsPage() {
     },
   });
 
+  // Live USD→EGP rate (server/fx.ts) so budget filtering and price sorting
+  // compare USD and EGP listings at today's rate.
+  const fxRate = useUsdEgpRate().rate;
+
   const filteredListings = useMemo(() => {
     return listings.filter((listing) => {
       // Free-text search — matches across title, project, location,
@@ -187,7 +191,7 @@ export default function ListingsPage() {
       // Budget, compared in EGP so USD listings are matched at the configured
       // rate. Unpriced listings are hidden once a bound is set.
       if (filters.priceMin != null || filters.priceMax != null) {
-        const p = priceInEgp(listing);
+        const p = priceInEgp(listing, fxRate);
         if (p == null) return false;
         if (filters.priceMin != null && p < filters.priceMin) return false;
         if (filters.priceMax != null && p > filters.priceMax) return false;
@@ -209,15 +213,15 @@ export default function ListingsPage() {
       }
       return true;
     });
-  }, [listings, filters, searchQuery]);
+  }, [listings, filters, searchQuery, fxRate]);
 
   const sortedListings = useMemo(() => {
     const sorted = [...filteredListings];
     switch (sortBy) {
       case "price-low":
-        return sorted.sort((a, b) => (priceInEgp(a) ?? Infinity) - (priceInEgp(b) ?? Infinity));
+        return sorted.sort((a, b) => (priceInEgp(a, fxRate) ?? Infinity) - (priceInEgp(b, fxRate) ?? Infinity));
       case "price-high":
-        return sorted.sort((a, b) => (priceInEgp(b) ?? -1) - (priceInEgp(a) ?? -1));
+        return sorted.sort((a, b) => (priceInEgp(b, fxRate) ?? -1) - (priceInEgp(a, fxRate) ?? -1));
       case "area-large":
         return sorted.sort((a, b) => (b.area_sqm ?? 0) - (a.area_sqm ?? 0));
       case "area-small":
@@ -232,7 +236,7 @@ export default function ListingsPage() {
             b.id - a.id,
         );
     }
-  }, [filteredListings, sortBy]);
+  }, [filteredListings, sortBy, fxRate]);
 
   const page = Math.max(1, Number(routeParams.page) || 1);
   const pageCount = Math.max(1, Math.ceil(sortedListings.length / PAGE_SIZE));

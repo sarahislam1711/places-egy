@@ -2,6 +2,7 @@ import type { Request, Response } from "express";
 import { supabaseAdmin } from "./supabase";
 import { sendMail } from "./mailer";
 import { fetchGa4WeeklyTraffic, type GA4WeeklyTraffic } from "./ga4-client";
+import { listingIssues, type CheckableListing } from "../client/src/lib/listing-checks";
 
 // Weekly Monday-morning admin email report.
 //
@@ -47,6 +48,10 @@ interface WeeklyMetrics {
   // yet OR the fetch failed. Report still ships in that case, just
   // without the traffic KPIs.
   ga4: GA4WeeklyTraffic | null;
+  // Published listings whose data contradicts itself (client/src/lib/listing-checks.ts).
+  // "mustFix" = values the admin form would refuse to save (e.g. a USD price
+  // saved as EGP); "toCheck" = warnings.
+  listingIssues: { mustFix: number; toCheck: number; top: Array<{ id: number; title: string; rule: string; mustFix: boolean }> } | null;
 }
 
 async function fetchMetrics(): Promise<WeeklyMetrics> {
@@ -161,6 +166,7 @@ async function fetchMetrics(): Promise<WeeklyMetrics> {
 
   // GA4 traffic in parallel — fire-and-await but not blocking on failure.
   const ga4 = await fetchGa4WeeklyTraffic();
+  const issues = await fetchListingIssues();
 
   return {
     leadsThisWeek: thisCount,
@@ -174,7 +180,48 @@ async function fetchMetrics(): Promise<WeeklyMetrics> {
     weekStart: weekStart.toISOString().split("T")[0],
     weekEnd: weekEnd.toISOString().split("T")[0],
     ga4,
+    listingIssues: issues,
   };
+}
+
+// Data-quality pass over published listings. Never fails the report.
+async function fetchListingIssues(): Promise<WeeklyMetrics["listingIssues"]> {
+  if (!supabaseAdmin) return null;
+  try {
+    const rows: Array<CheckableListing & { id: number; title: string }> = [];
+    for (let from = 0; ; from += 1000) {
+      const { data, error } = await supabaseAdmin
+        .from("listings")
+        .select(
+          "id,title,description,area_sqm,furnishing,maintenance_status,maintenance_fees,currency,price,transaction_type," +
+            "price_per_meter,outdoor_area_sqm,outdoor_price_per_meter,outdoor_area_type,price_is_lump_sum",
+        )
+        .eq("is_test", false)
+        .eq("property_type", "admin")
+        .order("id", { ascending: false })
+        .range(from, from + 999);
+      if (error) throw error;
+      rows.push(...((data ?? []) as unknown as Array<CheckableListing & { id: number; title: string }>));
+      if (!data || data.length < 1000) break;
+    }
+    let mustFix = 0;
+    let toCheck = 0;
+    const top: Array<{ id: number; title: string; rule: string; mustFix: boolean }> = [];
+    for (const l of rows) {
+      // "info" items (e.g. a quoted outdoor rate) were confirmed in the form.
+      const found = listingIssues(l).filter((i) => i.severity !== "info");
+      const block = found.find((i) => i.severity === "block");
+      if (block) mustFix++;
+      else if (found.length) toCheck++;
+      const first = block ?? found[0];
+      if (first) top.push({ id: l.id, title: l.title, rule: first.rule, mustFix: !!block });
+    }
+    top.sort((a, b) => Number(b.mustFix) - Number(a.mustFix) || b.id - a.id);
+    return { mustFix, toCheck, top: top.slice(0, 15) };
+  } catch (err) {
+    console.warn("[weekly-report] listing check failed:", (err as Error).message);
+    return null;
+  }
 }
 
 function escapeHtml(s: string): string {
@@ -485,6 +532,26 @@ function renderReport(m: WeeklyMetrics): string {
     <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ffffff; border:1px solid #EAE4DA; border-radius:12px; overflow:hidden;">
       ${hotLeadsRows}
     </table>
+
+    ${m.listingIssues && (m.listingIssues.mustFix > 0 || m.listingIssues.toCheck > 0)
+      ? `<!-- Section 6: Listing data to fix -->
+    <h2 style="margin:32px 0 12px 0; font-size:16px; font-weight:700; color:#171717;">Listings to fix</h2>
+    <p style="margin:0 0 12px 0; font-size:14px; color:#475569;">
+      <strong style="color:#B91C1C;">${m.listingIssues.mustFix} must fix</strong> (wrong currency, impossible price or area: visitors see wrong numbers)
+      · ${m.listingIssues.toCheck} to check.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ffffff; border:1px solid #EAE4DA; border-radius:12px; overflow:hidden;">
+      ${m.listingIssues.top
+        .map(
+          (t) => `<tr><td style="padding:10px 14px; border-bottom:1px solid #F1ECE4; font-size:13px;">
+            <span style="color:${t.mustFix ? "#B91C1C" : "#92400E"}; font-weight:600;">${t.mustFix ? "Must fix" : "Check"}</span>
+            · #${t.id} ${escapeHtml(t.title ?? "")}<br/>
+            <span style="color:#64748B;">${escapeHtml(t.rule)}</span>
+          </td></tr>`,
+        )
+        .join("")}
+    </table>`
+      : ""}
 
     <div style="margin:32px 0 8px 0; padding:16px 20px; background:#171717; border-radius:12px; text-align:center;">
       <a href="https://places-egy.com/dashboard" style="display:inline-block; color:#ffffff; text-decoration:none; font-weight:600; font-size:14px;">

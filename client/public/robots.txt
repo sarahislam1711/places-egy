@@ -1,6 +1,8 @@
 User-agent: *
 Allow: /
 Disallow: /dashboard
+# /saved is each visitor's own saved-listings page: nothing for search.
+Disallow: /saved
 # Faceted/search views of the listings page — any /listings?query URL — are
 # low-value variations of the base /listings page. They can render empty (soft
 # 404s), they duplicate content across filter combinations, and they were
@@ -33,6 +35,8 @@ User-agent: Applebot-Extended
 User-agent: CCBot
 Allow: /
 Disallow: /dashboard
+# /saved is each visitor's own saved-listings page: nothing for search.
+Disallow: /saved
 Disallow: /listings?
 # /projects?q=X are search-filter variants of the /projects hub — each
 # renders the projects page filtered to one project. Google was crawling

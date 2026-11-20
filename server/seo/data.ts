@@ -18,16 +18,37 @@ let inflight: Promise<SeoListing[]> | null = null;
 
 const FIELDS =
   "id,title,description,transaction_type,property_type,subtype,developer,project,location,location_area," +
-  "price,currency,price_per_meter,area_sqm,floor,parking,furnishing,maintenance_fees,maintenance_status," +
+  "price,currency,price_per_meter,area_sqm,outdoor_area_sqm,outdoor_price_per_meter,outdoor_area_type,price_is_lump_sum,floor,parking,furnishing,maintenance_fees,maintenance_status," +
   "delivery_date,images,is_test,rental_status,rental_start,rental_end,updated_at,created_at";
 
+// Columns added by sql/listings-outdoor-and-fx.sql. If the code is deployed
+// before that migration runs, the query is retried without them so listing
+// pages keep working (the extra-area features just stay off until it runs).
+const NEW_COLUMNS = ["outdoor_area_sqm", "outdoor_price_per_meter", "outdoor_area_type", "price_is_lump_sum"];
+const LEGACY_FIELDS = FIELDS.split(",").filter((f) => !NEW_COLUMNS.includes(f)).join(",");
+let fields = FIELDS;
+
 async function load(): Promise<SeoListing[]> {
+  try {
+    return await loadWith(fields);
+  } catch (err) {
+    const msg = String((err as { message?: string })?.message ?? err);
+    if (fields === FIELDS && /column|does not exist|42703/i.test(msg)) {
+      console.warn("[seo] new listing columns missing (run sql/listings-outdoor-and-fx.sql); using the old ones");
+      fields = LEGACY_FIELDS;
+      return loadWith(fields);
+    }
+    throw err;
+  }
+}
+
+async function loadWith(select: string): Promise<SeoListing[]> {
   if (!supabaseAdmin) return [];
   const rows: SeoListing[] = [];
   for (let from = 0; ; from += 1000) {
     const { data, error } = await supabaseAdmin
       .from("listings")
-      .select(FIELDS)
+      .select(select)
       .eq("is_test", false)
       .eq("property_type", "admin")
       .order("id", { ascending: false })

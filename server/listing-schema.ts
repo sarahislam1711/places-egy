@@ -21,7 +21,11 @@ const listingFields = z
     // by the dashboard's save-button gate, kept optional here so legacy rows
     // without a price can still be edited.
     price: z.number().finite().nonnegative().nullable().optional(),
-    currency: z.string().max(10).optional(),
+    // USD or EGP; required on create (see listingInsertSchema). The dashboard
+    // no longer pre-selects one, so a USD price can't be saved as EGP by default.
+    currency: z
+      .preprocess((v) => (typeof v === "string" ? v.trim().toUpperCase() || undefined : v ?? undefined), z.enum(["EGP", "USD"]))
+      .optional(),
     area_sqm: z.number().finite().nonnegative().nullable().optional(),
     transaction_type: z.string().max(50).optional(),
     furnishing: z.string().max(50).optional(),
@@ -30,6 +34,12 @@ const listingFields = z
     delivery_date: z.string().max(50).optional(),
     parking: z.number().int().nonnegative().nullable().optional(),
     price_per_meter: z.number().finite().nonnegative().nullable().optional(),
+    // Terrace/roof/outdoor space, kept apart from area_sqm (the unit itself).
+    outdoor_area_sqm: z.number().finite().nonnegative().nullable().optional(),
+    outdoor_price_per_meter: z.number().finite().nonnegative().nullable().optional(),
+    outdoor_area_type: z.enum(["outdoor", "roof", "terrace", "garden"]).nullable().optional(),
+    // Price quoted as one total (e.g. a whole building), not rate × area.
+    price_is_lump_sum: z.boolean().optional(),
     maintenance_fees: z.number().finite().nonnegative().nullable().optional(),
     maintenance_status: z.string().max(50).optional(),
     floor: z.number().int().nullable().optional(),
@@ -54,7 +64,9 @@ const rentalDatesInOrder = (l: { rental_start?: string | null; rental_end?: stri
   !l.rental_end || !l.rental_start || l.rental_end >= l.rental_start;
 const rentalDatesMessage = { message: "Available-from date must be after the rented date" };
 
-export const listingInsertSchema = listingFields.refine(rentalDatesInOrder, rentalDatesMessage);
+export const listingInsertSchema = listingFields
+  .refine(rentalDatesInOrder, rentalDatesMessage)
+  .refine((l) => l.currency === "EGP" || l.currency === "USD", { message: "Choose the currency the price is quoted in" });
 
 // Updates use the same shape but every field is optional. `.strict()` still
 // rejects unknown keys.

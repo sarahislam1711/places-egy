@@ -1,0 +1,43 @@
+# Loads the key pages of the live site in a real browser every 6 hours and
+# once after each push to main. A failure marks the run red, which e-mails
+# the repository's watchers, and opens (or updates) a GitHub issue.
+name: Live site health
+on:
+  schedule:
+    - cron: "17 */6 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+permissions:
+  contents: read
+  issues: write
+jobs:
+  health:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm i --no-save playwright@1.48.2 && npx playwright install --with-deps chromium
+      - name: Wait for a deploy to settle after a push
+        if: github.event_name == 'push'
+        run: sleep 300
+      - name: Health endpoint
+        run: |
+          curl -fsS --retry 3 --retry-delay 10 https://places-egy.com/api/health | tee health.json
+      - name: Page health
+        run: node scripts/page-health.mjs https://places-egy.com | tee page-health.txt; exit ${PIPESTATUS[0]}
+      - name: Open an issue on failure
+        if: failure() && github.event_name != 'push'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const read = (f) => fs.existsSync(f) ? fs.readFileSync(f, 'utf8').slice(-3000) : '(no output)';
+            const title = 'Live site health check failing';
+            const body = `Run: ${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}\n\n\`\`\`\n${read('health.json')}\n${read('page-health.txt')}\n\`\`\``;
+            const { data } = await github.rest.issues.listForRepo({ ...context.repo, state: 'open', labels: 'monitoring' });
+            const open = data.find(i => i.title === title);
+            if (open) await github.rest.issues.createComment({ ...context.repo, issue_number: open.number, body });
+            else await github.rest.issues.create({ ...context.repo, title, body, labels: ['monitoring'] });

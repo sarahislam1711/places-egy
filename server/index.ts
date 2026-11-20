@@ -6,6 +6,9 @@ import { registerListingRedirects } from "./listing-redirect";
 import { apiLimiter } from "./rate-limit";
 import { serveStatic } from "./static";
 import { createServer } from "http";
+import { installProcessAlerts, sendAdminAlert } from "./alerts";
+
+installProcessAlerts();
 
 const app = express();
 const httpServer = createServer(app);
@@ -140,6 +143,9 @@ app.use((req, res, next) => {
     const status = err.status || err.statusCode || 500;
 
     console.error("Internal Server Error:", err);
+    if (status >= 500) {
+      void sendAdminAlert(`500 ${_req.method} ${_req.path}`, `Server error on ${_req.method} ${_req.path}`, String(err?.stack ?? err));
+    }
 
     if (res.headersSent) {
       return next(err);

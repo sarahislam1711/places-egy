@@ -217,11 +217,21 @@ function postBody(p: BlogPostMeta, lang: BlogLang, data: BlogData): string {
       related.map((o) => `<li><a href="${base(lang)}/${attr(o.slug)}">${esc(o.heading)}</a></li>`).join("") +
       `</ul>`
     : "";
+  // Same call to action the React page shows after the article, so the served
+  // HTML links each post to the commercial pages too.
+  const cta =
+    lang === "ar"
+      ? `<h2>بتدور على مكتب دلوقتي؟</h2><p>ابعتلنا المنطقة والمساحة والميزانية، ومستشار من PLACES هيبعتلك قائمة بالوحدات المتاحة. ` +
+        `<a href="/listings">تصفح المكاتب المتاحة</a> · <a href="/rent/new-cairo">مكاتب للإيجار في القاهرة الجديدة</a> · <a href="/contact">تواصل معنا</a></p>`
+      : `<h2>Looking for an office now?</h2><p>Tell us the area, size and budget and a PLACES advisor will send you a shortlist of available units. ` +
+        `<a href="/listings">Browse available offices</a> · <a href="/rent/new-cairo">Offices for rent in New Cairo</a> · <a href="/contact">Contact us</a></p>`;
   return (
     `<article><h1>${esc(p.heading)}</h1>` +
     `<p><time datetime="${attr(p.publishedAt)}">${esc(p.publishedAt.slice(0, 10))}</time></p>` +
     twinLine +
-    `<div class="blog-content">${p.bodyHtml}</div></article>` +
+    `<div class="blog-content">${p.bodyHtml}</div>` +
+    cta +
+    `</article>` +
     relatedList
   );
 }

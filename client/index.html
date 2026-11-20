@@ -31,11 +31,21 @@
     <meta name="twitter:image" content="https://places-egy.com/opengraph.jpg" />
     <meta name="twitter:image:alt" content="PLACES — Administrative office real estate in Cairo, Egypt" />
 
-    <!-- Preload the LCP hero on the most-trafficked landing (/) so the
-         browser starts fetching it before parsing the JS bundle. Safe to
-         leave even when visitors land on other routes — same image is
-         widely reused and the cache hit pays off. -->
-    <link rel="preload" as="image" href="/images/hero-section.jpg" fetchpriority="high" />
+    <!-- Preload the LCP hero on the homepage only, so the browser starts
+         fetching it before parsing the JS bundle. This shell is shared by
+         every route (listings, blog, guides…), where a 380 KB high-priority
+         image the page never shows only delays the real LCP, so the hint is
+         added from the path instead of being a static <link>. -->
+    <script>
+      if (location.pathname === "/") {
+        var heroPreload = document.createElement("link");
+        heroPreload.rel = "preload";
+        heroPreload.as = "image";
+        heroPreload.href = "/images/hero-section.jpg";
+        heroPreload.setAttribute("fetchpriority", "high");
+        document.head.appendChild(heroPreload);
+      }
+    </script>
 
     <!-- SVG favicon with embedded prefers-color-scheme adapts in browsers that ignore the media attribute on icon links (Arc, Brave, etc.) -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -103,18 +113,35 @@
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
 
-      // Default: deny everything until user consents (EU compliance)
+      // Consent is asked for only where the law requires opt-in (EEA, UK,
+      // Switzerland), detected from the browser's time zone. Everyone else
+      // (almost all visitors, in Egypt and the Gulf) gets anonymous analytics
+      // by default so GA4 and Clarity see real lead clicks; ad storage stays
+      // denied until "Accept all". A saved "Reject" is always honoured.
+      // CookieBanner.tsx reads window.__consentRequired to decide whether to show.
+      window.__consentRequired = (function () {
+        try {
+          var tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+          return /^(Europe\/|Atlantic\/(Reykjavik|Canary|Madeira|Azores|Faroe)|Arctic\/)/.test(tz);
+        } catch (e) {
+          return true;
+        }
+      })();
+      var saved = null;
+      try { saved = localStorage.getItem('cookie_consent'); } catch (e) {}
+      window.__analyticsAllowed =
+        saved === 'accepted' || (!window.__consentRequired && saved !== 'rejected');
+
       gtag('consent', 'default', {
         ad_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied',
-        analytics_storage: 'denied',
+        analytics_storage: window.__analyticsAllowed ? 'granted' : 'denied',
         wait_for_update: 500
       });
 
       // Restore stored consent if user already chose
       try {
-        var saved = localStorage.getItem('cookie_consent');
         if (saved === 'accepted') {
           gtag('consent', 'update', {
             ad_storage: 'granted',
@@ -151,12 +178,9 @@
         })(window, document, "clarity", "script", window.__CLARITY_PROJECT_ID);
       };
 
-      // Load Clarity now if the user already consented in a prior session.
-      try {
-        if (localStorage.getItem('cookie_consent') === 'accepted') {
-          window.__loadClarity();
-        }
-      } catch (e) {}
+      // Load Clarity now if analytics is allowed (prior "Accept all", or a
+      // visitor outside the opt-in regions who hasn't rejected).
+      if (window.__analyticsAllowed) window.__loadClarity();
     </script>
 
     <link rel="preconnect" href="https://fonts.googleapis.com">

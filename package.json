@@ -10,7 +10,8 @@
     "generate-market-report": "tsx --env-file=.env script/generate-market-report.ts",
     "start": "NODE_ENV=production node dist/index.cjs",
     "check": "tsc",
-    "db:push": "drizzle-kit push"
+    "db:push": "drizzle-kit push",
+    "test": "tsx --test tests/*.test.ts"
   },
   "dependencies": {
     "@google-analytics/data": "^7.0.0",

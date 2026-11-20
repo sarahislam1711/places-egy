@@ -476,8 +476,7 @@ const DEVELOPER_LOGOS: Record<string, string> = {
   "akoya developments": "/images/Akoya-developments-logo.png",
   "el hazek": "/images/El-Hazek-Group.png",
   "el hazek group": "/images/El-Hazek-Group.png",
-  wealth: "/images/wealth-developments-logo.png",
-  "wealth developments": "/images/wealth-developments-logo.png",
+  // wealth: no logo file uploaded yet (was a 404); add it and restore these two lines.
 };
 
 export function getDeveloperLogo(name: string | null | undefined): string | undefined {

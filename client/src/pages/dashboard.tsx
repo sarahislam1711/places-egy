@@ -6,6 +6,9 @@ import { ClientLogosManager } from "@/components/admin/ClientLogosManager";
 import { LeadsManager } from "@/components/admin/LeadsManager";
 import { AccountsManager } from "@/components/admin/AccountsManager";
 import { HotdeskManager } from "@/components/admin/HotdeskManager";
+import { ExchangeRatePanel } from "@/components/admin/ExchangeRatePanel";
+import { PricePreview } from "@/components/admin/PricePreview";
+import { EXTRA_AREA_TYPES } from "@/lib/listing-pricing";
 import { ProjectPinInput } from "@/components/admin/ProjectPinInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,7 +94,9 @@ const EMPTY_FORM: ListingForm = {
   location: "",
   location_area: "",
   price: 0,
-  currency: "EGP",
+  // No default: the editor must choose. A pre-selected EGP is how USD prices
+  // ended up shown as EGP (e.g. "20,250 EGP / month" for a $20,250 unit).
+  currency: "",
   area_sqm: 0,
   transaction_type: "",
   furnishing: "",
@@ -100,6 +105,10 @@ const EMPTY_FORM: ListingForm = {
   delivery_date: "",
   parking: 0,
   price_per_meter: 0,
+  outdoor_area_sqm: null,
+  outdoor_price_per_meter: null,
+  outdoor_area_type: null,
+  price_is_lump_sum: false,
   maintenance_fees: 0,
   maintenance_status: "",
   floor: 0,
@@ -262,6 +271,7 @@ function ListingFormDialog({
   const [uploading, setUploading] = useState(false);
   const [issuesChecked, setIssuesChecked] = useState(false);
   const issues = useMemo(() => listingIssues(form), [form]);
+  const blocking = issues.filter((i) => i.severity === "block");
 
   useEffect(() => {
     setIssuesChecked(false);
@@ -457,25 +467,83 @@ function ListingFormDialog({
               <ProjectPinInput projectName={form.project} />
             </div>
 
-            <SelectField label="Currency" value={form.currency} options={ENUM_OPTIONS.currency} onChange={(v) => set("currency", v)} />
+            <SelectField
+              label="Currency of the price *"
+              value={form.currency ?? ""}
+              options={ENUM_OPTIONS.currency}
+              onChange={(v) => set("currency", v)}
+            />
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-primary">Price ({form.currency}) <span className="text-accent">*</span></Label>
+              <Label className="text-sm font-medium text-primary">
+                {(form.transaction_type ?? "").toLowerCase() === "rent" ? "Monthly rent" : "Price"}, indoor only ({form.currency || "choose currency"}) <span className="text-accent">*</span>
+              </Label>
               <Input type="number" value={form.price ?? ""} onChange={(e) => set("price", toNum(e.target.value))} className="bg-white" />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-primary">Area (sqm)</Label>
+              <Label className="text-sm font-medium text-primary">Area (m²): the unit itself, without terrace/roof</Label>
               <Input type="number" value={form.area_sqm ?? ""} onChange={(e) => set("area_sqm", toNum(e.target.value))} className="bg-white" />
             </div>
 
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-primary">Price per meter ({form.currency})</Label>
+              <Label className="text-sm font-medium text-primary">Price per m² ({form.currency || "choose currency"})</Label>
               <Input type="number" value={form.price_per_meter ?? ""} onChange={(e) => set("price_per_meter", toNum(e.target.value))} className="bg-white" />
             </div>
 
+            {/* Extra area: type, size and its own price per m², all entered freely. */}
+            <SelectField
+              label="Extra area type"
+              value={form.outdoor_area_type ?? ""}
+              options={EXTRA_AREA_TYPES.map((t) => ({ value: t.value, label: t.label }))}
+              onChange={(v) => set("outdoor_area_type", v || null)}
+              clearable
+            />
+
             <div className="space-y-1.5">
-              <Label className="text-sm font-medium text-primary">Maintenance Fees ({form.currency})</Label>
+              <Label className="text-sm font-medium text-primary">
+                {form.outdoor_area_type ? EXTRA_AREA_TYPES.find((t) => t.value === form.outdoor_area_type)?.label : "Extra area"} (m²)
+              </Label>
+              <Input
+                type="number"
+                value={form.outdoor_area_sqm ?? ""}
+                onChange={(e) => {
+                  const v = toNum(e.target.value);
+                  set("outdoor_area_sqm", v);
+                  if (v && !form.outdoor_area_type) set("outdoor_area_type", "outdoor");
+                }}
+                placeholder="Leave empty if none"
+                className="bg-white"
+              />
+            </div>
+
+            <div className="space-y-1.5 md:col-span-2">
+              <Label className="text-sm font-medium text-primary">
+                {form.outdoor_area_type ? EXTRA_AREA_TYPES.find((t) => t.value === form.outdoor_area_type)?.label : "Extra area"} price per m² (
+                {form.currency || "choose currency"}){form.outdoor_area_sqm ? <span className="text-accent"> *</span> : null}
+              </Label>
+              <Input
+                type="number"
+                value={form.outdoor_price_per_meter ?? ""}
+                onChange={(e) => set("outdoor_price_per_meter", toNum(e.target.value))}
+                placeholder={form.outdoor_area_sqm ? "Any amount; 0 if included in the indoor price" : "—"}
+                disabled={!form.outdoor_area_sqm}
+                className="bg-white"
+              />
+              <p className="text-xs text-muted-foreground">
+                Charged and shown separately from the indoor price. Enter whatever rate applies to this property.
+              </p>
+            </div>
+
+            <label className="md:col-span-2 flex items-center gap-2 text-sm text-primary">
+              <Checkbox checked={!!form.price_is_lump_sum} onCheckedChange={(v) => set("price_is_lump_sum", v === true)} />
+              Price is a lump sum (one total for the whole unit/building, not price per m² × area)
+            </label>
+
+            <PricePreview form={form} />
+
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-primary">Maintenance Fees ({form.currency || "choose currency"})</Label>
               <Input type="number" value={form.maintenance_fees ?? ""} onChange={(e) => set("maintenance_fees", toNum(e.target.value))} className="bg-white" />
             </div>
 
@@ -579,7 +647,7 @@ function ListingFormDialog({
           {saveMutation.error && (
             <div className="rounded-md border border-destructive/30 bg-destructive/5 text-destructive px-4 py-3 text-sm">
               <p className="font-semibold mb-1">Save failed</p>
-              <p className="text-xs">{humanizeError((saveMutation.error as Error).message)}</p>
+              <p className="text-xs whitespace-pre-line">{humanizeError((saveMutation.error as Error).message)}</p>
             </div>
           )}
 
@@ -588,16 +656,22 @@ function ListingFormDialog({
               <p className="font-semibold">Check before saving</p>
               <ul className="list-disc pl-5 space-y-1 text-xs">
                 {issues.map((i) => (
-                  <li key={i.rule}>
-                    <span className="font-medium">{i.rule}</span>
+                  <li key={i.rule} className={i.severity === "block" ? "text-destructive" : undefined}>
+                    <span className="font-medium">{i.severity === "block" ? "Must fix: " : i.severity === "info" ? "Confirm: " : ""}{i.rule}</span>
                     {i.conflicting ? ` (${i.conflicting})` : ""}. {i.fix}
                   </li>
                 ))}
               </ul>
-              <label className="flex items-center gap-2 text-xs font-medium">
-                <Checkbox checked={issuesChecked} onCheckedChange={(v) => setIssuesChecked(v === true)} />
-                I've checked these and want to save anyway
-              </label>
+              {blocking.length > 0 ? (
+                <p className="text-xs font-medium text-destructive">
+                  Fix the "Must fix" items to save. Visitors see these values on the site.
+                </p>
+              ) : (
+                <label className="flex items-center gap-2 text-xs font-medium">
+                  <Checkbox checked={issuesChecked} onCheckedChange={(v) => setIssuesChecked(v === true)} />
+                  I've checked these and want to save anyway
+                </label>
+              )}
             </div>
           )}
 
@@ -607,7 +681,13 @@ function ListingFormDialog({
             </Button>
             <Button
               onClick={() => saveMutation.mutate(form)}
-              disabled={saveMutation.isPending || !form.title.trim() || form.price == null || (issues.length > 0 && !issuesChecked)}
+              disabled={
+                saveMutation.isPending ||
+                !form.title.trim() ||
+                form.price == null ||
+                blocking.length > 0 ||
+                (issues.length > 0 && !issuesChecked)
+              }
               className="flex-1 bg-primary text-white"
             >
               {saveMutation.isPending ? "Saving..." : isEditing ? "Update" : "Create"}
@@ -623,7 +703,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
   const queryClient = useQueryClient();
   const [formOpen, setFormOpen] = useState(false);
   const [editListing, setEditListing] = useState<ListingForm | null>(null);
-  const [tab, setTab] = useState<"listings" | "deals" | "logos" | "leads" | "accounts" | "hotdesk">("listings");
+  const [tab, setTab] = useState<"listings" | "deals" | "logos" | "leads" | "accounts" | "hotdesk" | "fx">("listings");
   const { data: listings = [], isLoading } = useQuery<Listing[]>({
     queryKey: ["admin-listings"],
     queryFn: async () => {
@@ -762,6 +842,7 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
             { key: "leads", label: "Leads" },
             { key: "accounts", label: "Accounts" },
             { key: "hotdesk", label: "Hotdesk" },
+            { key: "fx", label: "Exchange rate" },
           ] as const).map(({ key, label }) => (
             <button
               key={key}
@@ -787,6 +868,8 @@ function Dashboard({ onLogout }: { onLogout: () => void }) {
           <AccountsManager />
         ) : tab === "hotdesk" ? (
           <HotdeskManager />
+        ) : tab === "fx" ? (
+          <ExchangeRatePanel />
         ) : isLoading ? (
           <p className="text-muted-foreground text-center py-8 md:py-12">Loading listings...</p>
         ) : listings.length === 0 ? (

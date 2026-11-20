@@ -689,6 +689,9 @@ export async function prerender() {
         : injectMeta(shell, meta);
     // Route-specific JSON-LD: /contact gets the enriched RealEstateAgent with opening hours.
     if (meta.route === "/contact") {
+      // The enriched block has the same @id as the shell's base RealEstateAgent
+      // block; drop the base one so the page carries one copy of the entity.
+      html = html.replace(/<script type="application\/ld\+json">\s*\{\s*"@context": "https:\/\/schema\.org",\s*"@type": "RealEstateAgent"[\s\S]*?<\/script>\s*/, "");
       html = injectJsonLd(html, buildContactJsonLd());
     }
 

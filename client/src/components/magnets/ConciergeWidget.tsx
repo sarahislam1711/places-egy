@@ -3,7 +3,13 @@ import { MessageCircle, X, ArrowRight, Check, Loader2, ChevronDown } from "lucid
 import { trackEvent } from "@/lib/analytics";
 import { detectPreferredLanguage } from "@/lib/detect-language";
 import { useLocation } from "wouter";
-import { conciergeAllowed, isReportOnScreen, onPopupChange, setConciergeOnScreen } from "@/lib/magnet-coord";
+import {
+  conciergeAllowed,
+  isCookieBannerOnScreen,
+  isReportOnScreen,
+  onPopupChange,
+  setConciergeOnScreen,
+} from "@/lib/magnet-coord";
 
 // Concierge widget — a friendly bottom-LEFT chat-bubble prompt asking
 // visitors what they're looking for. Positioned opposite the PDF market-
@@ -176,9 +182,9 @@ export function ConciergeWidget() {
     }
     let unsubscribe = () => {};
     const show = () => {
-      if (isReportOnScreen()) {
+      if (isReportOnScreen() || isCookieBannerOnScreen()) {
         unsubscribe = onPopupChange(() => {
-          if (isReportOnScreen()) return;
+          if (isReportOnScreen() || isCookieBannerOnScreen()) return;
           unsubscribe();
           show();
         });

@@ -3,6 +3,7 @@ import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Cookie, X } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { setCookieBannerOnScreen } from "@/lib/magnet-coord";
 
 const STORAGE_KEY = "cookie_consent";
 
@@ -77,10 +78,19 @@ export function CookieBanner() {
       localStorage.setItem(STORAGE_KEY, "rejected");
     } catch {}
     trackEvent("cookie_consent", { decision: "rejected" });
+    const gtag = getGtag();
+    if (typeof gtag === "function") gtag("consent", "update", { analytics_storage: "denied" });
     setConsent("rejected");
   };
 
-  if (!hydrated || consent !== null) return null;
+  // Only asked where opt-in consent is required (see index.html).
+  const required = (window as unknown as { __consentRequired?: boolean }).__consentRequired !== false;
+  const showing = hydrated && consent === null && required;
+  useEffect(() => {
+    setCookieBannerOnScreen(showing);
+  }, [showing]);
+
+  if (!showing) return null;
 
   return (
     <div

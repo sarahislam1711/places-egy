@@ -145,7 +145,9 @@ const DEVELOPERS: { name: string; logo: string; desc: string; slug?: string; log
   },
   {
     name: "Wealth Developments",
-    logo: "/images/wealth-developments-logo.png",
+    // No logo file uploaded yet (/images/wealth-developments-logo.png was a 404):
+    // the card shows the name instead. Add the file and restore the path.
+    logo: "",
     desc: "Egyptian developer established in 2002 by Engineer Ahmed Shaker — founder of Arkan Engineering Consulting — with three mixed-use commercial developments on New Cairo's South 90 and North 90 Streets: Elev 8, At 9, and South Gate.",
     slug: "wealth",
   },

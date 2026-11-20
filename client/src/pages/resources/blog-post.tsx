@@ -11,6 +11,7 @@ import {
   ChevronRight,
   Clock,
   Loader2,
+  MessageCircle,
 } from "lucide-react";
 import DOMPurify from "dompurify";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
@@ -29,6 +30,7 @@ import { trackEvent } from "@/lib/analytics";
 import { useScrollDepth } from "@/lib/use-scroll-depth";
 
 const BASE_URL = "https://places-egy.com";
+const WHATSAPP_NUMBER = "201063618217";
 
 const COPY = {
   en: {
@@ -46,6 +48,11 @@ const COPY = {
     ctaButton: "Talk to an advisor",
     backToAll: "Back to all posts",
     defaultCategory: "Insights",
+    inlineHeading: "Looking for an office now?",
+    inlineBody: "Tell us the area, size and budget on WhatsApp and a PLACES advisor will send you a shortlist of available units.",
+    inlineWhatsapp: "Send us your requirements on WhatsApp",
+    inlineBrowse: "Browse available offices",
+    waMessage: (title: string) => `Hi, I read "${title}" on the PLACES blog and I'd like help finding an office.`,
   },
   ar: {
     home: "الرئيسية",
@@ -62,6 +69,11 @@ const COPY = {
     ctaButton: "تحدث مع مستشار",
     backToAll: "العودة إلى جميع المقالات",
     defaultCategory: "رؤى",
+    inlineHeading: "بتدور على مكتب دلوقتي؟",
+    inlineBody: "ابعتلنا المنطقة والمساحة والميزانية على واتساب، ومستشار من PLACES هيبعتلك قائمة بالوحدات المتاحة.",
+    inlineWhatsapp: "ابعت طلبك على واتساب",
+    inlineBrowse: "تصفح المكاتب المتاحة",
+    waMessage: (title: string) => `مرحباً، قرأت مقال «${title}» على مدونة PLACES وعايز مساعدة في إيجاد مكتب.`,
   },
 } as const;
 
@@ -226,7 +238,7 @@ export default function BlogPostPage({ lang = "en" }: { lang?: BlogLang }) {
           { name: post.title, url: `${basePath}/${post.slug}` },
         ])}
       />
-      <SchemaMarkup schema={blogPostingSchema(post)} />
+      <SchemaMarkup schema={blogPostingSchema(post, basePath)} />
       <Navbar />
 
       <section className="pt-24 md:pt-32 pb-6 md:pb-8">
@@ -301,6 +313,37 @@ export default function BlogPostPage({ lang = "en" }: { lang?: BlogLang }) {
             className={`blog-content ${isAr ? "blog-content-ar" : ""}`}
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(post.content) }}
           />
+
+          {/* Lead capture right where the reader finishes the article. The
+              WhatsApp text names the post so leads can be traced to it. */}
+          <div
+            className="mt-10 rounded-2xl border border-accent/30 bg-accent/5 p-6 md:p-7"
+            dir={isAr ? "rtl" : "ltr"}
+          >
+            <h2 className={`text-xl md:text-2xl font-bold text-primary mb-2 ${isAr ? "font-serif-ar" : "font-serif"}`}>
+              {t.inlineHeading}
+            </h2>
+            <p className="text-muted-foreground mb-5">{t.inlineBody}</p>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(t.waMessage(post.title))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => trackEvent("whatsapp_click", { source: "blog_post_inline", lang, post_slug: post.slug })}
+                className="inline-flex items-center justify-center gap-2 rounded-full bg-[#25D366] hover:bg-[#1ebe5b] text-white font-medium px-6 h-12 transition-colors"
+              >
+                <MessageCircle className="w-4 h-4" />
+                {t.inlineWhatsapp}
+              </a>
+              <Link
+                href="/listings"
+                onClick={() => trackEvent("select_content", { content_type: "blog_post_inline_browse", lang })}
+                className="inline-flex items-center justify-center rounded-full border border-primary/20 text-primary font-medium px-6 h-12 hover:bg-primary/5 transition-colors"
+              >
+                {t.inlineBrowse}
+              </Link>
+            </div>
+          </div>
 
           {post.tags.length > 0 && (
             <div className="mt-10 pt-6 border-t border-border/40 flex flex-wrap gap-2">

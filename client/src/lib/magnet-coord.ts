@@ -56,17 +56,29 @@ export function setReportOnScreen(on: boolean): void {
 }
 export const isReportOnScreen = () => reportOnScreen;
 
-// Runs `show` after `delayMs`. If the concierge is on screen at that moment,
-// waits until it closes, then another 15s. Returns a cancel function.
+// The cookie banner counts as a popup too: nothing else opens while it is up,
+// so a first visit never shows two cards at once.
+let cookieBannerOnScreen = false;
+export function setCookieBannerOnScreen(on: boolean): void {
+  if (cookieBannerOnScreen === on) return;
+  cookieBannerOnScreen = on;
+  notify();
+}
+export const isCookieBannerOnScreen = () => cookieBannerOnScreen;
+
+// Runs `show` after `delayMs`. If the concierge or the cookie banner is on
+// screen at that moment, waits until it closes, then another 15s. Returns a
+// cancel function.
 export function scheduleReport(delayMs: number, show: () => void): () => void {
   let timer: ReturnType<typeof setTimeout> | undefined;
   let unsubscribe = () => {};
+  const blocked = () => conciergeOnScreen || cookieBannerOnScreen;
   const fire = () => {
-    if (!conciergeOnScreen) return show();
+    if (!blocked()) return show();
     const onChange = () => {
-      if (conciergeOnScreen) return;
+      if (blocked()) return;
       unsubscribe();
-      timer = setTimeout(() => (conciergeOnScreen ? fire() : show()), REPORT_AFTER_CONCIERGE_MS);
+      timer = setTimeout(() => (blocked() ? fire() : show()), REPORT_AFTER_CONCIERGE_MS);
     };
     listeners.add(onChange);
     unsubscribe = () => listeners.delete(onChange);

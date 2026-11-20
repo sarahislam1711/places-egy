@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/select";
 import { RotateCcw } from "lucide-react";
 import { FURNISHING_OPTIONS } from "@/lib/enums";
-import { USD_EGP_RATE, formatEgpShort, type Currency } from "@/lib/currency";
+import { currentUsdEgpRate, formatEgpShort, useUsdEgpRate, type Currency } from "@/lib/currency";
 
 export type Filters = {
   transactionType: "Sale" | "Rent" | "Income Property" | null;
@@ -70,8 +70,9 @@ export const budgetKindFor = (t: Filters["transactionType"]): BudgetKind | null 
 
 // The budget is always stored (and filtered, and put in the URL) in EGP; USD
 // is only what the visitor types and sees, converted at the site's rate.
-const egpToShown = (egp: number, cur: Currency) => (cur === "USD" ? Math.round(egp / USD_EGP_RATE) : egp);
-const shownToEgp = (n: number, cur: Currency) => (cur === "USD" ? Math.round(n * USD_EGP_RATE) : n);
+// Live rate from /api/fx/usd-egp (components call useUsdEgpRate() to re-render when it loads).
+const egpToShown = (egp: number, cur: Currency) => (cur === "USD" ? Math.round(egp / currentUsdEgpRate()) : egp);
+const shownToEgp = (n: number, cur: Currency) => (cur === "USD" ? Math.round(n * currentUsdEgpRate()) : n);
 
 /** Short label for a stored EGP amount in the visitor's chosen currency: "EGP 850K", "$15K". */
 export function formatBudgetShort(egp: number, cur: Currency): string {
@@ -94,6 +95,7 @@ export function BudgetFields({
   kind: BudgetKind;
   inputClassName?: string;
 }) {
+  useUsdEgpRate(); // re-render with the live rate once it loads
   const cur = filters.budgetCurrency;
   const hints = BUDGET_HINTS[kind];
   const setPrice = (key: "priceMin" | "priceMax", raw: string) => {
