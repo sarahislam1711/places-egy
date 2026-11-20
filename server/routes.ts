@@ -1,5 +1,6 @@
 import { invalidateInventory } from "./seo/data";
 import { healthHandler } from "./health";
+import { blockingProblems, touchesCheckedFields } from "./listing-gate";
 import { syncListingToHotdesk, hotdeskMode, isHotdeskEligible, toHotdeskListing, hotdeskWarnings, type ListingRow } from "./hotdesk";
 import { uploadVariants } from "./image-variants";
 import { forgetListing } from "./listing-redirect";
@@ -988,6 +989,10 @@ export async function registerRoutes(
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid listing payload" });
       }
+      const problems = blockingProblems(parsed.data as any);
+      if (problems.length) {
+        return res.status(422).json({ message: `Listing not saved. ${problems.join(" | ")}` });
+      }
       let { error, data } = await supabaseAdmin
         .from("listings")
         .insert(parsed.data)
@@ -1020,6 +1025,15 @@ export async function registerRoutes(
       const parsed = listingUpdateSchema.safeParse(body);
       if (!parsed.success) {
         return res.status(400).json({ message: "Invalid listing payload" });
+      }
+      if (touchesCheckedFields(parsed.data)) {
+        const { data: existing } = await supabaseAdmin.from("listings").select("*").eq("id", id).single();
+        if (existing) {
+          const problems = blockingProblems({ ...existing, ...parsed.data } as any);
+          if (problems.length) {
+            return res.status(422).json({ message: `Listing not saved. ${problems.join(" | ")}` });
+          }
+        }
       }
       const changes = { ...parsed.data, updated_at: new Date().toISOString() };
       let { error, data } = await supabaseAdmin.from("listings").update(changes).eq("id", id).select().single();

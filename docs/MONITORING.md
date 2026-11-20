@@ -4,7 +4,9 @@
 |---|---|---|---|
 | `GET /api/health` | database down, exchange rate stuck or on fallback, CMS unreachable | `server/health.ts` | polled by the uptime monitor below |
 | Server error e-mails | any 5xx response, unhandled promise rejection, uncaught exception (max 1 e-mail/hour per problem) | `server/alerts.ts` | `ALERT_EMAILS` or admin@ + mohamed.safwat@ |
-| CI build | a pull request that does not build | `.github/workflows/ci.yml` | GitHub (red check on the PR) |
+| CI tests + build | a pull request that fails the tests (`npm test`: pricing and listing-check rules) or does not build | `.github/workflows/ci.yml`, `tests/` | GitHub (red check on the PR) |
+| Listing save gate | the admin API refuses a listing with a blocking price/currency/area problem (same rules as the form) | `server/listing-gate.ts` | the editor sees the reason when saving |
+| Weekly SEO check (Mondays) | robots.txt, sitemap sizes, sampled pages indexable with a self-canonical, title and one H1, known 301s still work | `.github/workflows/seo-weekly.yml`, `scripts/seo-check.mjs` | failed-run e-mail + issue labelled `monitoring` |
 | Live health (every 6 h and after each push) | pages not loading, JS errors, broken images, missing title/H1/canonical, duplicate structured data | `.github/workflows/live-health.yml` | failed-run e-mail + a GitHub issue labelled `monitoring` |
 | GA4 custom insights | traffic or lead drops, event stops firing | GA4 admin | GA e-mail |
 | Search Console | indexing, coverage, manual actions | search.google.com | Search Console e-mail |
