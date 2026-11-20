@@ -1,4 +1,5 @@
 import { invalidateInventory } from "./seo/data";
+import { healthHandler } from "./health";
 import { syncListingToHotdesk, hotdeskMode, isHotdeskEligible, toHotdeskListing, hotdeskWarnings, type ListingRow } from "./hotdesk";
 import { uploadVariants } from "./image-variants";
 import { forgetListing } from "./listing-redirect";
@@ -297,6 +298,9 @@ export async function registerRoutes(
   // Sends a branded HTML email to admin@places-egy.com with the last 7
   // days of leads + deals + hot leads. See server/weekly-report.ts.
   app.post("/api/admin/weekly-report", weeklyReportHandler);
+
+  // Uptime monitors poll this (see docs/MONITORING.md).
+  app.get("/api/health", healthHandler);
 
   // ── Cron: day-2 + day-5 nurture followups ───────────────────────────────
   // Called daily at 10:00 Cairo. Finds leads created 48-72h ago (day_2) and
