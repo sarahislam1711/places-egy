@@ -23,3 +23,13 @@ test("unrelated edits are not re-checked, price edits are", () => {
   assert.equal(touchesCheckedFields({ price: 1 }), true);
   assert.equal(touchesCheckedFields({ currency: "USD" }), true);
 });
+
+import { humanizeError } from "../client/src/lib/error-messages";
+
+test("a refusal containing 401 or 429 is shown as is, not as a session or rate-limit error", () => {
+  const msg = "Listing not saved. price is too low for the area: If 401 is the rate per m², the monthly rent is 1,429 EGP/month | currency missing: Choose EGP or USD";
+  const out = humanizeError(msg);
+  assert.doesNotMatch(out, /session expired|Too many requests/);
+  assert.match(out, /price is too low for the area/);
+  assert.match(out, /\ncurrency missing/);
+});
