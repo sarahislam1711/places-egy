@@ -1,5 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
-import { COMPANY_PROFILE_DOWNLOAD_NAME, COMPANY_PROFILE_HREF, COMPANY_PROFILE_SIZE_LABEL } from "@/lib/company-profile";
+import { COMPANY_PROFILE_DOWNLOAD_NAME, COMPANY_PROFILE_HREF } from "@/lib/company-profile";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
 import { ClientsStrip } from "@/components/ClientsStrip";
@@ -172,7 +172,6 @@ export default function WhyPlaces() {
             >
               <Download className="h-4 w-4" />
               Download Company Profile
-              <span className="font-normal normal-case tracking-normal opacity-80">({COMPANY_PROFILE_SIZE_LABEL})</span>
             </a>
           </div>
           <div className="text-center mb-12">

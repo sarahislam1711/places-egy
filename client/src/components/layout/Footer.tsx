@@ -1,5 +1,5 @@
 import { Link } from "wouter";
-import { COMPANY_PROFILE_DOWNLOAD_NAME, COMPANY_PROFILE_HREF, COMPANY_PROFILE_SIZE_LABEL } from "@/lib/company-profile";
+import { COMPANY_PROFILE_DOWNLOAD_NAME, COMPANY_PROFILE_HREF } from "@/lib/company-profile";
 import { Facebook, Instagram, Linkedin, Phone, Mail, MessageCircle } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
 
@@ -177,7 +177,7 @@ export function Footer() {
             <SectionHeading>Company</SectionHeading>
             <ul className="space-y-2 text-sm text-gray-300">
               <li><Link href="/why-places" className="hover:text-white transition-colors">About</Link></li>
-              <li><a href={COMPANY_PROFILE_HREF} download={COMPANY_PROFILE_DOWNLOAD_NAME} className="hover:text-white transition-colors">Company Profile <span className="text-gray-500 text-xs">({COMPANY_PROFILE_SIZE_LABEL})</span></a></li>
+              <li><a href={COMPANY_PROFILE_HREF} download={COMPANY_PROFILE_DOWNLOAD_NAME} className="hover:text-white transition-colors">Company Profile</a></li>
               <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
             </ul>
             <SubHeading>Resources</SubHeading>

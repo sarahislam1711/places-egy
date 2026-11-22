@@ -409,8 +409,8 @@ function ListingFormDialog({
             <SelectField label="Transaction Type" value={form.transaction_type} options={ENUM_OPTIONS.transaction_type} onChange={(v) => set("transaction_type", v)} />
 
             {form.transaction_type === "rent" && (
-              <fieldset className="col-span-2 rounded-xl border border-border/60 bg-white px-4 py-3 space-y-3">
-                <legend className="px-1 text-sm font-medium text-primary">Availability</legend>
+              <fieldset className="col-span-2">
+                <legend className="mb-1.5 text-sm font-medium text-primary">Availability</legend>
                 <div className="flex flex-wrap gap-2" role="radiogroup" aria-label="Availability">
                   {(["available", "rented"] as const).map((s) => (
                     <button
@@ -434,7 +434,7 @@ function ListingFormDialog({
                   ))}
                 </div>
                 {form.rental_status === "rented" && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div className="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div className="space-y-1.5">
                       <Label htmlFor="rental_start" className="text-sm font-medium text-primary">Rented since</Label>
                       <Input id="rental_start" type="date" value={form.rental_start ?? ""} onChange={(e) => set("rental_start", e.target.value || null)} className="bg-white" />
