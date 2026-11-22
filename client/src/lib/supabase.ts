@@ -22,6 +22,9 @@ export type Listing = {
   project: string;
   location: string;
   location_area: string;
+  // Optional; shown on the listing page only. Sent to Hotdesk ("none" if empty).
+  street_name?: string | null;
+  building_name?: string | null;
   price: number;
   currency: string;
   area_sqm: number;

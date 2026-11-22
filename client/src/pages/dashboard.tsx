@@ -93,6 +93,8 @@ const EMPTY_FORM: ListingForm = {
   project: "",
   location: "",
   location_area: "",
+  street_name: "",
+  building_name: "",
   price: 0,
   // No default: the editor must choose. A pre-selected EGP is how USD prices
   // ended up shown as EGP (e.g. "20,250 EGP / month" for a $20,250 unit).
@@ -449,13 +451,21 @@ function ListingFormDialog({
               </fieldset>
             )}
             <SelectField label="Developer (optional)" value={form.developer} options={ENUM_OPTIONS.developer} onChange={(v) => set("developer", v)} clearable />
+            <SelectField label="Furnishing" value={form.furnishing} options={ENUM_OPTIONS.furnishing} onChange={(v) => set("furnishing", v)} />
+
             <SelectField label="Location" value={form.location} options={ENUM_OPTIONS.location} onChange={(v) => set("location", v)} />
             <div className="space-y-1.5">
               <Label className="text-sm font-medium text-primary">Location Area</Label>
               <Input value={form.location_area} onChange={(e) => set("location_area", e.target.value)} placeholder="e.g. Fifth Settlement" className="bg-white" />
             </div>
-
-            <SelectField label="Furnishing" value={form.furnishing} options={ENUM_OPTIONS.furnishing} onChange={(v) => set("furnishing", v)} />
+            <div className="space-y-1.5">
+              <Label htmlFor="building_name" className="text-sm font-medium text-primary">Building name (optional)</Label>
+              <Input id="building_name" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} placeholder="e.g. Building B7" className="bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="street_name" className="text-sm font-medium text-primary">Street name (optional)</Label>
+              <Input id="street_name" value={form.street_name ?? ""} onChange={(e) => set("street_name", e.target.value)} placeholder="e.g. 90th Street" className="bg-white" />
+            </div>
 
             <div className="space-y-1.5">
               <Label className="text-sm font-medium text-primary">Project</Label>

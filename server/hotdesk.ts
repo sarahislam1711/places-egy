@@ -35,6 +35,8 @@ export interface ListingRow {
   project: string | null;
   location: string | null;
   location_area: string | null;
+  street_name?: string | null;
+  building_name?: string | null;
   price: number | null;
   currency: string | null;
   price_per_meter: number | null;

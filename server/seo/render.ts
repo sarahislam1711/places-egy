@@ -308,6 +308,8 @@ export async function renderListing(l: SeoListing): Promise<string> {
     ["Area", l.area_sqm ? esc(areaLabel(l)) : "On request"],
     ["Location", locSlug ? `<a href="/locations/${locSlug}">${esc(l.location ?? "")}</a>` : esc(l.location ?? "")],
     ...(l.location_area ? ([["Area / district", esc(l.location_area)]] as Array<[string, string]>) : []),
+    ...(l.building_name?.trim() ? ([["Building", esc(l.building_name.trim())]] as Array<[string, string]>) : []),
+    ...(l.street_name?.trim() ? ([["Street", esc(l.street_name.trim())]] as Array<[string, string]>) : []),
     ...(condition ? ([["Condition", esc(condition)]] as Array<[string, string]>) : []),
     ["Transaction", esc(l.transaction_type === "income-property" ? "Income property" : l.transaction_type === "sale" ? "For sale" : "For rent")],
     ...(l.rental_status === "rented" ? ([["Availability", esc(rentedLabel(l))]] as Array<[string, string]>) : []),
