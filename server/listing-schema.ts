@@ -15,6 +15,10 @@ const listingFields = z
     project: z.string().max(200).optional(),
     location: z.string().max(200).optional(),
     location_area: z.string().max(200).optional(),
+    // Optional. Shown on the listing page only (not on cards). Hotdesk needs
+    // both, so an empty one is sent to Hotdesk as "none".
+    street_name: z.string().max(200).nullable().optional(),
+    building_name: z.string().max(200).nullable().optional(),
     // Numeric fields accept null: the admin form sends null for any number
     // input left blank (an unfilled stat is omitted, not stored as 0). Title is
     // the only hard-required field server-side; price is enforced as required

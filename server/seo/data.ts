@@ -17,14 +17,14 @@ let cache: { at: number; rows: SeoListing[] } | null = null;
 let inflight: Promise<SeoListing[]> | null = null;
 
 const FIELDS =
-  "id,title,description,transaction_type,property_type,subtype,developer,project,location,location_area," +
+  "id,title,description,transaction_type,property_type,subtype,developer,project,location,location_area,street_name,building_name," +
   "price,currency,price_per_meter,area_sqm,outdoor_area_sqm,outdoor_price_per_meter,outdoor_area_type,price_is_lump_sum,floor,parking,furnishing,maintenance_fees,maintenance_status," +
   "delivery_date,images,is_test,rental_status,rental_start,rental_end,updated_at,created_at";
 
 // Columns added by sql/listings-outdoor-and-fx.sql. If the code is deployed
 // before that migration runs, the query is retried without them so listing
 // pages keep working (the extra-area features just stay off until it runs).
-const NEW_COLUMNS = ["outdoor_area_sqm", "outdoor_price_per_meter", "outdoor_area_type", "price_is_lump_sum"];
+const NEW_COLUMNS = ["outdoor_area_sqm", "outdoor_price_per_meter", "outdoor_area_type", "price_is_lump_sum", "street_name", "building_name"];
 const LEGACY_FIELDS = FIELDS.split(",").filter((f) => !NEW_COLUMNS.includes(f)).join(",");
 let fields = FIELDS;
 

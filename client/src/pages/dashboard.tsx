@@ -93,6 +93,8 @@ const EMPTY_FORM: ListingForm = {
   project: "",
   location: "",
   location_area: "",
+  street_name: "",
+  building_name: "",
   price: 0,
   // No default: the editor must choose. A pre-selected EGP is how USD prices
   // ended up shown as EGP (e.g. "20,250 EGP / month" for a $20,250 unit).
@@ -460,6 +462,15 @@ function ListingFormDialog({
             <div className="space-y-1.5">
               <Label className="text-sm font-medium text-primary">Project</Label>
               <Input value={form.project} onChange={(e) => set("project", e.target.value)} className="bg-white" />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="building_name" className="text-sm font-medium text-primary">Building name (optional)</Label>
+              <Input id="building_name" value={form.building_name ?? ""} onChange={(e) => set("building_name", e.target.value)} placeholder="e.g. Building B7" className="bg-white" />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="street_name" className="text-sm font-medium text-primary">Street name (optional)</Label>
+              <Input id="street_name" value={form.street_name ?? ""} onChange={(e) => set("street_name", e.target.value)} placeholder="e.g. 90th Street" className="bg-white" />
             </div>
 
             <div className="space-y-1.5 md:col-span-2">

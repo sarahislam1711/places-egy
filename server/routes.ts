@@ -113,9 +113,10 @@ async function proxyToWp(path: string, res: Response) {
   }
 }
 
-// Columns added by sql/listings-outdoor-and-fx.sql. If this code runs before
-// that migration, admin saves retry without them instead of failing.
-const NEW_LISTING_COLUMNS = ["outdoor_area_sqm", "outdoor_price_per_meter", "outdoor_area_type", "price_is_lump_sum"] as const;
+// Columns added by sql/listings-outdoor-and-fx.sql and
+// sql/listings-street-building.sql. If this code runs before those
+// migrations, admin saves retry without them instead of failing.
+const NEW_LISTING_COLUMNS = ["outdoor_area_sqm", "outdoor_price_per_meter", "outdoor_area_type", "price_is_lump_sum", "street_name", "building_name"] as const;
 const missingNewColumns = (msg: string) =>
   /column|schema cache|42703|PGRST204/i.test(msg) && NEW_LISTING_COLUMNS.some((c) => msg.includes(c));
 function withoutNewColumns<T extends Record<string, unknown>>(row: T): T {

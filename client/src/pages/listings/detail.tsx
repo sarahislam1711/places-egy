@@ -467,6 +467,12 @@ function DetailView({ id, idSlug }: { id: number; idSlug: string }) {
                   {listing.location_area && (
                     <DetailRow icon={MapPin} label="Area" value={listing.location_area} />
                   )}
+                  {listing.building_name?.trim() && (
+                    <DetailRow icon={Building2} label="Building" value={listing.building_name.trim()} />
+                  )}
+                  {listing.street_name?.trim() && (
+                    <DetailRow icon={MapPin} label="Street" value={listing.street_name.trim()} />
+                  )}
                   <DetailRow icon={Building2} label="Property type" value={listing.property_type} />
                   {listing.subtype && (
                     <DetailRow icon={Building2} label="Subtype" value={listing.subtype} />

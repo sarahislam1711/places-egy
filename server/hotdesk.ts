@@ -47,6 +47,8 @@ export interface ListingRow {
   project: string | null;
   location: string | null;
   location_area: string | null;
+  street_name?: string | null;
+  building_name?: string | null;
   price: number | null;
   currency: string | null;
   price_per_meter: number | null;
@@ -120,6 +122,11 @@ function hotdeskPhoto(url: string): string {
 
 const label = (opts: Parameters<typeof getEnumLabel>[0], v: string | null) =>
   v ? getEnumLabel(opts, v) || v : null;
+
+// Street and building are optional in our admin but required by Hotdesk, so an
+// empty one is sent as "none" (agreed with Hotdesk; their site hides it).
+const NONE = "none";
+const clean = (v: string | null | undefined) => (v ?? "").replace(/[|]+/g, " ").replace(/\s+/g, " ").trim();
 
 // The office's own address from our data, e.g. "Mivida The Place, Fifth
 // Settlement, New Cairo". Our area field is free text ("new cairo",
@@ -211,7 +218,9 @@ export function toHotdeskListing(l: ListingRow) {
       workingHours: WORKING_HOURS,
       address: hotdeskAddress(l),
       area_name: label(LOCATION_OPTIONS, l.location),
-      building: (l.project ?? "").replace(/[|]+/g, " ").trim() || null,
+      // Hotdesk requires both; empty ones go as "none", which Hotdesk hides.
+      building: clean(l.building_name) || NONE,
+      street: clean(l.street_name) || NONE,
     },
     // Kept for the admin preview only.
     extra: {
@@ -459,8 +468,8 @@ export async function syncOne(
     ...(prev ?? {}),
     address: p.rules.address,
     area: p.rules.area_name ?? prev?.area ?? "",
-    buildingName: p.rules.building ?? prev?.buildingName ?? "-",
-    streetName: prev?.streetName || "-",
+    buildingName: p.rules.building,
+    streetName: p.rules.street,
     postalCode: postalCode || prev?.postalCode || "00000",
   });
   const developer = await hotdeskDeveloperId(row.developer);
@@ -473,7 +482,7 @@ export async function syncOne(
     descriptions: { en: p.description },
   };
   const placesHash = createHash("sha1")
-    .update(JSON.stringify([common, ourRules, p.rules.address, p.rules.area_name, p.rules.building, postalCode, ws.id, p.photos]))
+    .update(JSON.stringify([common, ourRules, p.rules.address, p.rules.area_name, p.rules.building, p.rules.street, postalCode, ws.id, p.photos]))
     .digest("hex");
   const ourMeta = { placesListingId: row.id, placesUrl: p.places_url, placesPhotos: p.photos, placesHash };
   const want = p.availability.status === "rented" ? STATUS.rented : STATUS.active;
