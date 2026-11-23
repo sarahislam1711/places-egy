@@ -21,9 +21,12 @@ import {
   landingStats,
   type DealSlug,
 } from "@/lib/landing-pages";
+import { landingDevelopers, landingFaqTopics } from "@/lib/landing-related";
 import NotFound from "@/pages/not-found";
 
 const SITE = "https://places-egy.com";
+const CHIP =
+  "inline-flex items-center rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-primary hover:border-accent hover:text-accent transition-colors";
 const BATCH = 24;
 const CARD_FIELDS =
   "id,title,transaction_type,property_type,subtype,developer,project,location,location_area,price,currency,area_sqm,furnishing,images,rental_status,rental_end,updated_at,price_per_meter,maintenance_fees,maintenance_status,floor,parking,delivery_date";
@@ -65,6 +68,8 @@ export default function LandingPage() {
     [all, loc, dealSlug],
   );
   const pagePath = deal && loc ? landingPath(dealSlug, loc.slug) : path;
+  const developers = useMemo(() => (loc ? landingDevelopers(loc.name) : []), [loc]);
+  const faqTopics = deal ? landingFaqTopics(dealSlug) : [];
 
   useDocumentMeta({
     title: copy?.title ?? "Offices | PLACES",
@@ -193,6 +198,26 @@ export default function LandingPage() {
                 {loc.name} area guide
               </Link>
             </li>
+          </ul>
+          {developers.length > 0 && (
+            <>
+              <h3 className="mt-8 mb-4 text-lg font-serif font-bold text-primary">Developers in {loc.name}</h3>
+              <ul className="flex flex-wrap gap-3">
+                {developers.map((d) => (
+                  <li key={d.path}>
+                    <Link href={d.path} className={CHIP}>{d.label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          <h3 className="mt-8 mb-4 text-lg font-serif font-bold text-primary">Questions to settle before you {dealSlug === "rent" ? "sign a lease" : "buy"}</h3>
+          <ul className="flex flex-wrap gap-3">
+            {faqTopics.map((t) => (
+              <li key={t.path}>
+                <Link href={t.path} className={CHIP}>{t.label}</Link>
+              </li>
+            ))}
           </ul>
           <p className="mt-6 text-sm text-muted-foreground">
             Can't find the right space?{" "}

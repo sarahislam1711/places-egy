@@ -25,6 +25,7 @@ import {
   landingStats,
   type DealSlug,
 } from "../../client/src/lib/landing-pages";
+import { landingDevelopers, landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
 
 const LOCATIONS = Object.values(LOCATION_CONTENT);
 import { esc, injectBody, injectJsonLd, injectMeta, prerenderInner, type PageMeta } from "./html";
@@ -167,9 +168,16 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
         ? `<h2>More offices in ${esc(loc.name)}</h2><ul>${siblings.map((p) => `<li><a href="${p.path}">${esc(DEALS[p.deal].heading(loc.name))}</a></li>`).join("")}</ul>`
         : "") +
       `<p><a href="/locations/${loc.slug}">${esc(`${loc.name} area guide: projects, developers and market overview`)}</a></p>` +
+      relatedList(`Developers in ${loc.name}`, landingDevelopers(loc.name)) +
+      relatedList(`Questions to settle before you ${deal === "rent" ? "sign a lease" : "buy"}`, landingFaqTopics(deal)) +
       landingNav(inventory, "Other popular searches") +
       locationNav(),
   );
+}
+
+function relatedList(heading: string, links: RelatedLink[]): string {
+  if (!links.length) return "";
+  return `<h2>${esc(heading)}</h2><ul>` + links.map((l) => `<li><a href="${l.path}">${esc(l.label)}</a></li>`).join("") + "</ul>";
 }
 
 const DEALS_FOR_LOCATION = (inventory: SeoListing[], locName: string) =>
