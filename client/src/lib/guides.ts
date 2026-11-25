@@ -52,7 +52,7 @@ export const GUIDES: Guide[] = [
     readMinutes: 12,
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
-    imageUrl: "/images/office-interior.jpg",
+    imageUrl: "/images/general-office.jpg",
   },
   {
     slug: "buy-vs-rent-office-cairo",

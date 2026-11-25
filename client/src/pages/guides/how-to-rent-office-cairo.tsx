@@ -198,7 +198,7 @@ export default function HowToRentOfficeCairoGuide() {
       </p>
 
       <GuideImage
-        src="/images/office-interior.jpg"
+        src="/images/general-office.jpg"
         alt="Interior of a Cairo office space during a site visit"
         caption="Site visits are where 80% of the elimination happens. Elevator wait times at 9 AM, HVAC noise in an empty unit, and restroom count tell you more than any brochure."
       />
