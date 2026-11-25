@@ -3,6 +3,7 @@ import { supabaseAdmin } from "./supabase";
 import { sendMail } from "./mailer";
 import { fetchGa4WeeklyTraffic, type GA4WeeklyTraffic } from "./ga4-client";
 import { listingIssues, type CheckableListing } from "../client/src/lib/listing-checks";
+import { checkCrawlerView, MIN_CRAWLER_WORDS, type CrawlerViewResult } from "./crawler-check";
 
 // Weekly Monday-morning admin email report.
 //
@@ -52,6 +53,8 @@ interface WeeklyMetrics {
   // "mustFix" = values the admin form would refuse to save (e.g. a USD price
   // saved as EGP); "toCheck" = warnings.
   listingIssues: { mustFix: number; toCheck: number; top: Array<{ id: number; title: string; rule: string; mustFix: boolean }> } | null;
+  // Pages that show crawlers (AI bots, Google's first pass) almost no text.
+  crawlerView: CrawlerViewResult | null;
 }
 
 async function fetchMetrics(): Promise<WeeklyMetrics> {
@@ -165,8 +168,11 @@ async function fetchMetrics(): Promise<WeeklyMetrics> {
     }));
 
   // GA4 traffic in parallel — fire-and-await but not blocking on failure.
-  const ga4 = await fetchGa4WeeklyTraffic();
-  const issues = await fetchListingIssues();
+  const [ga4, issues, crawlerView] = await Promise.all([
+    fetchGa4WeeklyTraffic(),
+    fetchListingIssues(),
+    checkCrawlerView(),
+  ]);
 
   return {
     leadsThisWeek: thisCount,
@@ -181,6 +187,7 @@ async function fetchMetrics(): Promise<WeeklyMetrics> {
     weekEnd: weekEnd.toISOString().split("T")[0],
     ga4,
     listingIssues: issues,
+    crawlerView,
   };
 }
 
@@ -551,6 +558,26 @@ function renderReport(m: WeeklyMetrics): string {
         )
         .join("")}
     </table>`
+      : ""}
+
+    ${m.crawlerView
+      ? `<!-- Section 7: Pages search engines and AI tools can't read -->
+    <h2 style="margin:32px 0 12px 0; font-size:16px; font-weight:700; color:#171717;">Pages Google and AI search can read</h2>
+    ${m.crawlerView.thin.length === 0
+      ? `<p style="margin:0; font-size:14px; color:#166534;">All ${m.crawlerView.checked} pages checked show their full text to crawlers that don't run JavaScript (ChatGPT, Perplexity, Claude).${m.crawlerView.partial ? " (Partial run: time limit reached.)" : ""}</p>`
+      : `<p style="margin:0 0 12px 0; font-size:14px; color:#475569;">
+      <strong style="color:#B91C1C;">${m.crawlerView.thin.length} of ${m.crawlerView.checked} pages</strong> show crawlers fewer than ${MIN_CRAWLER_WORDS} words (or don't load), so AI search and Google's first pass see an almost empty page. Ask the developer to render them on the server.
+    </p>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ffffff; border:1px solid #EAE4DA; border-radius:12px; overflow:hidden;">
+      ${m.crawlerView.thin
+        .slice(0, 25)
+        .map(
+          (t) => `<tr><td style="padding:10px 14px; border-bottom:1px solid #F1ECE4; font-size:13px;">
+            ${escapeHtml(t.path)} <span style="color:#64748B;">· ${t.status === 200 ? `${t.words} words` : t.status ? `HTTP ${t.status}` : "did not load"}</span>
+          </td></tr>`,
+        )
+        .join("")}
+    </table>`}`
       : ""}
 
     <div style="margin:32px 0 8px 0; padding:16px 20px; background:#171717; border-radius:12px; text-align:center;">

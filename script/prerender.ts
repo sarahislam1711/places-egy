@@ -4,6 +4,7 @@ import ts from "typescript";
 import { attr, esc, injectBody, injectMeta } from "../server/seo/html";
 import { STATIC_PAGE_META } from "../client/src/lib/page-meta";
 import { renderDeveloperBodies } from "./ssr-developers";
+import { renderStaticPageBodies } from "./ssr-pages";
 import { buildBlogData, collectBlogPosts, renderBlogHub, renderBlogPost } from "../server/seo/blog";
 import { FAQ_SECTIONS, countQuestionsInSection, faqSampleQuestions } from "../client/src/lib/faq";
 
@@ -646,6 +647,9 @@ export async function prerender() {
 
   // Full page content for each developer, rendered from its React component.
   const developerBodies = await renderDeveloperBodies();
+  // Same for guides, services, hubs and legal pages: without this, crawlers
+  // that don't run JavaScript saw only the title and one sentence (~120 words).
+  const pageBodies = await renderStaticPageBodies();
   for (const meta of metas) {
     const slug = meta.route.replace(/^\/developers\//, "");
     const html = injectBody(injectMeta(shell, meta), developerBodies[slug] ?? simpleBody(meta));
@@ -710,7 +714,7 @@ export async function prerender() {
       }).join("");
       html = injectBody(html, `<h1>${esc(headingFrom(meta.title))}</h1><p>${esc(meta.description)}</p>${sections}`);
     } else {
-      html = injectBody(html, simpleBody(meta));
+      html = injectBody(html, pageBodies[meta.route] ?? simpleBody(meta));
     }
     const flatOut = path.join(DIST, `${meta.route}.html`);
     await mkdir(path.dirname(flatOut), { recursive: true });
@@ -743,8 +747,11 @@ export async function prerender() {
   const guideMetas = await collectGuideMeta();
   let guideWritten = 0;
   for (const meta of guideMetas) {
-    let html = injectBody(injectMeta(shell, meta), simpleBody(meta));
-    html = injectJsonLd(html, buildGuideJsonLd(meta));
+    const body = pageBodies[meta.route];
+    let html = injectBody(injectMeta(shell, meta), body ?? simpleBody(meta));
+    // The rendered guide carries its own Article + BreadcrumbList blocks; only
+    // add the build-time copy when falling back to the meta-only body.
+    if (!body?.includes("application/ld+json")) html = injectJsonLd(html, buildGuideJsonLd(meta));
     // Write dist/public/guides/<slug>.html — express.static resolves
     // /guides/<slug> to this file before the SPA catch-all thanks to
     // the extensions:["html"] option on express.static.

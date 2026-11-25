@@ -13,7 +13,7 @@ const PAGES_DIR = "client/src/pages/developers";
 const OUT = path.resolve("dist/ssr-developers.mjs");
 
 /** Strip the app chrome and styling from rendered markup, keeping content and links. */
-function clean(html: string): string {
+export function clean(html: string): string {
   return html
     .replace(/<header[\s\S]*?<\/header>/, "") // Navbar
     .replace(/<footer[\s\S]*<\/footer>/, "")
