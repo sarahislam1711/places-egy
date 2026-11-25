@@ -3,7 +3,7 @@
 // numbered process → comparison → FAQs beside an advisor panel → CTA band.
 // Everything renders without data, so the build-time crawler render
 // (script/ssr-pages.ts) carries the full text.
-import type { ReactNode } from "react";
+import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -323,5 +323,141 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
         </div>
       </div>
     </section>
+  );
+}
+
+export interface Audience {
+  title: string;
+  /** What this audience needs, in their words ("You need …"). */
+  need: string;
+  /** How PLACES helps ("We …"). */
+  help: string;
+  image: string;
+  imageAlt: string;
+}
+
+/**
+ * "Who this is for" as a selector: audience names on the left, one panel with
+ * a photo and two short lines on the right. Every panel is in the HTML (the
+ * inactive ones are only hidden), so crawlers read all of them.
+ */
+export function AudienceTabs({ items, label }: { items: Audience[]; label: string }) {
+  const [active, setActive] = useState(0);
+  const base = useId();
+  const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
+    const next = e.key === "ArrowDown" || e.key === "ArrowRight" ? i + 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? i - 1 : null;
+    if (next === null) return;
+    e.preventDefault();
+    const n = (next + items.length) % items.length;
+    setActive(n);
+    document.getElementById(`${base}-tab-${n}`)?.focus();
+  };
+  return (
+    <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-6 lg:gap-12 items-start">
+      <div role="tablist" aria-label={label} aria-orientation="vertical" className="flex lg:flex-col gap-2 overflow-x-auto pb-1 snap-x">
+        {items.map((it, i) => {
+          const on = i === active;
+          return (
+            <button
+              key={it.title}
+              id={`${base}-tab-${i}`}
+              role="tab"
+              type="button"
+              aria-selected={on}
+              aria-controls={`${base}-panel-${i}`}
+              tabIndex={on ? 0 : -1}
+              onClick={() => setActive(i)}
+              onKeyDown={(e) => onKey(e, i)}
+              className={`group snap-start shrink-0 lg:shrink flex items-center justify-between gap-4 text-left rounded-xl px-5 py-4 lg:py-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                on ? "bg-primary text-white" : "bg-white/60 lg:bg-transparent text-primary hover:bg-white"
+              }`}
+            >
+              <span className="text-base lg:text-xl font-serif font-bold whitespace-nowrap lg:whitespace-normal">{it.title}</span>
+              <ArrowRight className={`hidden lg:block w-5 h-5 shrink-0 transition-transform ${on ? "text-accent translate-x-1" : "text-primary/30 group-hover:translate-x-1"}`} aria-hidden />
+            </button>
+          );
+        })}
+      </div>
+      <div>
+        {items.map((it, i) => (
+          <div
+            key={it.title}
+            id={`${base}-panel-${i}`}
+            role="tabpanel"
+            aria-labelledby={`${base}-tab-${i}`}
+            className={i === active ? "block" : "hidden"}
+          >
+            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.35)]">
+              <div className="aspect-[16/9] bg-muted overflow-hidden">
+                <img src={it.image} alt={it.imageAlt} width={960} height={540} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              </div>
+              <div className="p-6 md:p-8">
+                <h3 className="text-2xl font-serif font-bold text-primary">{it.title}</h3>
+                <p className="mt-3 text-lg text-primary/80 leading-relaxed">{it.need}</p>
+                <p className="mt-4 flex items-start gap-3 text-primary font-medium leading-relaxed">
+                  <span className="mt-0.5 inline-flex w-6 h-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                    <Check className="w-3.5 h-3.5" strokeWidth={3} aria-hidden />
+                  </span>
+                  {it.help}
+                </p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export interface ServiceCardItem {
+  href: string;
+  name: string;
+  desc: string;
+  tags: string[];
+  image: string;
+  imageAlt: string;
+}
+
+/** Photo-led service cards; the first card is the featured one (wider on desktop). */
+export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
+  return (
+    <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {items.map((s, i) => (
+        <Link
+          key={s.href}
+          href={s.href}
+          className={`group flex flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-20px_rgba(17,17,17,0.35)] transition-shadow hover:shadow-[0_20px_44px_-20px_rgba(17,17,17,0.45)] ${
+            i === 0 ? "sm:col-span-2 lg:col-span-2" : ""
+          }`}
+        >
+          <div className={`relative overflow-hidden bg-muted ${i === 0 ? "aspect-[16/7]" : "aspect-[16/10]"}`}>
+            <img
+              src={s.image}
+              alt={s.imageAlt}
+              width={960}
+              height={600}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/15 to-transparent" aria-hidden />
+            <h3 className="absolute left-5 right-5 bottom-4 text-2xl md:text-[1.7rem] font-serif font-bold text-white leading-tight">{s.name}</h3>
+          </div>
+          <div className="flex flex-1 flex-col p-5 md:p-6">
+            <p className="text-primary/80 leading-relaxed">{s.desc}</p>
+            <ul className="mt-4 flex flex-wrap gap-2" aria-label={`${s.name} is best for`}>
+              {s.tags.map((t) => (
+                <li key={t} className="rounded-full bg-background px-3 py-1 text-xs font-semibold text-primary">
+                  {t}
+                </li>
+              ))}
+            </ul>
+            <span className="mt-auto pt-5 inline-flex items-center text-accent font-semibold">
+              Learn more <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
+            </span>
+          </div>
+        </Link>
+      ))}
+    </div>
   );
 }

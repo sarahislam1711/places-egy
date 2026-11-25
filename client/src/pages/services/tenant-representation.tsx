@@ -7,12 +7,13 @@ import {
   Checklist,
   ComparisonTable,
   CtaBand,
-  DefinitionList,
   FaqWithAdvisor,
   LinkGrid,
   SectionHead,
   ServiceHero,
   StepList,
+  AudienceTabs,
+  type Audience,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -21,11 +22,11 @@ import { LOCATION_CONTENT } from "@/lib/location-content";
 
 const PATH = "/services/tenant-representation";
 
-const WHO = [
-  { title: "Companies securing their first office", desc: "A space that fits your team and budget, with room to grow, found without wasting weeks on the wrong options." },
-  { title: "Growing teams relocating or expanding", desc: "More space, a better location, or both, with terms negotiated around your growth plans." },
-  { title: "International companies entering Egypt", desc: "The right area, a clear view of how leases work in Egypt, and your first office or regional HQ in Cairo." },
-  { title: "Brands securing commercial space", desc: "The right unit in the right development, with footfall, lease terms and operational fit checked before you commit." },
+const WHO: Audience[] = [
+  { title: "Companies securing their first office", need: "You need a space that works for your team, fits your budget and gives you room to grow.", help: "We help you find it without wasting time on the wrong options.", image: "/images/office-interior.jpg", imageAlt: "Office interior ready for a team" },
+  { title: "Growing teams relocating or expanding", need: "You need more space, a better location, or both.", help: "We assess what's available and negotiate the best terms for your situation.", image: "/images/business-complex.jpg", imageAlt: "Office buildings in a Cairo business district" },
+  { title: "International companies entering Egypt", need: "You need the right area and a clear view of how office leases work in Egypt.", help: "We secure your first office or regional HQ in Cairo.", image: "/images/offices-hero.jpg", imageAlt: "Office towers in Cairo" },
+  { title: "Brands securing commercial space", need: "You need the right unit in the right development.", help: "We evaluate footfall, lease terms and operational fit before you commit.", image: "/images/commercial.jpg", imageAlt: "Commercial units in a Cairo development" },
 ];
 
 const BENEFITS = [
@@ -202,7 +203,7 @@ export default function TenantRepresentation() {
 
         <Band tone="cream">
           <SectionHead title="Who we represent" />
-          <DefinitionList items={WHO} />
+          <AudienceTabs items={WHO} label="Who we represent" />
         </Band>
 
         <Band tone="dark">

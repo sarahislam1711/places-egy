@@ -13,6 +13,8 @@ import {
   SectionHead,
   ServiceHero,
   StepList,
+  AudienceTabs,
+  type Audience,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -29,10 +31,10 @@ const WHAT_WE_LOOK_AT = [
   "Exit potential",
 ];
 
-const WHO = [
-  { title: "First-time investors", desc: "You want to invest in Egyptian real estate but don't know where to start. We give you an honest, structured entry point." },
-  { title: "Experienced investors", desc: "You want a second opinion on a specific asset or market opportunity. We provide objective analysis." },
-  { title: "Institutional buyers", desc: "You're evaluating assets at a portfolio level. We provide market data, asset evaluation, and ongoing advisory." },
+const WHO: Audience[] = [
+  { title: "First-time investors", need: "You want to invest in Egyptian real estate but don't know where to start.", help: "We give you an honest, structured entry point.", image: "/images/places-egy-team.jpg", imageAlt: "The PLACES advisory team" },
+  { title: "Experienced investors", need: "You want a second opinion on a specific asset or market opportunity.", help: "We provide objective analysis.", image: "/images/business-park.jpg", imageAlt: "A business park in Cairo" },
+  { title: "Institutional buyers", need: "You're evaluating assets at a portfolio level.", help: "We provide market data, asset evaluation, and ongoing advisory.", image: "/images/offices-hero.jpg", imageAlt: "Office towers in Cairo" },
 ];
 
 const WHY = [
@@ -175,7 +177,7 @@ export default function InvestmentConsultation() {
 
         <Band tone="cream">
           <SectionHead title="Who this service is for" />
-          <DefinitionList items={WHO} />
+          <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting an office rather than investing?{" "}
             <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">

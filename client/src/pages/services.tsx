@@ -4,7 +4,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
-import { Band, CtaBand, SectionHead, ServiceHero } from "@/components/service-page";
+import { Band, CtaBand, SectionHead, ServiceCards, ServiceHero
+} from "@/components/service-page";
 import { breadcrumbSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 
@@ -20,32 +21,42 @@ const SERVICES = [
   {
     name: "Tenant Representation",
     desc: "We represent your company, not the landlord: we find, compare and negotiate your office and review the lease. Free for tenants.",
-    bestFor: "Companies securing their first office, growing teams relocating or expanding, international companies entering Egypt, and brands securing commercial space.",
     slug: "tenant-representation",
+    tags: ["First offices", "Relocations & expansions", "Companies entering Egypt", "Commercial brands"],
+    image: "/images/leasing.jpg",
+    imageAlt: "Reviewing an office lease before signing",
   },
   {
     name: "Primary Property",
     desc: "Buy directly from the developer: off-plan and newly launched units across Egypt's most active developments.",
-    bestFor: "First-time buyers, investors who want early access before units hit the secondary market, and end users who will occupy the unit.",
     slug: "primary-property",
+    tags: ["First-time buyers", "Early-access investors", "End users"],
+    image: "/images/hero-main.jpg",
+    imageAlt: "A new office development in Egypt",
   },
   {
     name: "Property Resale",
     desc: "Buy or sell a unit that has already been transacted, with full market context on both sides.",
-    bestFor: "Buyers who want a unit that's ready now, sellers exiting an investment, and investors looking for undervalued resale units.",
     slug: "property-resale",
+    tags: ["Ready-now buyers", "Sellers", "Value investors"],
+    image: "/images/hero-section.jpg",
+    imageAlt: "Office buildings available on the resale market",
   },
   {
     name: "Investment Consultation",
     desc: "Data-driven advisory for investors evaluating administrative office assets in Egypt.",
-    bestFor: "First-time investors, experienced investors who want a second opinion, and institutional buyers evaluating assets at portfolio level.",
     slug: "investment-consultation",
+    tags: ["First-time investors", "Second opinions", "Institutional buyers"],
+    image: "/images/investment-consultation.jpg",
+    imageAlt: "Reviewing investment figures for an office asset",
   },
   {
     name: "Income Generating Property",
     desc: "Identify and acquire units that generate consistent rental income across Egypt's most active business districts.",
-    bestFor: "Yield-focused investors, portfolio builders, and passive investors who want income without active management.",
     slug: "income-generating-property",
+    tags: ["Yield-focused investors", "Portfolio builders", "Passive investors"],
+    image: "/images/Allegria-Business-Park.jpg",
+    imageAlt: "Allegria Business Park, an income-generating office location",
   },
 ];
 
@@ -131,29 +142,16 @@ export default function Services() {
             title="Our services"
             lead="Five service areas, one team. Start with the one that matches what you're trying to do."
           />
-          <div className="border-b border-primary/10">
-            {SERVICES.map((s) => (
-              <article key={s.slug} className="grid md:grid-cols-[1fr_1.5fr] gap-x-12 gap-y-3 py-8 border-t border-primary/10">
-                <h3 className="text-2xl font-serif font-bold text-primary">
-                  <Link href={`/services/${s.slug}`} className="hover:text-accent transition-colors">
-                    {s.name}
-                  </Link>
-                </h3>
-                <div>
-                  <p className="text-lg text-primary leading-relaxed">{s.desc}</p>
-                  <p className="mt-2 text-muted-foreground leading-relaxed">
-                    <span className="font-semibold text-primary">Best for:</span> {s.bestFor}
-                  </p>
-                  <Link
-                    href={`/services/${s.slug}`}
-                    className="group mt-4 inline-flex items-center text-accent font-semibold hover:underline"
-                  >
-                    Learn more about {s.name} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </article>
-            ))}
-          </div>
+          <ServiceCards
+            items={SERVICES.map((sv) => ({
+              href: `/services/${sv.slug}`,
+              name: sv.name,
+              desc: sv.desc,
+              tags: sv.tags,
+              image: sv.image,
+              imageAlt: sv.imageAlt,
+            }))}
+          />
         </Band>
 
         <Band tone="dark">
