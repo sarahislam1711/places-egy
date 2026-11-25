@@ -267,3 +267,55 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
     faqs,
   };
 }
+
+// ---------- deal hubs: /rent, /buy, /income-property (all of Cairo) ----------
+
+const CAIRO: LandingLocation = { slug: "", name: "Cairo", within: null };
+
+/** Available units of one deal type across every PLACES location. */
+export function hubRows<T extends LandingListing>(all: T[], deal: DealSlug): T[] {
+  return LANDING_LOCATIONS.flatMap((loc) => landingRows(all, deal, loc.name));
+}
+
+export interface HubArea {
+  loc: LandingLocation;
+  count: number;
+  /** Median EGP price per m² (monthly for rent); null when too few EGP-priced units. */
+  median: number | null;
+  /** The area's /{deal}/{loc} page when it has enough stock, else its area guide. */
+  path: string;
+}
+
+export interface HubCopy extends LandingCopy {
+  areas: HubArea[];
+  /** Short line describing an area's median, e.g. "median EGP 1,300 per m² per month". */
+  medianLabel: (median: number) => string;
+}
+
+export function hubCopy(dealSlug: DealSlug, all: LandingListing[]): HubCopy {
+  const rows = hubRows(all, dealSlug);
+  const base = landingCopy(dealSlug, CAIRO, landingStats(rows, CAIRO.name));
+  const rent = DEALS[dealSlug].tx === "rent";
+  const eligible = new Set(eligibleLandingPages(all).filter((p) => p.deal === dealSlug).map((p) => p.loc.slug));
+  const areas = LANDING_LOCATIONS.map((loc) => {
+    const locRows = landingRows(all, dealSlug, loc.name);
+    const s = landingStats(locRows, loc.name);
+    return {
+      loc,
+      count: locRows.length,
+      median: s.perSqm ? s.perSqm[1] : null,
+      path: eligible.has(loc.slug) ? landingPath(dealSlug, loc.slug) : `/locations/${loc.slug}`,
+    };
+  })
+    .filter((a) => a.count > 0)
+    .sort((a, b) => b.count - a.count);
+  const kind = dealSlug === "income-property" ? "leased offices for sale" : rent ? "offices for rent" : "offices for sale";
+  const areaNames = areas.slice(0, 3).map((a) => a.loc.name);
+  return {
+    ...base,
+    // Search snippets cut at ~155 characters.
+    description: `${rows.length} ${kind} across ${areas.length > 3 ? `${areaNames.join(", ")} and more` : list(areaNames)}. Compare prices per m², sizes and finishing${rent ? ", with free tenant representation" : ""}.`.slice(0, 158),
+    areas,
+    medianLabel: (m) => (rent ? `median EGP ${fmt(roundNice(m))} per m² a month` : `median EGP ${fmtMoney(m)} per m²`),
+  };
+}
