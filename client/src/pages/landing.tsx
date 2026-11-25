@@ -17,6 +17,8 @@ import {
   eligibleLandingPages,
   landingCopy,
   landingPath,
+  landingProjects,
+  medianLabel,
   landingRows,
   landingStats,
   type DealSlug,
@@ -70,6 +72,7 @@ export default function LandingPage() {
   );
   const pagePath = deal && loc ? landingPath(dealSlug, loc.slug) : path;
   const developers = useMemo(() => (loc ? landingDevelopers(loc.name) : []), [loc]);
+  const projects = useMemo(() => (loc ? landingProjects(rows, loc.name) : []), [rows, loc]);
   const faqTopics = deal ? landingFaqTopics(dealSlug) : [];
 
   useDocumentMeta({
@@ -100,9 +103,9 @@ export default function LandingPage() {
           <nav className="flex flex-wrap items-center gap-1.5 text-sm text-white/70 mb-6" aria-label="Breadcrumb">
             <Link href="/" className="hover:text-white transition-colors">Home</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <Link href={`/locations/${loc.slug}`} className="hover:text-white transition-colors">{loc.name}</Link>
+            <Link href={`/${dealSlug}`} className="hover:text-white transition-colors">{deal.heading("Cairo")}</Link>
             <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-white">{dealSlug === "income-property" ? "Income properties" : dealSlug === "buy" ? "For sale" : "For rent"}</span>
+            <span className="text-white">{loc.name}</span>
           </nav>
           <div className="inline-flex w-12 h-12 bg-accent/20 rounded-full items-center justify-center text-accent mb-4">
             <MapPin className="w-6 h-6" />
@@ -174,6 +177,30 @@ export default function LandingPage() {
           )}
         </div>
       </section>
+
+      {/* Projects with the most units — live counts and medians */}
+      {projects.length >= 2 && (
+        <section className="py-10">
+          <div className="container mx-auto px-6 md:px-10">
+            <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
+              <Building2 className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
+              <span>
+                Projects with the most {dealSlug === "rent" ? "offices for rent" : dealSlug === "buy" ? "offices for sale" : "income properties"} in {loc.name}
+              </span>
+            </h2>
+            <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              {projects.map((p) => (
+                <li key={p.name} className="rounded-2xl bg-white border border-border/40 p-5">
+                  <span className="block text-lg font-serif font-bold text-primary">{p.name}</span>
+                  <span className="block mt-1 text-sm text-muted-foreground">
+                    {p.count} available{p.median ? ` · ${medianLabel(dealSlug, p.median)}` : ""}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* FAQs */}
       {copy && (

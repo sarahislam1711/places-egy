@@ -22,6 +22,8 @@ import {
   hubCopy,
   hubRows,
   landingCopy,
+  landingProjects,
+  medianLabel,
   landingPath,
   landingRows,
   landingStats,
@@ -161,7 +163,7 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
     html,
     breadcrumbSchema([
       { name: "Home", url: SITE },
-      { name: `Offices in ${loc.name}`, url: `${SITE}/locations/${loc.slug}` },
+      { name: DEALS[deal].heading("Cairo"), url: `${SITE}/${deal}` },
       { name: copy.h1, url: `${SITE}${pagePath}` },
     ]),
   );
@@ -174,6 +176,7 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
     `<h1>${esc(copy.h1)}</h1>` +
       copy.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
       (deal === "rent" ? tenantRepHtml("rent", esc) : "") +
+      projectsHtml(deal, loc.name, rows) +
       `<h2>${esc(copy.listHeading)}</h2>` +
       listingLinks(rows) +
       `<h2>${esc(`${copy.h1}: FAQs`)}</h2>` +
@@ -220,6 +223,18 @@ export async function renderDealHub(dealSlug: string): Promise<string | null> {
       copy.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
       landingNav(inventory, "Other popular searches") +
       locationNav(),
+  );
+}
+
+// "Projects with the most offices for rent in New Cairo": live counts and medians.
+function projectsHtml(deal: DealSlug, locName: string, rows: SeoListing[]): string {
+  const projects = landingProjects(rows, locName);
+  if (projects.length < 2) return "";
+  const what = deal === "rent" ? "offices for rent" : deal === "buy" ? "offices for sale" : "income properties";
+  return (
+    `<h2>${esc(`Projects with the most ${what} in ${locName}`)}</h2><ul>` +
+    projects.map((p) => `<li>${esc(p.name)}: ${p.count} available${p.median ? `, ${esc(medianLabel(deal, p.median))}` : ""}</li>`).join("") +
+    `</ul>`
   );
 }
 
