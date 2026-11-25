@@ -232,8 +232,8 @@ export default function TenantRepresentation() {
             />
             <Checklist items={SERVICES} dark columns={2} />
           </div>
-          <div className="mt-14 pt-12 border-t border-white/15 grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-16 items-center">
-            <div>
+          <div className="mt-14 pt-12 border-t border-white/15">
+            <div className="max-w-2xl">
               <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">Why it's free for tenants</h2>
               <p className="mt-4 text-lg text-white/75 leading-relaxed">
                 When PLACES represents you, the landlord pays our fee once the lease is signed. You get your own
@@ -244,7 +244,7 @@ export default function TenantRepresentation() {
               </Link>
             </div>
             {/* How the fee flows: landlord → PLACES → your company */}
-            <ol className="flex flex-col md:flex-row items-stretch gap-2 md:gap-0" aria-label="Who pays for tenant representation">
+            <ol className="mt-10 flex flex-col md:flex-row items-stretch gap-2 md:gap-0" aria-label="Who pays for tenant representation">
               {FEE_FLOW.map((step, i) => (
                 <li key={step.who} className="flex flex-col md:flex-row items-center md:flex-1">
                   <div

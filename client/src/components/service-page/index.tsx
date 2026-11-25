@@ -488,9 +488,9 @@ export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: 
   return (
     <div className="rounded-2xl bg-background p-7 md:p-9">
       <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-7">{title}</h2>
-      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+      <ul className="grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
         {CLIENT_LOGOS.map((c) => (
-          <li key={c.name} className="flex h-20 md:h-24 items-center justify-center rounded-xl bg-white px-2 md:px-3">
+          <li key={c.name} className="flex h-16 md:h-24 items-center justify-center rounded-xl bg-white px-1.5 md:px-3">
             <img
               src={c.src}
               alt={c.name}
