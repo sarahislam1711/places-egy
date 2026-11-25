@@ -15,6 +15,8 @@ import {
   SectionHead,
   ServiceHero,
   StepList,
+  AudienceTabs,
+  type Audience,
 } from "@/components/service-page";
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
@@ -30,10 +32,10 @@ const WHY_SHORT = [
   "The same standard of honesty and diligence for buyers and sellers",
 ];
 
-const WHO = [
-  { title: "Buyers", desc: "You want a unit that's ready now, without waiting for a developer handover. We find the right unit at the right price." },
-  { title: "Sellers", desc: "You want to exit your investment at the best available price. We value your unit honestly and find serious buyers." },
-  { title: "Investors", desc: "You're looking for undervalued resale units with strong upside. We identify them and negotiate on your behalf." },
+const WHO: Audience[] = [
+  { title: "Buyers", need: "You want a unit that's ready now, without waiting for a developer handover.", help: "We find the right unit at the right price.", image: "/images/general-office.jpg", imageAlt: "A ready office" },
+  { title: "Sellers", need: "You want to exit your investment at the best available price.", help: "We value your unit honestly and find serious buyers.", image: "/images/business-complex.jpg", imageAlt: "Office buildings in a Cairo business district" },
+  { title: "Investors", need: "You're looking for undervalued resale units with strong upside.", help: "We identify them and negotiate on your behalf.", image: "/images/Trivium-Business-Complex.jpg", imageAlt: "Trivium Business Complex in New Cairo" },
 ];
 
 const SERVICES = [
@@ -239,7 +241,7 @@ export default function PropertyResale() {
 
         <Band tone="cream">
           <SectionHead title="Who this service is for" />
-          <DefinitionList items={WHO} />
+          <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting instead of buying?{" "}
             <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">

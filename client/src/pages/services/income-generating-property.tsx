@@ -13,6 +13,8 @@ import {
   SectionHead,
   ServiceHero,
   StepList,
+  AudienceTabs,
+  type Audience,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -29,10 +31,10 @@ const GOOD_INCOME_UNIT = [
   "Strong resale liquidity",
 ];
 
-const WHO = [
-  { title: "Yield-focused investors", desc: "You want consistent rental income from a well-located, well-managed asset. We find and evaluate the right units." },
-  { title: "Portfolio builders", desc: "You're building a portfolio of income-generating assets. We help you identify, evaluate, and acquire them systematically." },
-  { title: "Passive investors", desc: "You want an asset that generates income without requiring active management. We advise on asset quality and lease terms." },
+const WHO: Audience[] = [
+  { title: "Yield-focused investors", need: "You want consistent rental income from a well-located, well-managed asset.", help: "We find and evaluate the right units.", image: "/images/income-generating-property.jpg", imageAlt: "A leased office building" },
+  { title: "Portfolio builders", need: "You're building a portfolio of income-generating assets.", help: "We help you identify, evaluate, and acquire them systematically.", image: "/images/Mivida-Business-Park.jpg", imageAlt: "Mivida Business Park in New Cairo" },
+  { title: "Passive investors", need: "You want an asset that generates income without requiring active management.", help: "We advise on asset quality and lease terms.", image: "/images/office-interior.jpg", imageAlt: "A tenanted office interior" },
 ];
 
 const WHY = [
@@ -176,7 +178,7 @@ export default function IncomeGeneratingProperty() {
 
         <Band tone="cream">
           <SectionHead title="Who this service is for" />
-          <DefinitionList items={WHO} />
+          <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting an office for your own company?{" "}
             <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">

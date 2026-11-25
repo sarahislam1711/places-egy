@@ -15,6 +15,8 @@ import {
   SectionHead,
   ServiceHero,
   StepList,
+  AudienceTabs,
+  type Audience,
 } from "@/components/service-page";
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
@@ -30,10 +32,10 @@ const WHAT_WE_DO = [
   "Paperwork, payment milestones and handover managed on your behalf",
 ];
 
-const WHO = [
-  { title: "First-time buyers", desc: "You want to buy in a strong development at the best available price. We give you access and market context." },
-  { title: "Investors", desc: "You want early access to units before they hit the secondary market at a premium. We track launches and give you first access." },
-  { title: "End users", desc: "You want a unit you'll eventually occupy. We evaluate the development, the payment plan, and the handover timeline." },
+const WHO: Audience[] = [
+  { title: "First-time buyers", need: "You want to buy in a strong development at the best available price.", help: "We give you access and market context.", image: "/images/business-park.jpg", imageAlt: "A business park in Cairo" },
+  { title: "Investors", need: "You want early access to units before they hit the secondary market at a premium.", help: "We track launches and give you first access.", image: "/images/mixed-use.jpg", imageAlt: "A mixed-use office development" },
+  { title: "End users", need: "You want a unit you'll eventually occupy.", help: "We evaluate the development, the payment plan, and the handover timeline.", image: "/images/general-office.jpg", imageAlt: "An office in use" },
 ];
 
 const WHY = [
@@ -239,7 +241,7 @@ export default function PrimaryProperty() {
 
         <Band tone="cream">
           <SectionHead title="Who this service is for" />
-          <DefinitionList items={WHO} />
+          <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting instead of buying?{" "}
             <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
