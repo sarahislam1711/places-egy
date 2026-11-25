@@ -1,4 +1,5 @@
 import { Link } from "wouter";
+import { ArrowRight, Briefcase, Building2, Handshake } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
@@ -15,6 +16,7 @@ import {
   AudienceTabs,
   type Audience,
   ClientLogoStrip,
+  AreaTiles,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -22,6 +24,12 @@ import { STATIC_PAGE_META } from "@/lib/page-meta";
 import { LOCATION_CONTENT } from "@/lib/location-content";
 
 const PATH = "/services/tenant-representation";
+
+const FEE_FLOW = [
+  { icon: Building2, who: "The landlord", does: "pays our fee when the lease is signed" },
+  { icon: Handshake, who: "PLACES", does: "negotiates on your side of the table" },
+  { icon: Briefcase, who: "Your company", does: "pays nothing for the service" },
+];
 
 const WHO: Audience[] = [
   { title: "Companies securing their first office", need: "You need a space that works for your team, fits your budget and gives you room to grow.", help: "We help you find it without wasting time on the wrong options.", image: "/images/admin%202.jpg", imageAlt: "A private office with a desk and chairs, ready for a team" },
@@ -38,10 +46,18 @@ const BENEFITS = [
 ];
 
 // All six areas, with each area guide's first highlight as the one-liner.
+// Area photos: each area page's hero, except two that don't show offices in
+// that area (6th October's is a villa; Sheraton's is the Nile hotel).
+const AREA_IMAGE: Record<string, { image: string; alt: string }> = {
+  "6th-october": { image: "/images/business-complex.jpg", alt: "A business park with office buildings" },
+  sheraton: { image: "/images/city-center-almaza.webp", alt: "City Centre Almaza in the Sheraton area" },
+};
 const AREAS = Object.values(LOCATION_CONTENT).map((a) => ({
   href: `/locations/${a.slug}`,
-  title: `Offices in ${a.displayName}`,
-  desc: a.highlights?.[0] ?? a.subtitle,
+  name: a.displayName,
+  line: a.highlights?.[0] ?? a.subtitle,
+  image: AREA_IMAGE[a.slug]?.image ?? a.heroImage,
+  imageAlt: AREA_IMAGE[a.slug]?.alt ?? `${a.displayName}, Cairo`,
 }));
 
 const RELATED = [
@@ -216,17 +232,36 @@ export default function TenantRepresentation() {
             />
             <Checklist items={SERVICES} dark columns={2} />
           </div>
-          <div className="mt-14 pt-12 border-t border-white/15 grid lg:grid-cols-[1fr_1.3fr] gap-6 lg:gap-16 items-start">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">Why it's free for tenants</h2>
+          <div className="mt-14 pt-12 border-t border-white/15 grid lg:grid-cols-[1fr_1.15fr] gap-10 lg:gap-16 items-center">
             <div>
-              <p className="text-lg text-white/75 leading-relaxed">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">Why it's free for tenants</h2>
+              <p className="mt-4 text-lg text-white/75 leading-relaxed">
                 When PLACES represents you, the landlord pays our fee once the lease is signed. You get your own
                 advisor negotiating on your side, at no cost to your company.
               </p>
-              <Link href="/faqs/advisors-brokers" className="mt-4 inline-flex items-center text-accent font-semibold hover:underline">
-                Read the advisors &amp; brokers FAQs
+              <Link href="/faqs/advisors-brokers" className="group mt-5 inline-flex items-center text-accent font-semibold hover:underline">
+                Read the advisors &amp; brokers FAQs <ArrowRight className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
               </Link>
             </div>
+            {/* How the fee flows: landlord → PLACES → your company */}
+            <ol className="flex flex-col md:flex-row items-stretch gap-2 md:gap-0" aria-label="Who pays for tenant representation">
+              {FEE_FLOW.map((step, i) => (
+                <li key={step.who} className="flex flex-col md:flex-row items-center md:flex-1">
+                  <div
+                    className={`w-full md:h-full rounded-2xl p-5 ${
+                      i === FEE_FLOW.length - 1 ? "bg-accent text-white" : "bg-white/[0.06] border border-white/10 text-white"
+                    }`}
+                  >
+                    <step.icon className={`w-5 h-5 mb-3 ${i === FEE_FLOW.length - 1 ? "text-white" : "text-accent"}`} aria-hidden />
+                    <p className="font-serif font-bold text-lg leading-tight">{step.who}</p>
+                    <p className={`mt-1 text-sm leading-snug ${i === FEE_FLOW.length - 1 ? "text-white/90" : "text-white/65"}`}>{step.does}</p>
+                  </div>
+                  {i < FEE_FLOW.length - 1 && (
+                    <ArrowRight className="w-5 h-5 text-white/40 shrink-0 my-1 md:my-0 md:mx-2 rotate-90 md:rotate-0" aria-hidden />
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
         </Band>
 
@@ -255,7 +290,7 @@ export default function TenantRepresentation() {
             title="Areas we cover"
             lead="We search every major office district in Cairo, so you can compare areas before you compare buildings."
           />
-          <LinkGrid items={AREAS} />
+          <AreaTiles items={AREAS} />
           <div className="mt-14">
             <ClientLogoStrip />
           </div>
