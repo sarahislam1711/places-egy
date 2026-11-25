@@ -527,8 +527,8 @@ export function AreaTiles({ items }: { items: AreaTile[] }) {
   return (
     <ul className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
       {items.map((a) => (
-        <li key={a.href}>
-          <Link href={a.href} className="group block overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)]">
+        <li key={a.href} className="flex">
+          <Link href={a.href} className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)]">
             <div className="relative aspect-[4/3] overflow-hidden bg-muted">
               <img
                 src={a.image}
@@ -545,7 +545,10 @@ export function AreaTiles({ items }: { items: AreaTile[] }) {
                 <ArrowRight className="hidden md:block w-5 h-5 text-white shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
               </span>
             </div>
-            <p className="px-3 py-3 md:px-5 md:py-4 text-xs md:text-sm text-muted-foreground leading-snug">{a.line}</p>
+            {/* Same height on every tile: room for 3 lines on phones, 2 on desktop. */}
+            <p className="flex-1 px-3 py-3 md:px-5 md:py-4 text-xs md:text-sm text-muted-foreground leading-snug line-clamp-3 md:line-clamp-2 min-h-[calc(3*1.375em+1.5rem)] md:min-h-[calc(2*1.375em+2rem)]">
+              {a.line}
+            </p>
           </Link>
         </li>
       ))}

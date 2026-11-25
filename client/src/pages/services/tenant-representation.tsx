@@ -52,10 +52,20 @@ const AREA_IMAGE: Record<string, { image: string; alt: string }> = {
   "6th-october": { image: "/images/business-complex.jpg", alt: "A business park with office buildings" },
   sheraton: { image: "/images/city-center-almaza.webp", alt: "City Centre Almaza in the Sheraton area" },
 };
+// Short versions of each area guide's first highlight, so every tile fits
+// the same space without cutting words.
+const AREA_LINE: Record<string, string> = {
+  "new-cairo": "Egypt's most active office market",
+  "sheikh-zayed": "West Cairo's most connected business district",
+  maadi: "A favourite of multinationals and embassies",
+  "downtown-cairo": "Egypt's most central business district",
+  "6th-october": "A large planned city with mature infrastructure",
+  sheraton: "5 minutes from Cairo International Airport",
+};
 const AREAS = Object.values(LOCATION_CONTENT).map((a) => ({
   href: `/locations/${a.slug}`,
   name: a.displayName,
-  line: a.highlights?.[0] ?? a.subtitle,
+  line: AREA_LINE[a.slug] ?? a.highlights?.[0] ?? a.subtitle,
   image: AREA_IMAGE[a.slug]?.image ?? a.heroImage,
   imageAlt: AREA_IMAGE[a.slug]?.alt ?? `${a.displayName}, Cairo`,
 }));
