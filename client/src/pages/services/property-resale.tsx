@@ -1,39 +1,176 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
-import { Button } from "@/components/ui/button";
-import { ListingCard } from "@/components/listings/ListingCard";
-import { supabase, type Listing } from "@/lib/supabase";
-import {
-  ArrowRight,
-  ChevronRight,
-  Search,
-  Tag,
-  BarChart3,
-  FileCheck,
-  UserCheck,
-  ClipboardCheck,
-  Users,
-  KeyRound,
-  TrendingUp,
-  Building2,
-  Coins,
-} from "lucide-react";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
-import { breadcrumbSchema, serviceSchema } from "@/lib/schema";
+import { ListingCard } from "@/components/listings/ListingCard";
+import {
+  Band,
+  Checklist,
+  CtaBand,
+  DefinitionList,
+  FaqWithAdvisor,
+  LinkGrid,
+  SectionHead,
+  ServiceHero,
+  StepList,
+} from "@/components/service-page";
+import { supabase, type Listing } from "@/lib/supabase";
+import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { STATIC_PAGE_META } from "@/lib/page-meta";
 
+const PATH = "/services/property-resale";
+
+const WHY_SHORT = [
+  "Honest market pricing: what the unit is actually worth, not what the seller is asking",
+  "Serious, qualified buyers only, not unqualified enquiries",
+  "The legal transfer, payment terms and handover managed from start to finish",
+  "The same standard of honesty and diligence for buyers and sellers",
+];
+
+const WHO = [
+  { title: "Buyers", desc: "You want a unit that's ready now, without waiting for a developer handover. We find the right unit at the right price." },
+  { title: "Sellers", desc: "You want to exit your investment at the best available price. We value your unit honestly and find serious buyers." },
+  { title: "Investors", desc: "You're looking for undervalued resale units with strong upside. We identify them and negotiate on your behalf." },
+];
+
+const SERVICES = [
+  { title: "For buyers", desc: "We identify resale units that represent genuine value, negotiate on your behalf, and review transfer documentation." },
+  { title: "For sellers", desc: "We assess your unit's market value, identify serious buyers, and manage the transaction to completion." },
+  { title: "Market pricing", desc: "We give you an honest view of what the unit is worth, based on comparable transactions, not asking prices." },
+  { title: "Transaction management", desc: "We manage the legal transfer, payment terms, and handover process from start to finish." },
+];
+
+const STEPS = [
+  {
+    title: "Market value",
+    desc: "Selling: we assess what your unit is worth. Buying: we tell you what a unit is actually worth. Both are based on comparable transactions, not asking prices.",
+  },
+  {
+    title: "The right match",
+    desc: "For buyers, we identify resale units that represent genuine value. For sellers, we identify motivated, qualified buyers.",
+  },
+  {
+    title: "Documents",
+    desc: "We review the transfer documentation. Ownership documents, registered contract status, outstanding fees, building condition and existing lease terms should all be verified before signing.",
+  },
+  {
+    title: "Negotiation",
+    desc: "We negotiate on your behalf as a buyer or investor, using comparable transactions rather than asking prices.",
+  },
+  {
+    title: "Legal transfer and payment",
+    desc: "We manage the legal transfer and the payment terms between buyer and seller.",
+  },
+  {
+    title: "Handover",
+    desc: "We manage the handover process and see the transaction through to completion.",
+  },
+];
+
+const COMPARISON = [
+  { label: "Who you buy from", a: "An existing owner: a ready unit or a partially-paid contract", b: "The developer, usually off-plan or at a new launch" },
+  { label: "When you get the unit", a: "Immediately, with no construction wait", b: "After construction and handover" },
+  { label: "What you can inspect", a: "The actual unit, its surroundings and the building quality", b: "The developer's plans, track record and payment plan" },
+  { label: "Rental income", a: "Some units come with existing tenants and day-one rental income", b: "None during the construction period" },
+  { label: "Payment", a: "Less remaining payment plan flexibility", b: "Developer installment plans of 5 to 10 years, with 5% to 20% down" },
+  { label: "Main risks", a: "Hidden defects, outstanding maintenance fees, contracts that may not transfer cleanly", b: "Delivery delays, masterplan changes, developer financial issues" },
+];
+
+const RELATED = [
+  { href: "/services/primary-property", title: "Primary Property", desc: "Looking to buy from the developer instead? Off-plan and newly launched units across Egypt's most active developments." },
+  { href: "/services/tenant-representation", title: "Tenant Representation", desc: "Looking to lease rather than buy? We represent you, not the landlord, and it's free for tenants." },
+  { href: "/services/investment-consultation", title: "Investment Consultation", desc: "Not sure where to put your money? We analyze yield potential, vacancy risk, and capital appreciation." },
+  { href: "/services/income-generating-property", title: "Income Generating Property", desc: "Looking for assets that generate rental income? We identify units with strong tenant demand and sustainable yield." },
+];
+
+// Verbatim from the FAQ bank (client/src/lib/faq.ts).
+const FAQS = [
+  {
+    question: "What are the advantages of buying resale commercial units?",
+    answer:
+      "Resale units allow immediate ownership and income, no construction risk, no waiting period for handover, and the chance to inspect the actual unit, surroundings, and building quality before buying. Some resale units come with existing tenants, providing day-one rental income. Resale also offers room for negotiation, since sellers often need liquidity, and prices can be 30% to 50% below primary launch prices.",
+  },
+  {
+    question: "What are the risks of buying resale commercial properties in Egypt?",
+    answer:
+      "Risks include hidden defects in the unit or building, outstanding maintenance fees from previous owners, contracts that may not transfer cleanly, weak tenants locked in below-market leases, and lack of remaining payment plan flexibility. Due diligence is essential — verify ownership documents, registered contract status, outstanding fees, building condition, and existing lease terms before signing any resale agreement.",
+  },
+  {
+    question: "Who buys resale commercial properties in Egypt?",
+    answer:
+      "Buyers include end-users (doctors, business owners, franchise operators) who want ready units for immediate use, investors seeking ready income-producing assets, businesses that want to own rather than rent their operating space, and other investors looking for value below primary market prices. End-users typically pay higher prices per square meter than pure investors because they value business utility over yield calculations.",
+  },
+  {
+    question: "How do I price a commercial unit correctly for resale?",
+    answer:
+      "Price based on three benchmarks: comparable resale listings in the same project, primary developer prices for similar units, and rental yield expectations of likely buyers. A unit producing 10% annual yield justifies a price 10 times the annual rent. Pricing 5% to 10% below primary developer prices typically attracts buyers, while overpricing extends time on market and weakens negotiation position.",
+  },
+  {
+    question: "When should I sell a commercial property to maximize profit?",
+    answer:
+      "Strong selling moments include: just before handover when end-users compete for ready units, just after handover when tenants are signed and income is proven, and at year 5 to 7 when the area has matured. Selling too early misses appreciation; selling too late risks market cycle changes. Time the sale to project completion phases and local demand cycles. Net proceeds after capital gains tax and transfer fees should be your benchmark.",
+  },
+  {
+    question: "How do I verify the property's title is clear before buying?",
+    answer:
+      "Conduct a title search at the Real Estate Publicity Department to verify ownership history, check for liens or mortgages, confirm no court-imposed restrictions, and conduct a litigation search in the property's jurisdiction. Verify that the property is not subject to inheritance disputes, fraudulent transfer claims, or precautionary court measures. Hiring a real estate lawyer for this verification is strongly recommended — informal title checks miss legal issues that surface later.",
+  },
+  {
+    question: "What is the difference between a primary sales advisor and a resale specialist?",
+    answer:
+      "Primary sales advisors source units directly from developers at launch prices, working through partnership agreements that give them access to pre-launch and early-launch inventory. Resale specialists source ready or near-delivery units from existing owners, often below primary launch prices in the same project. Comprehensive advisors handle both channels — primary for appreciation plays and resale for immediate income — providing more complete options for your portfolio.",
+  },
+];
+
+/** Neutral side-by-side table: neither column is "wrong", so no ticks or crosses. */
+function SideBySide({ left, right, rows }: { left: string; right: string; rows: { label: string; a: string; b: string }[] }) {
+  return (
+    <>
+      <div className="md:hidden space-y-3">
+        {rows.map((r) => (
+          <div key={r.label} className="rounded-2xl bg-white p-5 shadow-[0_8px_24px_-16px_rgba(17,17,17,0.25)]">
+            <h3 className="font-bold text-primary mb-3">{r.label}</h3>
+            <p className="text-sm mb-2"><span className="font-semibold text-primary">{left}:</span> <span className="text-muted-foreground">{r.a}</span></p>
+            <p className="text-sm"><span className="font-semibold text-primary">{right}:</span> <span className="text-muted-foreground">{r.b}</span></p>
+          </div>
+        ))}
+      </div>
+      <div className="hidden md:block overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.3)]">
+        <table className="w-full text-base">
+          <thead>
+            <tr>
+              <th className="p-5 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
+              <th className="p-5 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
+              <th className="p-5 text-left font-serif text-lg font-bold text-primary" scope="col">{right}</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.label} className="border-t border-primary/10">
+                <th className="p-5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <td className="p-5 align-top bg-primary/[0.03] text-primary">{r.a}</td>
+                <td className="p-5 align-top text-muted-foreground">{r.b}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
+}
+
 export default function PropertyResale() {
-  useDocumentMeta(STATIC_PAGE_META["/services/property-resale"]);
-  const { data: saleListings = [] } = useQuery<Listing[]>({
+  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { data: saleListings = [], isPending } = useQuery<Listing[]>({
     queryKey: ["resale-listings"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from<Listing>("listings")
         .select("*")
-        .eq('is_test', false)
+        .eq("is_test", false)
         .eq("property_type", "admin")
         .eq("transaction_type", "sale")
         .neq("rental_status", "rented")
@@ -50,167 +187,109 @@ export default function PropertyResale() {
         schema={breadcrumbSchema([
           { name: "Home", url: "/" },
           { name: "Services", url: "/services" },
-          { name: "Property Resale", url: "/services/property-resale" },
+          { name: "Property Resale", url: PATH },
         ])}
       />
       <SchemaMarkup
         schema={serviceSchema({
           name: "Property Resale in Egypt",
           description:
-            "Buy or sell a unit that has already been transacted — with full market context on both sides, honest pricing, and end-to-end transaction management.",
-          url: "/services/property-resale",
+            "Buy or sell a unit that has already been transacted, with full market context on both sides, honest pricing, and end-to-end transaction management.",
+          url: PATH,
           serviceType: "Secondary Real Estate Sales",
         })}
       />
+      <SchemaMarkup schema={faqSchema(FAQS)} />
       <Navbar />
 
-      {/* Section 1 — Hero (centered, faded image, contained so it doesn't bleed into next section) */}
-      <section className="relative pt-24 md:pt-32 pb-8 md:pb-12 overflow-hidden">
-        <div className="absolute inset-0 z-0 overflow-hidden pointer-events-none">
-          <img
-            src="/images/hero-section.jpg"
-            alt="Property resale in Egypt"
-            fetchPriority="high"
-            decoding="async"
-            className="w-full h-full object-cover opacity-65"
-          />
-          {/* Brand-tinted darken layer for added depth and contrast */}
-          <div className="absolute inset-0 bg-primary/25" />
-          {/* Slightly darker top so the centered text reads cleanly; fades to page bg at the bottom */}
-          <div className="absolute inset-0 bg-linear-to-b from-background/15 via-background/55 to-background" />
-        </div>
-        <div className="relative z-10 container mx-auto px-6 md:px-10 text-center">
-          <nav className="flex items-center justify-center gap-1.5 text-sm font-medium text-muted-foreground mb-6">
-            <Link href="/" className="hover:text-primary transition-colors">Home</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <Link href="/services" className="hover:text-primary transition-colors">Services</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-primary">Property Resale</span>
-          </nav>
-          <h1 className="text-3xl md:text-[3.25rem] font-serif font-bold text-primary mb-5 leading-tight max-w-4xl mx-auto">
-            Property Resale in Egypt
-          </h1>
-          <p className="text-lg text-muted-foreground font-medium mb-10 max-w-2xl mx-auto">
-            Buy or sell a unit that has already been transacted — with full market context on both sides.
-          </p>
-          <Link href="/contact" className="inline-flex">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold px-8 h-14 text-base shadow-xl shadow-accent/30 transition-all hover:scale-105">
-              Talk to an Advisor <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </Link>
-        </div>
-      </section>
+      <main className="flex-1">
+        <ServiceHero
+          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Property Resale" }]}
+          title="Buy or Sell a Resale Office in Egypt"
+          intro="Our property resale service helps you buy or sell a unit that has already been transacted, with full market context on both sides. It is for buyers who want a unit that's ready now, sellers who want the best available price, and investors looking for undervalued resale units."
+          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          image="/images/hero-section.jpg"
+          imageAlt="Property resale in Egypt"
+          promise={{ title: "Honest market pricing", text: "We tell you what the unit is actually worth, based on comparable transactions, not what the seller is asking." }}
+          points={["For buyers and sellers", "Priced on comparable transactions", "Transfer to handover managed"]}
+        />
 
-      {/* Section 2 — Why choose PLACES (sits directly under hero, covers the image fade) */}
-      <section className="relative py-10">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="bg-primary/95 rounded-3xl p-10 md:p-14">
-            <h2 className="text-2xl md:text-3xl font-serif font-bold text-white mb-10">
-              Why choose PLACES for property resale
-            </h2>
-
-            <div className="grid md:grid-cols-4 gap-6">
-              {[
-                { icon: BarChart3, title: "Honest market pricing", desc: "We tell you what the unit is actually worth — not what the seller is asking." },
-                { icon: UserCheck, title: "Serious buyers only", desc: "We don't waste your time with unqualified enquiries. We identify motivated, qualified buyers." },
-                { icon: ClipboardCheck, title: "Full transaction management", desc: "We manage the legal transfer, payment terms, and handover from start to finish." },
-                { icon: Users, title: "We act for both sides", desc: "Buyers and sellers get the same standard of honesty and diligence from our team." },
-              ].map((item, i) => (
-                <div key={i}>
-                  <div className="w-10 h-10 bg-accent/15 rounded-full flex items-center justify-center mb-4 text-accent">
-                    <item.icon className="w-5 h-5" />
-                  </div>
-                  <h3 className="text-base font-bold text-white mb-1">{item.title}</h3>
-                  <p className="text-white/60 text-sm leading-relaxed">{item.desc}</p>
-                </div>
-              ))}
+        <Band tone="white">
+          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
+            <div>
+              <SectionHead title="What is property resale?" />
+              <div className="-mt-4 space-y-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
+                <p>
+                  Property resale, or the secondary market, means buying a unit from its existing owner instead of
+                  from the developer. It can be a ready unit or a partially-paid contract transferred to a new buyer.
+                </p>
+                <p>
+                  The secondary market in Egypt moves fast. Units get relisted, prices shift, and deals fall through,
+                  often because neither side has full market context. We give buyers and sellers that context and
+                  manage the transaction to completion.
+                </p>
+              </div>
+            </div>
+            <div className="lg:pt-3 rounded-2xl bg-background p-7 md:p-9">
+              <p className="text-sm font-semibold text-primary mb-5">Why choose PLACES for property resale:</p>
+              <Checklist items={WHY_SHORT} />
             </div>
           </div>
-        </div>
-      </section>
+        </Band>
 
-      {/* Section 3 — Our approach */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="mb-10 max-w-3xl">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary mb-4">
-              Our approach
-            </h2>
-            <p className="text-base md:text-lg text-muted-foreground leading-relaxed">
-              The secondary market in Egypt moves fast — units get relisted, prices shift, and deals fall through, often because neither side has full market context.
-            </p>
-          </div>
+        <Band tone="cream">
+          <SectionHead title="Who this service is for" />
+          <DefinitionList items={WHO} />
+          <p className="mt-10 text-muted-foreground">
+            Renting instead of buying?{" "}
+            <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
+              Our tenant representation is free for tenants
+            </Link>
+            .
+          </p>
+        </Band>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {[
-              { icon: Search, title: "For buyers", desc: "We identify resale units that represent genuine value, negotiate on your behalf, and review transfer documentation." },
-              { icon: Tag, title: "For sellers", desc: "We assess your unit's market value, identify serious buyers, and manage the transaction to completion." },
-              { icon: BarChart3, title: "Market pricing", desc: "We give you an honest view of what the unit is worth — based on comparable transactions, not asking prices." },
-              { icon: FileCheck, title: "Transaction management", desc: "We manage the legal transfer, payment terms, and handover process from start to finish." },
-            ].map((item, i) => (
-              <div key={i}>
-                <div className="w-10 h-10 bg-accent/10 rounded-full flex items-center justify-center mb-4 text-accent">
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-base font-bold text-primary mb-1">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        <Band tone="dark">
+          <SectionHead
+            dark
+            title="Our property resale services"
+            lead="We act for both sides. Buyers and sellers get the same standard of honesty and diligence from our team."
+          />
+          <DefinitionList items={SERVICES} dark />
+        </Band>
 
-      {/* Section 4 — Who this service is for */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary">
-              Who this service is for
-            </h2>
-          </div>
+        <Band tone="white">
+          <SectionHead
+            title="How a resale deal works"
+            lead="From an honest valuation to handover, we manage the transaction from start to finish."
+          />
+          <StepList steps={STEPS} />
+        </Band>
 
-          <div className="grid md:grid-cols-3 gap-6">
-            {[
-              {
-                icon: KeyRound,
-                title: "Buyers",
-                desc: "You want a unit that's ready now — without waiting for a developer handover. We find the right unit at the right price.",
-              },
-              {
-                icon: Tag,
-                title: "Sellers",
-                desc: "You want to exit your investment at the best available price. We value your unit honestly and find serious buyers.",
-              },
-              {
-                icon: TrendingUp,
-                title: "Investors",
-                desc: "You're looking for undervalued resale units with strong upside. We identify them and negotiate on your behalf.",
-              },
-            ].map((item, i) => (
-              <div key={i} className="bg-secondary/50 rounded-2xl border-l-4 border-accent p-6 md:p-7">
-                <div className="w-10 h-10 bg-accent/15 rounded-full flex items-center justify-center text-accent mb-4">
-                  <item.icon className="w-4 h-4" />
-                </div>
-                <h3 className="text-lg font-serif font-bold text-primary mb-2">{item.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{item.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+        <Band tone="cream">
+          <SectionHead
+            title="Resale vs primary property"
+            lead="Resale suits buyers who want the unit now, want to skip handover delays, or want to see the delivered product before buying. Primary suits longer time horizons and developer payment plans."
+          />
+          <SideBySide left="Resale (from an owner)" right="Primary (from the developer)" rows={COMPARISON} />
+          <p className="mt-10 text-muted-foreground">
+            Buying off-plan instead?{" "}
+            <Link href="/services/primary-property" className="text-accent font-semibold hover:underline">
+              See our primary property service
+            </Link>
+            .
+          </p>
+        </Band>
 
-      {/* Section 5 — Available units for sale */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary">
+        <Band tone="white">
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 md:mb-14">
+            <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-primary">
               Units currently available for sale
             </h2>
-            <a href="/listings?transaction=sale" className="hidden md:inline-flex items-center text-primary font-medium hover:text-accent transition-colors group mt-4 md:mt-0">
-              Browse all available units <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+            <a href="/listings?transaction=sale" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
+              Browse all available units <ArrowRight className="ml-2 w-4 h-4" />
             </a>
           </div>
-
           {saleListings.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {saleListings.map((listing) => (
@@ -218,126 +297,40 @@ export default function PropertyResale() {
               ))}
             </div>
           ) : (
-            <p className="text-muted-foreground py-8">No sale listings available yet.</p>
+            !isPending && <p className="text-muted-foreground py-8">No sale listings available yet.</p>
           )}
+        </Band>
 
-          <div className="mt-8 md:hidden">
-            <a href="/listings?transaction=sale">
-              <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
-                Browse all available units
-              </Button>
-            </a>
-          </div>
-        </div>
-      </section>
+        <Band tone="cream">
+          <FaqWithAdvisor
+            title="Property resale FAQs"
+            faqs={FAQS}
+            footer={
+              <>
+                More FAQs:{" "}
+                <Link href="/faqs/rent-buy-resale" className="text-accent font-medium hover:underline">Rent vs buy vs resale</Link>
+                {" · "}
+                <Link href="/faqs/pricing-value" className="text-accent font-medium hover:underline">Pricing, value &amp; unit evaluation</Link>
+                {" · "}
+                <Link href="/faqs/contracts-legal" className="text-accent font-medium hover:underline">Contracts, legal &amp; due diligence</Link>
+                {" · "}
+                <Link href="/faqs" className="text-accent font-medium hover:underline">Browse all FAQs</Link>
+              </>
+            }
+          />
+        </Band>
 
-      {/* Section 6 — Explore other services */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="mb-10">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary">
-              Explore other services
-            </h2>
-          </div>
+        <Band tone="white">
+          <SectionHead title="Explore other services" />
+          <LinkGrid items={RELATED} />
+        </Band>
 
-          <div className="grid md:grid-cols-3 gap-5">
-            {[
-              {
-                icon: Building2,
-                title: "Primary Property",
-                desc: "Looking to buy from the developer instead? Off-plan and newly launched units across Egypt's most active developments.",
-                link: "/services/primary-property",
-              },
-              {
-                icon: TrendingUp,
-                title: "Investment Consultation",
-                desc: "Not sure where to put your money? We analyze yield potential, vacancy risk, and capital appreciation.",
-                link: "/services/investment-consultation",
-              },
-              {
-                icon: Coins,
-                title: "Income Generating Property",
-                desc: "Looking for assets that generate rental income? We identify units with strong tenant demand and sustainable yield.",
-                link: "/services/income-generating-property",
-              },
-            ].map((item, i) => (
-              <Link
-                key={i}
-                href={item.link}
-                className="group relative p-8 rounded-2xl bg-primary/[0.03] border border-border/30 hover:bg-primary hover:border-primary transition-all duration-300 overflow-hidden"
-              >
-                <div className="w-11 h-11 bg-accent/10 rounded-full flex items-center justify-center mb-5 text-accent group-hover:bg-accent/20 transition-colors">
-                  <item.icon className="w-5 h-5" />
-                </div>
-                <h3 className="text-xl font-serif font-bold text-primary group-hover:text-white mb-2 transition-colors">{item.title}</h3>
-                <p className="text-sm text-muted-foreground group-hover:text-white/70 leading-relaxed mb-6 transition-colors">{item.desc}</p>
-                <span className="inline-flex items-center text-accent text-sm font-medium group-hover:text-accent transition-colors">
-                  Learn more <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                </span>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Read more — Related FAQs */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-10">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary">
-              Common FAQs on Property Resale
-            </h2>
-            <a href="/faqs" className="hidden md:inline-flex items-center text-primary font-medium hover:text-accent transition-colors group mt-4 md:mt-0">
-              Browse all FAQs <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-            </a>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-3">
-            {[
-              { title: "Rent vs buy vs resale", link: "/faqs/rent-buy-resale" },
-              { title: "Pricing, value & unit evaluation", link: "/faqs/pricing-value" },
-              { title: "Contracts, legal & due diligence", link: "/faqs/contracts-legal" },
-            ].map((item, i) => (
-              <Link
-                key={i}
-                href={item.link}
-                className="group flex items-center justify-between gap-4 p-5 rounded-xl bg-white border border-border/40 hover:border-accent hover:shadow-md transition-all"
-              >
-                <div className="flex-1 min-w-0">
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-accent block mb-1">
-                    FAQ Section
-                  </span>
-                  <h3 className="text-sm font-bold text-primary leading-snug group-hover:text-accent transition-colors">
-                    {item.title}
-                  </h3>
-                </div>
-                <ArrowRight className="w-4 h-4 text-accent shrink-0 group-hover:translate-x-1 transition-transform" />
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Section 7 — Final CTA */}
-      <section className="py-8">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 py-8 md:py-12 border-t border-border/40">
-            <div>
-              <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary mb-2">
-                Buying or selling a resale unit?
-              </h2>
-              <p className="text-muted-foreground text-lg">
-                Get honest market context before you commit to anything.
-              </p>
-            </div>
-            <Link href="/contact">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-6 md:px-10 h-12 md:h-14 text-base md:text-lg font-medium shadow-lg shadow-accent/30 transition-all hover:scale-105 shrink-0">
-                Book a free consultation
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+        <CtaBand
+          title="Buying or selling a resale unit?"
+          text="Get honest market context before you commit to anything."
+          primary={{ label: "Book a free consultation", href: "/contact" }}
+        />
+      </main>
 
       <Footer />
     </div>

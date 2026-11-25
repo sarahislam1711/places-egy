@@ -223,9 +223,9 @@ const INDEX_ROUTES: RouteMeta[] = [
   },
   {
     route: "/services",
-    title: "Real Estate Services in Egypt — Leasing, Sales & Advisory | PLACES",
+    title: "Office Real Estate Services in Egypt | PLACES",
     description:
-      "Full-service admin-office brokerage in Cairo: leasing, sales, property resale, primary-market advisory, and income-generating investment services. Trusted by 40+ companies.",
+      "Office real estate services in Egypt: tenant representation (free for tenants), buying from developers, resale, investment advice and income property.",
     url: `${SITE}/services`,
   },
   {

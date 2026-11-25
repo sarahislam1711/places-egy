@@ -1,208 +1,219 @@
+import { Link } from "wouter";
+import { ArrowRight } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
-import { Link } from "wouter";
-import { Button } from "@/components/ui/button";
-import {
-  ArrowRight,
-  Handshake,
-  Building2,
-  Repeat,
-  TrendingUp,
-  Coins,
-} from "lucide-react";
-import type { LucideIcon } from "lucide-react";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
+import { Band, CtaBand, SectionHead, ServiceHero } from "@/components/service-page";
 import { breadcrumbSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 
-const SERVICES: { icon: LucideIcon; name: string; desc: string; slug: string }[] = [
+// Keep in sync with the "/services" entry in script/prerender.ts (INDEX_ROUTES).
+const META = {
+  title: "Office Real Estate Services in Egypt | PLACES",
+  description:
+    "Office real estate services in Egypt: tenant representation (free for tenants), buying from developers, resale, investment advice and income property.",
+  url: "https://places-egy.com/services",
+};
+
+const SERVICES = [
   {
-    icon: Handshake,
     name: "Tenant Representation",
     desc: "We represent your company, not the landlord: we find, compare and negotiate your office and review the lease. Free for tenants.",
+    bestFor: "Companies securing their first office, growing teams relocating or expanding, international companies entering Egypt, and brands securing commercial space.",
     slug: "tenant-representation",
   },
   {
-    icon: Building2,
     name: "Primary Property",
-    desc: "Buy directly from the developer — off-plan and newly launched units across Egypt's most active developments.",
+    desc: "Buy directly from the developer: off-plan and newly launched units across Egypt's most active developments.",
+    bestFor: "First-time buyers, investors who want early access before units hit the secondary market, and end users who will occupy the unit.",
     slug: "primary-property",
   },
   {
-    icon: Repeat,
     name: "Property Resale",
-    desc: "Buy or sell a unit that has already been transacted — with full market context on both sides.",
+    desc: "Buy or sell a unit that has already been transacted, with full market context on both sides.",
+    bestFor: "Buyers who want a unit that's ready now, sellers exiting an investment, and investors looking for undervalued resale units.",
     slug: "property-resale",
   },
   {
-    icon: TrendingUp,
     name: "Investment Consultation",
     desc: "Data-driven advisory for investors evaluating administrative office assets in Egypt.",
+    bestFor: "First-time investors, experienced investors who want a second opinion, and institutional buyers evaluating assets at portfolio level.",
     slug: "investment-consultation",
   },
   {
-    icon: Coins,
     name: "Income Generating Property",
     desc: "Identify and acquire units that generate consistent rental income across Egypt's most active business districts.",
+    bestFor: "Yield-focused investors, portfolio builders, and passive investors who want income without active management.",
+    slug: "income-generating-property",
+  },
+];
+
+const GUIDANCE = [
+  {
+    situation: "You're renting an office for your company",
+    answer: "We find, compare and negotiate your office across Cairo and review the lease before you sign. The landlord pays our fee.",
+    service: "Tenant Representation",
+    slug: "tenant-representation",
+  },
+  {
+    situation: "You want to buy a new unit from a developer",
+    answer: "Off-plan and newly launched units, with the unit, the developer and the payment plan assessed before you commit.",
+    service: "Primary Property",
+    slug: "primary-property",
+  },
+  {
+    situation: "You want a ready unit now, or you're selling one",
+    answer: "Honest pricing based on comparable transactions, serious buyers, and the legal transfer managed through to handover.",
+    service: "Property Resale",
+    slug: "property-resale",
+  },
+  {
+    situation: "You're not sure where to invest",
+    answer: "Objective analysis of yield potential, vacancy rates and capital appreciation, based on your objectives, risk appetite and target return.",
+    service: "Investment Consultation",
+    slug: "investment-consultation",
+  },
+  {
+    situation: "You want a unit that pays rent",
+    answer: "Units evaluated on tenant demand, realistic net yield, building management and lease terms that protect your income.",
+    service: "Income Generating Property",
     slug: "income-generating-property",
   },
 ];
 
 export default function Services() {
-  useDocumentMeta({
-    title: "Services — Leasing, Sales, Resale & Investment | PLACES",
-    description:
-      "PLACES delivers full-cycle office real estate services in Egypt: leasing, primary purchases, resale, investment consultation, and income-generating property advisory.",
-    url: "https://places-egy.com/services",
-  });
+  useDocumentMeta(META);
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-background">
-      {/* Hazy faded background image — fixed so it stays put as the user
-          scrolls. Sits behind all content via z-0 + relative z-10 wrapper. */}
-      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
-        <img
-          src="/images/general-office.jpg"
-          alt=""
-          loading="lazy"
-          decoding="async"
-          className="w-full h-full object-cover opacity-15 blur-sm"
+      <SchemaMarkup
+        schema={breadcrumbSchema([
+          { name: "Home", url: "/" },
+          { name: "Services", url: "/services" },
+        ])}
+      />
+      <SchemaMarkup
+        schema={{
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "PLACES Services",
+          url: "https://places-egy.com/services",
+          itemListElement: SERVICES.map((s, i) => ({
+            "@type": "ListItem",
+            position: i + 1,
+            item: {
+              "@type": "Service",
+              name: s.name,
+              description: s.desc,
+              url: `https://places-egy.com/services/${s.slug}`,
+              provider: { "@id": "https://places-egy.com/#organization" },
+            },
+          })),
+        }}
+      />
+      <Navbar />
+
+      <main className="flex-1">
+        <ServiceHero
+          crumbs={[{ name: "Home", href: "/" }, { name: "Services" }]}
+          title="Office Real Estate Services in Egypt"
+          intro="PLACES offers five specialized services covering the full lifecycle of administrative office real estate in Egypt, from leasing and acquisition to resale and investment advisory. Each one is built for a different decision: renting an office, buying one, selling one, or investing for income."
+          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          image="/images/general-office.jpg"
+          imageAlt="Office space in Egypt"
+          promise={{ title: "Free for tenants", text: "When we represent your company in an office lease, the landlord pays our fee once the lease is signed." }}
+          points={["Leasing, buying and resale", "Investment and income advice", "Free tenant representation"]}
         />
-        <div className="absolute inset-0 bg-background/50" />
-      </div>
 
-      <div className="relative z-10 flex flex-col flex-1">
-        <SchemaMarkup
-          schema={breadcrumbSchema([
-            { name: "Home", url: "/" },
-            { name: "Services", url: "/services" },
-          ])}
-        />
-        <SchemaMarkup
-          schema={{
-            "@context": "https://schema.org",
-            "@type": "ItemList",
-            name: "PLACES Services",
-            url: "https://places-egy.com/services",
-            itemListElement: SERVICES.map((s, i) => ({
-              "@type": "ListItem",
-              position: i + 1,
-              item: {
-                "@type": "Service",
-                name: s.name,
-                description: s.desc,
-                url: `https://places-egy.com/services/${s.slug}`,
-                provider: { "@id": "https://places-egy.com/#organization" },
-              },
-            })),
-          }}
-        />
-        <Navbar />
-
-      {/* Hero */}
-      <section className="pt-32 pb-6">
-        <div className="container mx-auto px-6 md:px-10">
-          <h1 className="text-3xl md:text-[3.25rem] font-serif font-bold text-primary mb-4 leading-tight">
-            Services
-          </h1>
-          <p className="text-lg text-muted-foreground max-w-3xl">
-            Five specialized service areas covering the full lifecycle of administrative office real estate in Egypt — from leasing and acquisition to resale and investment advisory.
-          </p>
-        </div>
-      </section>
-
-      {/* All services grid */}
-      <section className="py-10">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="grid md:grid-cols-2 gap-6">
-            {SERVICES.map((service, i) => {
-              // If we have an odd number of services, span the last card across
-              // both columns so we never leave a visually empty cell.
-              const spanFull = i === SERVICES.length - 1 && SERVICES.length % 2 === 1;
-              return (
-              <Link
-                key={service.slug}
-                href={`/services/${service.slug}`}
-                className={`group relative p-8 md:p-10 rounded-2xl bg-white border border-border/40 shadow-sm hover:shadow-2xl hover:-translate-y-1 hover:border-accent/40 transition-all duration-300 overflow-hidden ${spanFull ? "md:col-span-2" : ""}`}
-              >
-                {/* Large faded service icon as decorative backdrop in the
-                    bottom-right corner — adds depth without competing for
-                    attention. Intensifies slightly on hover. */}
-                <service.icon
-                  className="absolute -right-8 -bottom-8 w-44 h-44 text-accent/5 group-hover:text-accent/10 transition-colors duration-500 pointer-events-none"
-                  aria-hidden="true"
-                />
-
-                <div className="relative">
-                  <div className="w-14 h-14 bg-accent/10 rounded-2xl flex items-center justify-center mb-6 text-accent group-hover:bg-accent group-hover:text-white transition-colors duration-300">
-                    <service.icon className="w-7 h-7" />
-                  </div>
-                  <h2 className="text-2xl font-serif font-bold text-primary mb-2">
-                    {service.name}
-                  </h2>
-                  <p className="text-sm md:text-base text-muted-foreground leading-relaxed mb-6">
-                    {service.desc}
+        <Band tone="white">
+          <SectionHead
+            title="Our services"
+            lead="Five service areas, one team. Start with the one that matches what you're trying to do."
+          />
+          <div className="border-b border-primary/10">
+            {SERVICES.map((s) => (
+              <article key={s.slug} className="grid md:grid-cols-[1fr_1.5fr] gap-x-12 gap-y-3 py-8 border-t border-primary/10">
+                <h3 className="text-2xl font-serif font-bold text-primary">
+                  <Link href={`/services/${s.slug}`} className="hover:text-accent transition-colors">
+                    {s.name}
+                  </Link>
+                </h3>
+                <div>
+                  <p className="text-lg text-primary leading-relaxed">{s.desc}</p>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">
+                    <span className="font-semibold text-primary">Best for:</span> {s.bestFor}
                   </p>
-                  <span className="inline-flex items-center text-accent text-sm font-medium group-hover:text-primary transition-colors">
-                    Learn more <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </span>
+                  <Link
+                    href={`/services/${s.slug}`}
+                    className="group mt-4 inline-flex items-center text-accent font-semibold hover:underline"
+                  >
+                    Learn more about {s.name} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
                 </div>
-              </Link>
-              );
-            })}
+              </article>
+            ))}
           </div>
-        </div>
-      </section>
+        </Band>
 
-      {/* Read more — Link to FAQs */}
-      <section className="py-10">
-        <div className="container mx-auto px-6 md:px-10">
+        <Band tone="dark">
+          <SectionHead
+            dark
+            title="Which service do I need?"
+            lead="Match your situation to the right starting point. If you're unsure, an advisor will point you to it."
+          />
+          <div className="border-b border-white/15">
+            {GUIDANCE.map((g) => (
+              <div key={g.slug} className="grid md:grid-cols-[1fr_1.5fr] gap-x-12 gap-y-2 py-7 border-t border-white/15">
+                <h3 className="text-xl font-serif font-bold text-white">{g.situation}</h3>
+                <div>
+                  <p className="text-white/75 leading-relaxed">{g.answer}</p>
+                  <Link
+                    href={`/services/${g.slug}`}
+                    className="group mt-3 inline-flex items-center text-accent font-semibold hover:underline"
+                  >
+                    {g.service} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+          <p className="mt-10 text-white/75">
+            Still deciding whether to rent or buy?{" "}
+            <Link href="/guides/buy-vs-rent-office-cairo" className="text-accent font-semibold hover:underline">
+              Read our guide to buying vs renting an office in Cairo
+            </Link>
+            .
+          </p>
+        </Band>
+
+        <Band tone="cream">
           <Link
             href="/faqs"
-            className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 p-8 md:p-10 rounded-2xl bg-secondary/40 border border-border/40 hover:border-accent hover:shadow-md transition-all"
+            className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-2xl bg-white p-7 md:p-10 border border-primary/10 hover:border-accent transition-colors"
           >
             <div>
-              <span className="text-xs font-bold uppercase tracking-widest text-accent">
-                Read more
-              </span>
-              <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mt-2 group-hover:text-accent transition-colors">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary group-hover:text-accent transition-colors">
                 Have questions before choosing a service?
               </h2>
-              <p className="text-sm md:text-base text-muted-foreground mt-1">
-                Browse FAQs on Egypt's administrative office real estate market — organized into ten topic areas.
+              <p className="mt-2 text-muted-foreground">
+                Browse FAQs on Egypt's administrative office real estate market, organized into ten topic areas.
               </p>
             </div>
-            <span className="inline-flex items-center text-accent text-sm font-medium whitespace-nowrap shrink-0">
-              Browse all FAQs <ArrowRight className="ml-2 w-4 h-4 group-hover:translate-x-1 transition-transform" />
+            <span className="inline-flex items-center text-accent font-semibold whitespace-nowrap shrink-0">
+              Browse all FAQs <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
             </span>
           </Link>
-        </div>
-      </section>
+        </Band>
 
-      {/* CTA */}
-      <section className="py-10">
-        <div className="container mx-auto px-6 md:px-10">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-8 py-10 border-t border-border/40">
-            <div>
-              <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary mb-2">
-                Not sure which service fits?
-              </h2>
-              <p className="text-muted-foreground">
-                Tell us what you're trying to accomplish and we'll recommend the right starting point.
-              </p>
-            </div>
-            <Link href="/contact">
-              <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-8 h-12 text-base font-medium shadow-lg shadow-accent/30 transition-all hover:scale-105 shrink-0">
-                Talk to an advisor
-              </Button>
-            </Link>
-          </div>
-        </div>
-      </section>
+        <CtaBand
+          title="Not sure which service fits?"
+          text="Tell us what you're trying to accomplish and we'll recommend the right starting point."
+          primary={{ label: "Talk to an advisor", href: "/contact" }}
+        />
+      </main>
 
-        <Footer />
-      </div>
+      <Footer />
       <CornerSlideMagnet />
     </div>
   );
