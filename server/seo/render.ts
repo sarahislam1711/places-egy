@@ -19,6 +19,8 @@ import {
   LANDING_LOCATIONS,
   LANDING_MIN_UNITS,
   eligibleLandingPages,
+  hubCopy,
+  hubRows,
   landingCopy,
   landingPath,
   landingRows,
@@ -179,9 +181,43 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
       (siblings.length
         ? `<h2>More offices in ${esc(loc.name)}</h2><ul>${siblings.map((p) => `<li><a href="${p.path}">${esc(DEALS[p.deal].heading(loc.name))}</a></li>`).join("")}</ul>`
         : "") +
-      `<p><a href="/locations/${loc.slug}">${esc(`${loc.name} area guide: projects, developers and market overview`)}</a></p>` +
+      `<p><a href="/${deal}">${esc(DEALS[deal].heading("Cairo"))}</a> · <a href="/locations/${loc.slug}">${esc(`${loc.name} area guide: projects, developers and market overview`)}</a></p>` +
       relatedList(`Developers in ${loc.name}`, landingDevelopers(loc.name)) +
       relatedList(`Questions to settle before you ${deal === "rent" ? "sign a lease" : "buy"}`, landingFaqTopics(deal)) +
+      landingNav(inventory, "Other popular searches") +
+      locationNav(),
+  );
+}
+
+// /rent, /buy, /income-property: every available unit of one deal type across
+// Cairo, with a breakdown by area. Same copy as the React page (hubCopy).
+export async function renderDealHub(dealSlug: string): Promise<string | null> {
+  if (!(dealSlug in DEALS)) return null;
+  const deal = dealSlug as DealSlug;
+  const inventory = await getInventory();
+  const rows = hubRows(inventory, deal);
+  if (!rows.length) return null;
+  const copy = hubCopy(deal, inventory);
+  const path = `/${deal}`;
+  let html = injectMeta(shell(), { title: copy.title, description: copy.description, url: `${SITE}${path}` });
+  html = injectJsonLd(html, breadcrumbSchema([{ name: "Home", url: SITE }, { name: copy.h1, url: `${SITE}${path}` }]));
+  html = injectJsonLd(html, itemListSchema({ name: copy.h1, url: path, items: rows.slice(0, 48).map((l) => ({ name: listingTitle(l), url: l.path })) }));
+  html = injectJsonLd(html, faqSchema(copy.faqs));
+  return injectBody(
+    html,
+    `<h1>${esc(copy.h1)}</h1>` +
+      copy.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+      (deal === "rent" ? tenantRepHtml("rent", esc) : "") +
+      `<h2>${esc(`${copy.h1} by area`)}</h2><ul>` +
+      copy.areas
+        .map((a) => `<li><a href="${a.path}">${esc(DEALS[deal].heading(a.loc.name))}</a>: ${a.count} available${a.median ? `, ${esc(copy.medianLabel(a.median))}` : ""}</li>`)
+        .join("") +
+      `</ul>` +
+      `<h2>${esc(`Latest ${copy.h1.toLowerCase().replace(/ in cairo$/, "")}`)}</h2>` +
+      listingLinks(rows.slice(0, 48)) +
+      `<p><a href="/listings">Browse all ${inventory.length} listings</a></p>` +
+      `<h2>${esc(`${copy.h1}: FAQs`)}</h2>` +
+      copy.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
       landingNav(inventory, "Other popular searches") +
       locationNav(),
   );

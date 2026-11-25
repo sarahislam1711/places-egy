@@ -7,7 +7,7 @@ import type { Express } from "express";
 import { buildPostEntries, fetchAllPosts, type WpPost } from "../../script/build-sitemap";
 import { getInventory } from "./data";
 import { builtFile, SITE } from "./render";
-import { eligibleLandingPages, landingRows } from "../../client/src/lib/landing-pages";
+import { DEAL_SLUGS, eligibleLandingPages, hubRows, landingRows } from "../../client/src/lib/landing-pages";
 
 const XML_HEAD = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 const URLSET_OPEN = `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`;
@@ -61,7 +61,12 @@ async function blogXml(): Promise<string> {
 
 async function landingXml(): Promise<string> {
   const inventory = await getInventory();
-  return eligibleLandingPages(inventory)
+  // Deal hubs (/rent, /buy, /income-property) for every deal type with stock.
+  const hubs = DEAL_SLUGS.filter((d) => hubRows(inventory, d).length > 0).map((d) => {
+    const latest = hubRows(inventory, d).reduce<string | null>((m, l) => ((l.updated_at ?? "") > (m ?? "") ? l.updated_at : m), null);
+    return url(`${SITE}/${d}`, day(latest), "daily", "0.9");
+  });
+  return hubs.join("\n") + "\n" + eligibleLandingPages(inventory)
     .map((p) => {
       const rows = landingRows(inventory, p.deal, p.loc.name);
       const latest = rows.reduce<string | null>((m, l) => ((l.updated_at ?? "") > (m ?? "") ? l.updated_at : m), null);

@@ -204,6 +204,11 @@ export default function LandingPage() {
               </li>
             ))}
             <li>
+              <Link href={`/${dealSlug}`} className={CHIP}>
+                {deal.heading("Cairo")}
+              </Link>
+            </li>
+            <li>
               <Link href={`/locations/${loc.slug}`} className="inline-flex items-center rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-primary hover:border-accent hover:text-accent transition-colors">
                 {loc.name} area guide
               </Link>
