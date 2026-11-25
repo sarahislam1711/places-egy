@@ -14,6 +14,7 @@ import {
   StepList,
   AudienceTabs,
   type Audience,
+  ClientLogoStrip,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -255,16 +256,8 @@ export default function TenantRepresentation() {
             lead="We search every major office district in Cairo, so you can compare areas before you compare buildings."
           />
           <LinkGrid items={AREAS} />
-          <div className="mt-14 rounded-2xl bg-background p-7 md:p-9 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-xl md:text-2xl font-serif font-bold text-primary">Companies we've placed</h2>
-              <p className="mt-1 text-muted-foreground">
-                More than 100 companies, including Bosch, Henkel, Bupa and OPPO, have found their offices with PLACES.
-              </p>
-            </div>
-            <Link href="/why-places" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
-              See our clients
-            </Link>
+          <div className="mt-14">
+            <ClientLogoStrip />
           </div>
         </Band>
 
