@@ -202,6 +202,12 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   // into the old 404 above.
   "/resources/blog/where-to-buy-office-cairo-guide": "/blog/offices-for-sale-new-cairo",
   "/developers/palm-hills-1": "/developers/palm-hills",
+
+  // Old Arabic URLs still getting search impressions but returning 404 (GSC, 2026-11-25).
+  // The first has the Arabic question mark ؟ in it, unlike the entry above.
+  "/ar/blog/أشتري-ولا-أأجر-مكتب-لشركتي؟-دليل-عملي-ق": "/ar/blog/شراء-ام-ايجار-مكتب",
+  "/ar/blog/دليل-المكاتب-الإدارية-مصر": "/ar/blog/دليل-المكاتب-الادارية-مصر",
+  "/ar/blog/مكاتذ-التسعين-الشمالى": "/ar/blog/مكاتب-التسعين-الشمالى",
 };
 
 // Prefix redirects for path roots that have moved. Anything matching the
@@ -244,7 +250,9 @@ function lookupRedirect(rawPath: string): string | undefined {
   // Old Arabic slugs also leaked under /blog/* (former sitemap bug).
   if (decoded.startsWith("/blog/")) {
     const viaAr = DECODED_REDIRECTS.get(`/ar${decoded}`);
-    if (viaAr) return viaAr;
+    // An /ar/ entry can point at the live English post with the same slug
+    // (e.g. office-investment-yield-new-cairo): following it would loop.
+    if (viaAr && viaAr.normalize("NFC") !== decoded) return viaAr;
     if (decoded.startsWith("/blog/ar-blog-")) return `/ar${decoded}`;
   }
   return undefined;
