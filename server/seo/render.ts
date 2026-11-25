@@ -226,6 +226,31 @@ export async function renderListingsIndex(page: number): Promise<string | null> 
   );
 }
 
+// The about paragraph's **bold** and ~~accent~~ markers, as plain emphasis.
+function emphasis(text: string): string {
+  return esc(text)
+    .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+    .replace(/~~([^~]+)~~/g, "<strong>$1</strong>");
+}
+
+// The area guide copy visitors see on /locations/{slug} (about, at a glance,
+// projects, why operators/investors choose it). Without it, crawlers saw only
+// the heading and the listing count: 184 words on /locations/sheraton.
+function locationGuide(loc: (typeof LOCATIONS)[number]): string {
+  const card = (title: string, c: (typeof loc)["why"]["operators"]) =>
+    `<h3>${esc(title)}: ${esc(c.headline)}</h3><p><strong>${esc(c.stat)}</strong> ${esc(c.statLabel)}</p>` +
+    `<ul>${c.bullets.map((b) => `<li>${esc(b)}</li>`).join("")}</ul>`;
+  return (
+    `<h2>About ${esc(loc.displayName)}</h2><p>${emphasis(loc.about)}</p>` +
+    (loc.highlights?.length ? `<h3>${esc(loc.displayName)} at a glance</h3><ul>${loc.highlights.map((h) => `<li>${esc(h)}</li>`).join("")}</ul>` : "") +
+    (loc.projectsContext ? `<h2>Office projects in ${esc(loc.displayName)}</h2><p>${esc(loc.projectsContext)}</p>` : "") +
+    (loc.developersContext ? `<p>${esc(loc.developersContext)}</p>` : "") +
+    `<h2>Why companies choose ${esc(loc.displayName)}</h2>` +
+    card("For operators", loc.why.operators) +
+    card("For investors", loc.why.investors)
+  );
+}
+
 export async function renderLocation(slug: string): Promise<string | null> {
   const loc = LOCATIONS.find((l) => l.slug === slug);
   const base = builtFile(`locations/${slug}.html`);
@@ -239,7 +264,8 @@ export async function renderLocation(slug: string): Promise<string | null> {
     : "";
   return injectBody(
     base,
-    intro + dealLinks + `<h2>Available offices in ${esc(loc.displayName)} (${rows.length})</h2>` + listingLinks(rows) + locationNav(),
+    intro + dealLinks + locationGuide(loc) +
+      `<h2>Available offices in ${esc(loc.displayName)} (${rows.length})</h2>` + listingLinks(rows) + locationNav(),
   );
 }
 
