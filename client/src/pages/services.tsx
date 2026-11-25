@@ -4,7 +4,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
-import { Band, CtaBand, SectionHead, ServiceCards, ServiceHero
+import { Band, ClientLogoStrip, CtaBand, SectionHead, ServiceCards, ServiceHero
 } from "@/components/service-page";
 import { breadcrumbSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -160,22 +160,22 @@ export default function Services() {
             title="Which service do I need?"
             lead="Match your situation to the right starting point. If you're unsure, an advisor will point you to it."
           />
-          <div className="border-b border-white/15">
+          <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {GUIDANCE.map((g) => (
-              <div key={g.slug} className="grid md:grid-cols-[1fr_1.5fr] gap-x-12 gap-y-2 py-7 border-t border-white/15">
-                <h3 className="text-xl font-serif font-bold text-white">{g.situation}</h3>
-                <div>
-                  <p className="text-white/75 leading-relaxed">{g.answer}</p>
-                  <Link
-                    href={`/services/${g.slug}`}
-                    className="group mt-3 inline-flex items-center text-accent font-semibold hover:underline"
-                  >
-                    {g.service} <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
-                  </Link>
-                </div>
-              </div>
+              <li key={g.slug} className="flex">
+                <Link
+                  href={`/services/${g.slug}`}
+                  className="group flex w-full flex-col rounded-2xl border border-white/10 bg-white/[0.05] p-6 transition-colors hover:border-accent/60 hover:bg-white/[0.08]"
+                >
+                  <h3 className="text-lg font-serif font-bold leading-snug text-white">{g.situation}</h3>
+                  <p className="mt-2 flex-1 text-sm text-white/65 leading-relaxed">{g.answer}</p>
+                  <span className="mt-5 inline-flex items-center self-start gap-2 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white">
+                    {g.service} <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
+                  </span>
+                </Link>
+              </li>
             ))}
-          </div>
+          </ul>
           <p className="mt-10 text-white/75">
             Still deciding whether to rent or buy?{" "}
             <Link href="/guides/buy-vs-rent-office-cairo" className="text-accent font-semibold hover:underline">
@@ -186,9 +186,10 @@ export default function Services() {
         </Band>
 
         <Band tone="cream">
+          <ClientLogoStrip />
           <Link
             href="/faqs"
-            className="group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-2xl bg-white p-7 md:p-10 border border-primary/10 hover:border-accent transition-colors"
+            className="mt-10 group flex flex-col md:flex-row items-start md:items-center justify-between gap-6 rounded-2xl bg-white p-7 md:p-10 border border-primary/10 hover:border-accent transition-colors"
           >
             <div>
               <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary group-hover:text-accent transition-colors">

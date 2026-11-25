@@ -1,20 +1,22 @@
+import { BarChart3, CircleSlash, Handshake, Scale } from "lucide-react";
 import { Link } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import {
+  AudienceTabs,
   Band,
   Checklist,
   ComparisonTable,
   CtaBand,
-  DefinitionList,
   FaqWithAdvisor,
-  LinkGrid,
+  ReasonGrid,
+  RelatedServices,
   SectionHead,
   ServiceHero,
   StepList,
-  AudienceTabs,
   type Audience,
+  type Reason,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -37,11 +39,11 @@ const WHO: Audience[] = [
   { title: "Institutional buyers", need: "You're evaluating assets at a portfolio level.", help: "We provide market data, asset evaluation, and ongoing advisory.", image: "/images/offices-hero.jpg", imageAlt: "Office towers in Cairo" },
 ];
 
-const WHY = [
-  { title: "Objective advisory", desc: "We don't earn commission on what we recommend. Our advice is based on data, not on closing a deal." },
-  { title: "Market depth", desc: "We track yield trends, vacancy rates, and capital appreciation across commercial and administrative assets in Egypt." },
-  { title: "Long-term relationship", desc: "We stay available after your first acquisition, for portfolio reviews and future decisions." },
-  { title: "We say no", desc: "If a unit doesn't fit your investment thesis, we tell you. We don't push deals that don't make sense." },
+const WHY: Reason[] = [
+  { icon: Scale, title: "Objective advisory", desc: "We don't earn commission on what we recommend. Our advice is based on data, not on closing a deal." },
+  { icon: BarChart3, title: "Market depth", desc: "We track yield trends, vacancy rates, and capital appreciation across commercial and administrative assets in Egypt." },
+  { icon: Handshake, title: "Long-term relationship", desc: "We stay available after your first acquisition, for portfolio reviews and future decisions." },
+  { icon: CircleSlash, title: "We say no", desc: "If a unit doesn't fit your investment thesis, we tell you. We don't push deals that don't make sense." },
 ];
 
 const STEPS = [
@@ -68,13 +70,6 @@ const COMPARISON = [
   { label: "Incentives", us: "We don't earn commission on what we recommend", them: "Aligned with the developer rather than the buyer" },
   { label: "What you get", us: "Objective comparisons based on data and your criteria", them: "Detailed product knowledge, with limited objectivity" },
   { label: "If the unit doesn't fit", us: "We tell you, and don't push the deal", them: "Their job is to sell that developer's units" },
-];
-
-const RELATED = [
-  { href: "/services/income-generating-property", title: "Income Generating Property", desc: "Looking for assets that generate consistent rental income? We identify units with strong tenant demand and sustainable yield." },
-  { href: "/services/primary-property", title: "Primary Property", desc: "Buy directly from the developer: off-plan and newly launched units across Egypt's most active developments." },
-  { href: "/services/property-resale", title: "Property Resale", desc: "Buy or sell a unit that has already been transacted, with full market context and end-to-end transaction management." },
-  { href: "/services/tenant-representation", title: "Tenant Representation", desc: "Renting an office for your company instead? We represent you, not the landlord, and it's free for tenants." },
 ];
 
 // Verbatim from the FAQ bank (client/src/lib/faq.ts).
@@ -193,7 +188,7 @@ export default function InvestmentConsultation() {
             title="Why choose PLACES for investment consultation"
             lead="Advice based on data, from the first assessment to the decisions that come after your acquisition."
           />
-          <DefinitionList items={WHY} dark />
+          <ReasonGrid items={WHY} dark />
         </Band>
 
         <Band tone="white">
@@ -240,7 +235,7 @@ export default function InvestmentConsultation() {
 
         <Band tone="cream">
           <SectionHead title="Explore other services" />
-          <LinkGrid items={RELATED} />
+          <RelatedServices current="/services/investment-consultation" order={["/services/income-generating-property", "/services/primary-property", "/services/property-resale", "/services/tenant-representation"]} />
         </Band>
 
         <CtaBand

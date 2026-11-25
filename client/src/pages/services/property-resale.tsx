@@ -1,22 +1,23 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BarChart3, ClipboardCheck, Search, Tag } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { ListingCard } from "@/components/listings/ListingCard";
 import {
+  AudienceTabs,
   Band,
   Checklist,
   CtaBand,
-  DefinitionList,
   FaqWithAdvisor,
-  LinkGrid,
+  ReasonGrid,
+  RelatedServices,
   SectionHead,
   ServiceHero,
   StepList,
-  AudienceTabs,
   type Audience,
+  type Reason,
 } from "@/components/service-page";
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
@@ -38,11 +39,11 @@ const WHO: Audience[] = [
   { title: "Investors", need: "You're looking for undervalued resale units with strong upside.", help: "We identify them and negotiate on your behalf.", image: "/images/Trivium-Business-Complex.jpg", imageAlt: "Trivium Business Complex in New Cairo" },
 ];
 
-const SERVICES = [
-  { title: "For buyers", desc: "We identify resale units that represent genuine value, negotiate on your behalf, and review transfer documentation." },
-  { title: "For sellers", desc: "We assess your unit's market value, identify serious buyers, and manage the transaction to completion." },
-  { title: "Market pricing", desc: "We give you an honest view of what the unit is worth, based on comparable transactions, not asking prices." },
-  { title: "Transaction management", desc: "We manage the legal transfer, payment terms, and handover process from start to finish." },
+const SERVICES: Reason[] = [
+  { icon: Search, title: "For buyers", desc: "We identify resale units that represent genuine value, negotiate on your behalf, and review transfer documentation." },
+  { icon: Tag, title: "For sellers", desc: "We assess your unit's market value, identify serious buyers, and manage the transaction to completion." },
+  { icon: BarChart3, title: "Market pricing", desc: "We give you an honest view of what the unit is worth, based on comparable transactions, not asking prices." },
+  { icon: ClipboardCheck, title: "Transaction management", desc: "We manage the legal transfer, payment terms, and handover process from start to finish." },
 ];
 
 const STEPS = [
@@ -79,13 +80,6 @@ const COMPARISON = [
   { label: "Rental income", a: "Some units come with existing tenants and day-one rental income", b: "None during the construction period" },
   { label: "Payment", a: "Less remaining payment plan flexibility", b: "Developer installment plans of 5 to 10 years, with 5% to 20% down" },
   { label: "Main risks", a: "Hidden defects, outstanding maintenance fees, contracts that may not transfer cleanly", b: "Delivery delays, masterplan changes, developer financial issues" },
-];
-
-const RELATED = [
-  { href: "/services/primary-property", title: "Primary Property", desc: "Looking to buy from the developer instead? Off-plan and newly launched units across Egypt's most active developments." },
-  { href: "/services/tenant-representation", title: "Tenant Representation", desc: "Looking to lease rather than buy? We represent you, not the landlord, and it's free for tenants." },
-  { href: "/services/investment-consultation", title: "Investment Consultation", desc: "Not sure where to put your money? We analyze yield potential, vacancy risk, and capital appreciation." },
-  { href: "/services/income-generating-property", title: "Income Generating Property", desc: "Looking for assets that generate rental income? We identify units with strong tenant demand and sustainable yield." },
 ];
 
 // Verbatim from the FAQ bank (client/src/lib/faq.ts).
@@ -257,7 +251,7 @@ export default function PropertyResale() {
             title="Our property resale services"
             lead="We act for both sides. Buyers and sellers get the same standard of honesty and diligence from our team."
           />
-          <DefinitionList items={SERVICES} dark />
+          <ReasonGrid items={SERVICES} dark />
         </Band>
 
         <Band tone="white">
@@ -324,7 +318,7 @@ export default function PropertyResale() {
 
         <Band tone="white">
           <SectionHead title="Explore other services" />
-          <LinkGrid items={RELATED} />
+          <RelatedServices current="/services/property-resale" order={["/services/primary-property", "/services/tenant-representation", "/services/investment-consultation", "/services/income-generating-property"]} />
         </Band>
 
         <CtaBand

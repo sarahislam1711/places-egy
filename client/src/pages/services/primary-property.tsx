@@ -1,22 +1,23 @@
 import { Link } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, BellRing, ClipboardCheck, Scale, SearchCheck } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { ListingCard } from "@/components/listings/ListingCard";
 import {
+  AudienceTabs,
   Band,
   Checklist,
   CtaBand,
-  DefinitionList,
   FaqWithAdvisor,
-  LinkGrid,
+  ReasonGrid,
+  RelatedServices,
   SectionHead,
   ServiceHero,
   StepList,
-  AudienceTabs,
   type Audience,
+  type Reason,
 } from "@/components/service-page";
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
@@ -38,11 +39,11 @@ const WHO: Audience[] = [
   { title: "End users", need: "You want a unit you'll eventually occupy.", help: "We evaluate the development, the payment plan, and the handover timeline.", image: "/images/general-office.jpg", imageAlt: "An office in use" },
 ];
 
-const WHY = [
-  { title: "We know the launches", desc: "We track every major developer launch in Egypt, so you never miss a strong opportunity." },
-  { title: "We evaluate before you buy", desc: "We assess the unit, the developer, and the payment plan, not just the brochure." },
-  { title: "We manage the process", desc: "From reservation to handover, we manage every step so nothing falls through." },
-  { title: "Independent perspective", desc: "We're not employed by any developer. Our recommendations are based on the unit, not the commission." },
+const WHY: Reason[] = [
+  { icon: BellRing, title: "We know the launches", desc: "We track every major developer launch in Egypt, so you never miss a strong opportunity." },
+  { icon: SearchCheck, title: "We evaluate before you buy", desc: "We assess the unit, the developer, and the payment plan, not just the brochure." },
+  { icon: ClipboardCheck, title: "We manage the process", desc: "From reservation to handover, we manage every step so nothing falls through." },
+  { icon: Scale, title: "Independent perspective", desc: "We're not employed by any developer. Our recommendations are based on the unit, not the commission." },
 ];
 
 const STEPS = [
@@ -78,13 +79,6 @@ const COMPARISON = [
   { label: "When you get the unit", a: "After construction and handover", b: "Immediately, with no construction wait" },
   { label: "Rental income", a: "None during the construction period", b: "Some units come with existing tenants and day-one rental income" },
   { label: "Main risks", a: "Delivery delays, masterplan changes, developer financial issues", b: "Hidden defects, outstanding maintenance fees, contracts that may not transfer cleanly" },
-];
-
-const RELATED = [
-  { href: "/services/property-resale", title: "Property Resale", desc: "Looking at the secondary market instead? Buy or sell a previously transacted unit with full market context on both sides." },
-  { href: "/services/tenant-representation", title: "Tenant Representation", desc: "Looking to lease rather than buy? We represent you, not the landlord, and it's free for tenants." },
-  { href: "/services/investment-consultation", title: "Investment Consultation", desc: "Not sure where to put your money? We analyze yield potential, vacancy risk, and capital appreciation." },
-  { href: "/services/income-generating-property", title: "Income Generating Property", desc: "Looking for assets that generate rental income? We identify units with strong tenant demand and sustainable yield." },
 ];
 
 // Verbatim from the FAQ bank (client/src/lib/faq.ts).
@@ -257,7 +251,7 @@ export default function PrimaryProperty() {
             title="Why choose PLACES for primary property"
             lead="We work across developers, not for one of them, and stay with you from the first shortlist to handover."
           />
-          <DefinitionList items={WHY} dark />
+          <ReasonGrid items={WHY} dark />
         </Band>
 
         <Band tone="white">
@@ -331,7 +325,7 @@ export default function PrimaryProperty() {
 
         <Band tone="white">
           <SectionHead title="Explore other services" />
-          <LinkGrid items={RELATED} />
+          <RelatedServices current="/services/primary-property" order={["/services/property-resale", "/services/tenant-representation", "/services/investment-consultation", "/services/income-generating-property"]} />
         </Band>
 
         <CtaBand

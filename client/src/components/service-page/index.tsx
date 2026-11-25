@@ -5,7 +5,7 @@
 // (script/ssr-pages.ts) carries the full text.
 import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "wouter";
-import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X } from "lucide-react";
+import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqAccordionList } from "@/components/FaqAccordionList";
 
@@ -523,9 +523,9 @@ export interface AreaTile {
 }
 
 /** Areas as photo tiles: the name on the photo, one line underneath. */
-export function AreaTiles({ items }: { items: AreaTile[] }) {
+export function AreaTiles({ items, columns = 3 }: { items: AreaTile[]; columns?: 3 | 4 }) {
   return (
-    <ul className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+    <ul className={`grid grid-cols-2 ${columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-3 md:gap-5`}>
       {items.map((a) => (
         <li key={a.href} className="flex">
           <Link href={a.href} className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)]">
@@ -550,6 +550,51 @@ export function AreaTiles({ items }: { items: AreaTile[] }) {
               {a.line}
             </p>
           </Link>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+// One short line + photo per service, shared by every "other services" block
+// so the five pages stay consistent. Photos are each service page's hero
+// (checked visually 2026-11-25).
+const SERVICE_TILES: AreaTile[] = [
+  { href: "/services/tenant-representation", name: "Tenant Representation", line: "We represent you, not the landlord", image: "/images/leasing.jpg", imageAlt: "Reviewing an office lease before signing" },
+  { href: "/services/primary-property", name: "Primary Property", line: "Buy directly from the developer", image: "/images/hero-main.jpg", imageAlt: "A new office development in Egypt" },
+  { href: "/services/property-resale", name: "Property Resale", line: "Buy or sell a ready office", image: "/images/hero-section.jpg", imageAlt: "Office buildings on the resale market" },
+  { href: "/services/investment-consultation", name: "Investment Consultation", line: "Data-driven advice before you invest", image: "/images/investment-consultation.jpg", imageAlt: "Reviewing investment figures for an office asset" },
+  { href: "/services/income-generating-property", name: "Income Generating Property", line: "Find units with real tenant demand", image: "/images/Allegria-Business-Park.jpg", imageAlt: "Allegria Business Park, an income-generating office location" },
+];
+
+/** The other four services as photo tiles (pass the current page's path to leave it out). */
+export function RelatedServices({ current, order }: { current: string; order?: string[] }) {
+  const tiles = SERVICE_TILES.filter((t) => t.href !== current);
+  if (order) tiles.sort((a, b) => order.indexOf(a.href) - order.indexOf(b.href));
+  return <AreaTiles items={tiles} columns={4} />;
+}
+
+export interface Reason {
+  icon: LucideIcon;
+  title: string;
+  desc: string;
+}
+
+/** Reasons / features as a row of four: icon, short title, one sentence. */
+export function ReasonGrid({ items, dark = false }: { items: Reason[]; dark?: boolean }) {
+  return (
+    <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-x-8 gap-y-10">
+      {items.map((r) => (
+        <li key={r.title}>
+          <span
+            className={`inline-flex w-12 h-12 items-center justify-center rounded-2xl ${
+              dark ? "bg-accent/15 text-accent" : "bg-accent/10 text-accent"
+            }`}
+          >
+            <r.icon className="w-6 h-6" aria-hidden />
+          </span>
+          <h3 className={`mt-5 text-xl font-serif font-bold leading-snug ${dark ? "text-white" : "text-primary"}`}>{r.title}</h3>
+          <p className={`mt-2 text-sm leading-relaxed ${dark ? "text-white/65" : "text-muted-foreground"}`}>{r.desc}</p>
         </li>
       ))}
     </ul>

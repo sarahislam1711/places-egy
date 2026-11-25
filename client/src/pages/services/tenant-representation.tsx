@@ -9,7 +9,6 @@ import {
   ComparisonTable,
   CtaBand,
   FaqWithAdvisor,
-  LinkGrid,
   SectionHead,
   ServiceHero,
   StepList,
@@ -17,6 +16,7 @@ import {
   type Audience,
   ClientLogoStrip,
   AreaTiles,
+  RelatedServices,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -69,12 +69,6 @@ const AREAS = Object.values(LOCATION_CONTENT).map((a) => ({
   image: AREA_IMAGE[a.slug]?.image ?? a.heroImage,
   imageAlt: AREA_IMAGE[a.slug]?.alt ?? `${a.displayName}, Cairo`,
 }));
-
-const RELATED = [
-  { href: "/services/primary-property", title: "Primary Property", desc: "Buy an office directly from the developer: off-plan and newly launched units." },
-  { href: "/services/property-resale", title: "Property Resale", desc: "Buy a ready office on the resale market, with the unit, price and paperwork checked." },
-  { href: "/services/investment-consultation", title: "Investment Consultation", desc: "Compare yield, vacancy risk and capital growth before you invest in an office." },
-];
 
 const STEPS = [
   {
@@ -323,7 +317,7 @@ export default function TenantRepresentation() {
 
         <Band tone="white">
           <SectionHead title="Buying instead of renting?" />
-          <LinkGrid items={RELATED} />
+          <RelatedServices current="/services/tenant-representation" order={["/services/primary-property", "/services/property-resale", "/services/income-generating-property", "/services/investment-consultation"]} />
         </Band>
 
         <CtaBand

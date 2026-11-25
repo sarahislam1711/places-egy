@@ -1,20 +1,22 @@
+import { Building2, FileText, TrendingUp, Users } from "lucide-react";
 import { Link } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import {
+  AudienceTabs,
   Band,
   Checklist,
   ComparisonTable,
   CtaBand,
-  DefinitionList,
   FaqWithAdvisor,
-  LinkGrid,
+  ReasonGrid,
+  RelatedServices,
   SectionHead,
   ServiceHero,
   StepList,
-  AudienceTabs,
   type Audience,
+  type Reason,
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
@@ -37,11 +39,11 @@ const WHO: Audience[] = [
   { title: "Passive investors", need: "You want an asset that generates income without requiring active management.", help: "We advise on asset quality and lease terms.", image: "/images/admin%201.jpg", imageAlt: "A meeting room in a leased office" },
 ];
 
-const WHY = [
-  { title: "Yield-first thinking", desc: "We evaluate every asset on its income potential, not just its location or price." },
-  { title: "Tenant demand data", desc: "We assess real rental demand in your target area before you commit capital." },
-  { title: "Asset quality focus", desc: "A well-located unit in a poorly managed building is a liability. We evaluate both." },
-  { title: "Lease term expertise", desc: "We structure leases that protect your income: break clauses, escalations and service charges, all reviewed." },
+const WHY: Reason[] = [
+  { icon: TrendingUp, title: "Yield-first thinking", desc: "We evaluate every asset on its income potential, not just its location or price." },
+  { icon: Users, title: "Tenant demand data", desc: "We assess real rental demand in your target area before you commit capital." },
+  { icon: Building2, title: "Asset quality focus", desc: "A well-located unit in a poorly managed building is a liability. We evaluate both." },
+  { icon: FileText, title: "Lease term expertise", desc: "We structure leases that protect your income: break clauses, escalations and service charges, all reviewed." },
 ];
 
 const STEPS = [
@@ -69,13 +71,6 @@ const COMPARISON = [
   { label: "Building", us: "Unit condition and building management evaluated", them: "A well-located unit in a poorly managed building can become a liability" },
   { label: "After handover", us: "Tenants sourced before handover, which shortens the gap", them: "Plan for 6 to 18 months of costs with no rental income" },
   { label: "Lease", us: "Break clauses, escalations and service charges reviewed", them: "Terms that may not protect your income" },
-];
-
-const RELATED = [
-  { href: "/services/investment-consultation", title: "Investment Consultation", desc: "Need a broader view? Data-driven advisory for investors evaluating commercial and administrative assets." },
-  { href: "/services/primary-property", title: "Primary Property", desc: "Acquiring an income asset off-plan? Buy directly from the developer at the best available price and terms." },
-  { href: "/services/property-resale", title: "Property Resale", desc: "Looking at the secondary market? Buy or sell a previously transacted unit with full market context." },
-  { href: "/services/tenant-representation", title: "Tenant Representation", desc: "Renting an office for your own company? We represent you, not the landlord, and it's free for tenants." },
 ];
 
 // Verbatim from the FAQ bank (client/src/lib/faq.ts).
@@ -194,7 +189,7 @@ export default function IncomeGeneratingProperty() {
             title="Why choose PLACES for income generating property"
             lead="Income depends on tenant demand, the lease and the building. We check all three before you commit capital."
           />
-          <DefinitionList items={WHY} dark />
+          <ReasonGrid items={WHY} dark />
         </Band>
 
         <Band tone="white">
@@ -234,7 +229,7 @@ export default function IncomeGeneratingProperty() {
 
         <Band tone="cream">
           <SectionHead title="Explore other services" />
-          <LinkGrid items={RELATED} />
+          <RelatedServices current="/services/income-generating-property" order={["/services/investment-consultation", "/services/primary-property", "/services/property-resale", "/services/tenant-representation"]} />
         </Band>
 
         <CtaBand
