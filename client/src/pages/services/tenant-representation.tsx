@@ -23,7 +23,7 @@ import { LOCATION_CONTENT } from "@/lib/location-content";
 const PATH = "/services/tenant-representation";
 
 const WHO: Audience[] = [
-  { title: "Companies securing their first office", need: "You need a space that works for your team, fits your budget and gives you room to grow.", help: "We help you find it without wasting time on the wrong options.", image: "/images/office-interior.jpg", imageAlt: "Office interior ready for a team" },
+  { title: "Companies securing their first office", need: "You need a space that works for your team, fits your budget and gives you room to grow.", help: "We help you find it without wasting time on the wrong options.", image: "/images/admin%202.jpg", imageAlt: "A private office with a desk and chairs, ready for a team" },
   { title: "Growing teams relocating or expanding", need: "You need more space, a better location, or both.", help: "We assess what's available and negotiate the best terms for your situation.", image: "/images/business-complex.jpg", imageAlt: "Office buildings in a Cairo business district" },
   { title: "International companies entering Egypt", need: "You need the right area and a clear view of how office leases work in Egypt.", help: "We secure your first office or regional HQ in Cairo.", image: "/images/offices-hero.jpg", imageAlt: "Office towers in Cairo" },
   { title: "Brands securing commercial space", need: "You need the right unit in the right development.", help: "We evaluate footfall, lease terms and operational fit before you commit.", image: "/images/commercial.jpg", imageAlt: "Commercial units in a Cairo development" },

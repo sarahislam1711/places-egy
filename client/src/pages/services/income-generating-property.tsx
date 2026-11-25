@@ -34,7 +34,7 @@ const GOOD_INCOME_UNIT = [
 const WHO: Audience[] = [
   { title: "Yield-focused investors", need: "You want consistent rental income from a well-located, well-managed asset.", help: "We find and evaluate the right units.", image: "/images/income-generating-property.jpg", imageAlt: "A leased office building" },
   { title: "Portfolio builders", need: "You're building a portfolio of income-generating assets.", help: "We help you identify, evaluate, and acquire them systematically.", image: "/images/Mivida-Business-Park.jpg", imageAlt: "Mivida Business Park in New Cairo" },
-  { title: "Passive investors", need: "You want an asset that generates income without requiring active management.", help: "We advise on asset quality and lease terms.", image: "/images/office-interior.jpg", imageAlt: "A tenanted office interior" },
+  { title: "Passive investors", need: "You want an asset that generates income without requiring active management.", help: "We advise on asset quality and lease terms.", image: "/images/admin%201.jpg", imageAlt: "A meeting room in a leased office" },
 ];
 
 const WHY = [
