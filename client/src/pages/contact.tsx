@@ -47,6 +47,11 @@ export default function Contact() {
             <p className="text-muted-foreground text-base md:text-lg max-w-xl mx-auto leading-relaxed">
               Whether you're looking for a specific unit or just exploring — pick the option that fits.
             </p>
+            <p className="mt-3 text-sm text-muted-foreground max-w-xl mx-auto">
+              Renting an office? Our{" "}
+              <Link href="/services/tenant-representation" className="text-accent font-medium hover:underline">tenant representation</Link>{" "}
+              is free for tenants.
+            </p>
           </div>
 
           {/* Two main paths */}

@@ -9,6 +9,7 @@ import { ArrowRight, ArrowLeft, Clock, ChevronRight, MessageCircle } from "lucid
 import { nextGuide, type Guide } from "@/lib/guides";
 import { trackEvent } from "@/lib/analytics";
 import { openCalendly } from "@/lib/calendly";
+import { TenantRepCallout } from "@/components/TenantRepCallout";
 import { DeveloperSurveyMagnet } from "@/components/magnets/DeveloperSurveyMagnet";
 
 // Shared layout for every /guides/* page. Handles:
@@ -181,6 +182,11 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
               </aside>
             )}
           </div>
+        </div>
+
+        {/* Tenant representation — every guide ends with the free advisor offer */}
+        <div className="container mx-auto px-4 md:px-8 max-w-4xl mt-12">
+          <TenantRepCallout variant="advice" />
         </div>
 
         {/* End-of-article section — ONE container that combines the Talk-

@@ -34,6 +34,8 @@ import {
   type FAQSection,
 } from "@/lib/faq";
 import NotFound from "@/pages/not-found";
+import { TenantRepCallout } from "@/components/TenantRepCallout";
+import { TENANT_REP_FAQ_SECTIONS } from "@/lib/tenant-rep-cta";
 
 // Wraps every case-insensitive occurrence of `query` inside `text` in a styled
 // <mark> so the matched substring stands out.
@@ -361,6 +363,8 @@ function SectionView({ section }: { section: FAQSection }) {
                 </div>
               ))
             )}
+
+            {TENANT_REP_FAQ_SECTIONS.has(section.id) && <TenantRepCallout variant="advice" className="mt-16" />}
 
             {/* Final per-section CTA */}
             <section className="mt-16 mb-4">

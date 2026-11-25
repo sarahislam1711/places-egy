@@ -34,6 +34,7 @@ import { breadcrumbSchema, placeSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import NotFound from "@/pages/not-found";
 import { DEALS, eligibleLandingPages } from "@/lib/landing-pages";
+import { TenantRepCallout } from "@/components/TenantRepCallout";
 
 const UNIT_TABS = [
   { tx: "rent", label: "For rent", noun: "offices for rent" },
@@ -562,6 +563,13 @@ export default function LocationDetail() {
           </div>
         </section>
       )}
+
+      {/* Tenant representation */}
+      <section className="py-8">
+        <div className="container mx-auto px-6 md:px-10">
+          <TenantRepCallout variant="rent" />
+        </div>
+      </section>
 
       {/* Final CTA */}
       <section className="py-8">
