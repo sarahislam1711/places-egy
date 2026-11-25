@@ -465,3 +465,49 @@ export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
     </div>
   );
 }
+
+// Well-known client logos (static files, so they're in the crawler HTML with
+// the company name as alt text). Checked visually 2026-11-25.
+const CLIENT_LOGOS: { name: string; src: string }[] = [
+  { name: "Bosch", src: "/images/clients/bosch.png" },
+  { name: "Henkel", src: "/images/clients/henkel.png" },
+  { name: "Bupa", src: "/images/clients/bupa.png" },
+  { name: "OPPO", src: "/images/clients/oppo.png" },
+  { name: "AXA", src: "/images/clients/axa.png" },
+  { name: "Crédit Agricole", src: "/images/clients/credit-agricole.png" },
+  { name: "talabat", src: "/images/clients/talabat.png" },
+  { name: "Informa", src: "/images/clients/informa.png" },
+  { name: "Knauf", src: "/images/clients/knauf.png" },
+  { name: "IWG", src: "/images/clients/iwg.png" },
+  { name: "ACWA Power", src: "/images/clients/acwa-power.png" },
+  { name: "TMF Group", src: "/images/clients/tmf-group.png" },
+];
+
+/** "Companies we've placed": a grid of client logos with a link to the full list. */
+export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: string }) {
+  return (
+    <div className="rounded-2xl bg-background p-7 md:p-9">
+      <div className="flex items-center justify-between gap-4 mb-7">
+        <h2 className="text-xl md:text-2xl font-serif font-bold text-primary">{title}</h2>
+        <Link href="/why-places" className="group inline-flex items-center text-accent font-semibold hover:underline shrink-0">
+          See all clients <ArrowRight className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
+        </Link>
+      </div>
+      <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+        {CLIENT_LOGOS.map((c) => (
+          <li key={c.name} className="flex h-20 md:h-24 items-center justify-center rounded-xl bg-white px-2 md:px-3">
+            <img
+              src={c.src}
+              alt={c.name}
+              width={250}
+              height={100}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain"
+            />
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
