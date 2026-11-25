@@ -11,11 +11,11 @@ export interface StaticPageMeta {
 }
 
 export const STATIC_PAGE_META = {
-  "/services/leasing": {
-    title: "Office & Commercial Leasing in Cairo | PLACES",
+  "/services/tenant-representation": {
+    title: "Tenant Representation in Cairo | Office Leasing | PLACES",
     description:
-      "Find the right office or commercial unit on the right terms — admin offices and commercial units across Cairo's top business districts, with advisory, negotiation, and contract review.",
-    url: `${SITE}/services/leasing`,
+      "PLACES represents companies, not landlords. We find, compare and negotiate your office in Cairo and review the lease. Free for tenants.",
+    url: `${SITE}/services/tenant-representation`,
   },
   "/services/primary-property": {
     title: "Primary Property in Egypt — Buy Direct From Developers | PLACES",

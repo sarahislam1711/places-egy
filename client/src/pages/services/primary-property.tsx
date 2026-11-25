@@ -250,9 +250,9 @@ export default function PrimaryProperty() {
               },
               {
                 icon: Building2,
-                title: "Leasing",
-                desc: "Looking to lease rather than buy? Find the right office or commercial space on the right terms.",
-                link: "/services/leasing",
+                title: "Tenant Representation",
+                desc: "Looking to lease rather than buy? We represent you, not the landlord, and it's free for tenants.",
+                link: "/services/tenant-representation",
               },
               {
                 icon: TrendingUp,

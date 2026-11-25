@@ -19,9 +19,9 @@ import { useDocumentMeta } from "@/lib/use-document-meta";
 const SERVICES: { icon: LucideIcon; name: string; desc: string; slug: string }[] = [
   {
     icon: Handshake,
-    name: "Leasing",
-    desc: "Find the right office on the right terms — administrative office spaces across Cairo's top business districts.",
-    slug: "leasing",
+    name: "Tenant Representation",
+    desc: "We represent your company, not the landlord: we find, compare and negotiate your office and review the lease. Free for tenants.",
+    slug: "tenant-representation",
   },
   {
     icon: Building2,

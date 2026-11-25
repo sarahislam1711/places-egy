@@ -36,7 +36,7 @@ const GuideBuyVsRentPage = lazy(() => import("@/pages/guides/buy-vs-rent-office-
 const GuideSizePage = lazy(() => import("@/pages/guides/office-size-guide"));
 const GuideFitOutPage = lazy(() => import("@/pages/guides/office-fit-out-costs-cairo"));
 const SavedListingsPage = lazy(() => import("@/pages/saved"));
-const LeasingPage = lazy(() => import("@/pages/services/leasing"));
+const TenantRepresentationPage = lazy(() => import("@/pages/services/tenant-representation"));
 const PrimaryProperty = lazy(() => import("@/pages/services/primary-property"));
 const PropertyResale = lazy(() => import("@/pages/services/property-resale"));
 const InvestmentConsultation = lazy(() => import("@/pages/services/investment-consultation"));
@@ -236,7 +236,7 @@ function Router() {
       <Route path="/privacy-policy" component={PrivacyPolicy} />
       <Route path="/terms-of-service" component={TermsOfService} />
       <Route path="/services" component={ServicesIndex} />
-      <Route path="/services/leasing" component={LeasingPage} />
+      <Route path="/services/tenant-representation" component={TenantRepresentationPage} />
       <Route path="/services/primary-property" component={PrimaryProperty} />
       <Route path="/services/property-resale" component={PropertyResale} />
       <Route path="/services/investment-consultation" component={InvestmentConsultation} />

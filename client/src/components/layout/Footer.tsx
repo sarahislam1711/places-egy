@@ -10,7 +10,7 @@ const SOCIAL_LINKS = [
 ];
 
 const SERVICES = [
-  { name: "Leasing", href: "/services/leasing" },
+  { name: "Tenant Representation", href: "/services/tenant-representation" },
   { name: "Primary Property", href: "/services/primary-property" },
   { name: "Property Resale", href: "/services/property-resale" },
   { name: "Investment Consultation", href: "/services/investment-consultation" },
