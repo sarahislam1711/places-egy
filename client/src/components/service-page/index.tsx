@@ -94,14 +94,16 @@ export function ServiceHero({
                 {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
             </Link>
-            <a
-              href={WHATSAPP}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 h-13 px-6 rounded-md border border-primary/15 bg-white text-primary font-semibold hover:border-primary/40 transition-colors"
+            <Button
+              asChild
+              size="lg"
+              variant="outline"
+              className="bg-white text-primary border-primary/20 hover:border-primary/50 font-semibold px-7 h-13 text-base transition-transform hover:-translate-y-0.5"
             >
-              <MessageCircle className="w-4 h-4" /> WhatsApp us
-            </a>
+              <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
+                <MessageCircle className="w-4 h-4" /> WhatsApp us
+              </a>
+            </Button>
           </div>
           <ul className="mt-10 grid sm:grid-cols-3 gap-x-6 gap-y-3 border-t border-primary/10 pt-6">
             {points.map((p) => (
@@ -312,14 +314,16 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
               {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
           </Link>
-          <a
-            href={WHATSAPP}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 h-13 px-6 rounded-md border border-white/25 text-white font-semibold hover:border-white/60 transition-colors"
+          <Button
+            asChild
+            size="lg"
+            variant="outline"
+            className="bg-transparent text-white border-white/30 hover:border-white/70 font-semibold px-7 h-13 text-base"
           >
-            <MessageCircle className="w-4 h-4" /> WhatsApp
-          </a>
+            <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
+              <MessageCircle className="w-4 h-4" /> WhatsApp
+            </a>
+          </Button>
         </div>
       </div>
     </section>
