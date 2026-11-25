@@ -204,6 +204,69 @@ export interface LandingCopy {
 const list = (items: string[]) =>
   items.length <= 1 ? items.join("") : `${items.slice(0, -1).join(", ")} and ${items[items.length - 1]}`;
 
+/** Search results show ~60 characters of a title; drop the count when it doesn't fit. */
+function landingTitle(h1: string, count: number): string {
+  const full = `${h1} | ${count} Available | PLACES`;
+  return full.length <= 60 ? full : `${h1} | PLACES`;
+}
+
+/** Meta description that fits Google's ~155-character snippet: count, sizes, typical price, next step. */
+function landingDescription(dealSlug: DealSlug, locName: string, s: LandingStats): string {
+  const rent = DEALS[dealSlug].tx === "rent";
+  const what = dealSlug === "income-property" ? "leased offices for sale" : rent ? "offices for rent" : "offices for sale";
+  const sizes = s.areaMin && s.areaMax ? `, ${fmt(s.areaMin)}–${fmt(s.areaMax)} m²` : "";
+  const price = s.perSqm
+    ? rent
+      ? ` Typical rent EGP ${fmt(roundNice(s.perSqm[0]))}–${fmt(roundNice(s.perSqm[2]))} per m² a month.`
+      : ` Typical price EGP ${fmtMoney(s.perSqm[0])}–${fmtMoney(s.perSqm[2])} per m².`
+    : "";
+  const next = rent ? " Free tenant representation: book a viewing." : " Compare units and book a viewing.";
+  const options = [
+    `${s.count} ${what} in ${locName}${sizes}.${price}${next}`,
+    `${s.count} ${what} in ${locName}${sizes}.${price}`,
+    `${s.count} ${what} in ${locName}.${price}`,
+  ];
+  return options.find((o) => o.length <= 155) ?? options[options.length - 1].slice(0, 155);
+}
+
+export interface LandingProject {
+  name: string;
+  count: number;
+  /** Median EGP price per m² (monthly for rent); null with fewer than 3 EGP-priced units. */
+  median: number | null;
+}
+
+/** Projects with at least 2 available units on a landing page, biggest first (location names excluded). */
+export function landingProjects(rows: LandingListing[], locName: string, limit = 8): LandingProject[] {
+  const locNames = new Set(LANDING_LOCATIONS.map((l) => l.name.toLowerCase()));
+  const groups = new Map<string, { name: string; rows: LandingListing[] }>();
+  for (const r of rows) {
+    const raw = (r.project ?? "").trim();
+    const key = raw.toLowerCase();
+    if (!raw || locNames.has(key) || key === locName.toLowerCase()) continue;
+    const display = /[A-Z]/.test(raw) ? raw : raw.length <= 4 ? raw.toUpperCase() : titleCase(raw);
+    const g = groups.get(key) ?? { name: display, rows: [] };
+    g.rows.push(r);
+    groups.set(key, g);
+  }
+  return Array.from(groups.values())
+    .filter((g) => g.rows.length >= 2)
+    .sort((a, b) => b.rows.length - a.rows.length)
+    .slice(0, limit)
+    .map((g) => {
+      const per = g.rows
+        .filter((r) => (r.currency ?? "EGP") !== "USD" && Number(r.price) > 0 && Number(r.area_sqm) > 0)
+        .map((r) => Number(r.price) / Number(r.area_sqm))
+        .sort((a, b) => a - b);
+      return { name: g.name, count: g.rows.length, median: per.length >= 3 ? quantile(per, 0.5) : null };
+    });
+}
+
+/** "median EGP 1,300 per m² a month" / "median EGP 190,000 per m²" */
+export function medianLabel(dealSlug: DealSlug, median: number): string {
+  return DEALS[dealSlug].tx === "rent" ? `median EGP ${fmt(roundNice(median))} per m² a month` : `median EGP ${fmtMoney(median)} per m²`;
+}
+
 export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: LandingStats): LandingCopy {
   const deal = DEALS[dealSlug];
   const h1 = deal.heading(loc.name);
@@ -253,14 +316,30 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
       answer: `The most listings right now are in ${list(s.projects)}. Each listing page shows the project, floor, finishing and price.`,
     });
   }
+  if (rent) {
+    const small = s.sizeBands.find(([b]) => b === "under 100 m²")?.[1] ?? 0;
+    if (small > 0) {
+      faqs.push({
+        question: `Are there small offices for rent in ${loc.name}?`,
+        answer: `Yes. ${small} of the offices for rent in ${loc.name} are under 100 m², suitable for small teams.${s.areaMin ? ` The smallest is ${fmt(s.areaMin)} m².` : ""}`,
+      });
+    }
+    const furnished = s.conditions.find(([c]) => c === "furnished")?.[1] ?? 0;
+    if (furnished > 0) {
+      faqs.push({
+        question: `Can I rent a furnished office in ${loc.name}?`,
+        answer: `Yes. ${furnished} of the offices for rent in ${loc.name} are offered furnished, ready to move into. Each listing shows its finishing level.`,
+      });
+    }
+  }
   faqs.push({
     question: `How do I ${rent ? "rent" : "buy"} an office in ${loc.name} through PLACES?`,
     answer: `Open any listing and choose "Book a viewing", or contact PLACES with your size, budget and move-in date and we'll send a shortlist of matching ${deal.variant(loc.name)}.`,
   });
 
   return {
-    title: `${h1} | ${s.count} Available | PLACES`,
-    description: `${s.count} ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}, ${sizes}.${priceLine ? ` ${priceLine}` : ""} Book a viewing with PLACES.`.slice(0, 300),
+    title: landingTitle(h1, s.count),
+    description: landingDescription(dealSlug, loc.name, s),
     h1,
     intro,
     listHeading: `${titleCase(deal.variant(loc.name)).replace(/ In /, " in ").replace(/ For /, " for ")} (${s.count})`,
@@ -314,8 +393,8 @@ export function hubCopy(dealSlug: DealSlug, all: LandingListing[]): HubCopy {
   return {
     ...base,
     // Search snippets cut at ~155 characters.
-    description: `${rows.length} ${kind} across ${areas.length > 3 ? `${areaNames.join(", ")} and more` : list(areaNames)}. Compare prices per m², sizes and finishing${rent ? ", with free tenant representation" : ""}.`.slice(0, 158),
+    description: `${rows.length} ${kind} across ${areas.length > 3 ? `${areaNames.join(", ")} and more` : list(areaNames)}. Compare prices per m², sizes and finishing${rent ? ", with free tenant representation" : ""}.`.slice(0, 155),
     areas,
-    medianLabel: (m) => (rent ? `median EGP ${fmt(roundNice(m))} per m² a month` : `median EGP ${fmtMoney(m)} per m²`),
+    medianLabel: (m) => medianLabel(dealSlug, m),
   };
 }
