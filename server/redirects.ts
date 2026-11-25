@@ -61,7 +61,9 @@ export async function getBlogSlugSets(): Promise<BlogSlugs> {
 // Permanent (301) redirects for retired URLs — preserves SEO link equity
 // and keeps any external bookmarks landing on a useful page.
 const PERMANENT_REDIRECTS: Record<string, string> = {
-  "/services/corporate-leasing": "/services/leasing",
+  "/services/corporate-leasing": "/services/tenant-representation",
+  // Leasing page became the tenant representation page (2026-11-25).
+  "/services/leasing": "/services/tenant-representation",
   "/admin-offices": "/admin",
   "/admin-offices/business-park": "/admin/business-park",
   "/admin-offices/business-building": "/admin/business-building",

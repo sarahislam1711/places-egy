@@ -22,7 +22,7 @@ const RESOURCES = [
 ];
 
 const SERVICES = [
-  { title: "Leasing", href: "/services/leasing", icon: Handshake },
+  { title: "Tenant Representation", href: "/services/tenant-representation", icon: Handshake },
   { title: "Primary Property", href: "/services/primary-property", icon: Building2 },
   { title: "Property Resale", href: "/services/property-resale", icon: Repeat },
   { title: "Investment Consultation", href: "/services/investment-consultation", icon: TrendingUp },

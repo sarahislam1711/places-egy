@@ -21,7 +21,7 @@ export const STATIC_PAGE_COMPONENTS: Record<string, string> = {
   "/guides/office-size-guide": "guides/office-size-guide",
   "/guides/office-fit-out-costs-cairo": "guides/office-fit-out-costs-cairo",
   "/services": "services",
-  "/services/leasing": "services/leasing",
+  "/services/tenant-representation": "services/tenant-representation",
   "/services/primary-property": "services/primary-property",
   "/services/property-resale": "services/property-resale",
   "/services/investment-consultation": "services/investment-consultation",

@@ -5,9 +5,9 @@ import { Handshake, Building2, Repeat, TrendingUp, Coins, ArrowRight } from "luc
 const services = [
   {
     icon: Handshake,
-    title: "Leasing",
-    desc: "Find the right space on the right terms. We match your operational needs with available units across Cairo's top administrative developments.",
-    link: "/services/leasing",
+    title: "Tenant Representation",
+    desc: "We represent your company, not the landlord: we find, compare and negotiate your office across Cairo and review the lease. Free for tenants.",
+    link: "/services/tenant-representation",
   },
   {
     icon: Building2,
