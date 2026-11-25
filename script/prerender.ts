@@ -5,6 +5,7 @@ import { attr, esc, injectBody, injectMeta } from "../server/seo/html";
 import { STATIC_PAGE_META } from "../client/src/lib/page-meta";
 import { renderDeveloperBodies } from "./ssr-developers";
 import { renderStaticPageBodies } from "./ssr-pages";
+import { TENANT_REP_FAQ_SECTIONS, tenantRepHtml } from "../client/src/lib/tenant-rep-cta";
 import { buildBlogData, collectBlogPosts, renderBlogHub, renderBlogPost } from "../server/seo/blog";
 import { FAQ_SECTIONS, countQuestionsInSection, faqSampleQuestions } from "../client/src/lib/faq";
 
@@ -222,9 +223,9 @@ const INDEX_ROUTES: RouteMeta[] = [
   },
   {
     route: "/services",
-    title: "Real Estate Services in Egypt — Leasing, Sales & Advisory | PLACES",
+    title: "Office Real Estate Services in Egypt | PLACES",
     description:
-      "Full-service admin-office brokerage in Cairo: leasing, sales, property resale, primary-market advisory, and income-generating investment services. Trusted by 40+ companies.",
+      "Office real estate services in Egypt: tenant representation (free for tenants), buying from developers, resale, investment advice and income property.",
     url: `${SITE}/services`,
   },
   {
@@ -790,6 +791,7 @@ export async function prerender() {
     let html = injectBody(
       injectMeta(shell, meta),
       `<h1>${esc(headingFrom(meta.title))}</h1><p>${esc(meta.description)}</p>${qa}` +
+        (TENANT_REP_FAQ_SECTIONS.has(slug) ? tenantRepHtml("advice", esc) : "") +
         `<p><a href="/faqs">All FAQs</a></p>`,
     );
     if (items.length > 0) {

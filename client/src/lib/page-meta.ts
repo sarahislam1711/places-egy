@@ -18,27 +18,27 @@ export const STATIC_PAGE_META = {
     url: `${SITE}/services/tenant-representation`,
   },
   "/services/primary-property": {
-    title: "Primary Property in Egypt — Buy Direct From Developers | PLACES",
+    title: "Primary Property in Egypt: Buy From Developers | PLACES",
     description:
-      "Buy directly from the developer — off-plan and newly launched units across Egypt's most active developments, with evaluation and transaction management.",
+      "Primary property in Egypt: buy offices directly from developers, off-plan or at launch, with the unit, developer and payment plan assessed first.",
     url: `${SITE}/services/primary-property`,
   },
   "/services/property-resale": {
-    title: "Property Resale in Egypt — Buy & Sell Offices | PLACES",
+    title: "Property Resale in Egypt: Buy & Sell Offices | PLACES",
     description:
-      "Buy or sell a unit that has already been transacted — with full market context on both sides, honest pricing, and end-to-end transaction management.",
+      "Property resale in Egypt: buy or sell an office that has already been transacted, priced on comparable transactions, with the transfer managed.",
     url: `${SITE}/services/property-resale`,
   },
   "/services/investment-consultation": {
     title: "Real Estate Investment Consultation in Egypt | PLACES",
     description:
-      "Data-driven advisory for investors evaluating commercial and administrative assets in Egypt — from portfolio assessment to ongoing post-acquisition support.",
+      "Real estate investment consultation in Egypt: objective, data-driven advice on yield, vacancy and capital growth for commercial and administrative assets.",
     url: `${SITE}/services/investment-consultation`,
   },
   "/services/income-generating-property": {
     title: "Income Generating Property in Egypt | PLACES",
     description:
-      "Identify and acquire units that generate consistent rental income across Egypt's most active business districts — yield-first thinking, tenant demand data, and lease structuring.",
+      "Income generating property in Egypt: find and buy units with real tenant demand, realistic net yield and lease terms that protect your rental income.",
     url: `${SITE}/services/income-generating-property`,
   },
   "/glossary": {
