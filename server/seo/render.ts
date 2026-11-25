@@ -37,7 +37,7 @@ const SERVICE_LINKS = [
   { href: "/services/primary-property", name: "Primary Property", desc: "buy an office directly from the developer." },
   { href: "/services/property-resale", name: "Property Resale", desc: "buy or sell an office on the resale market." },
   { href: "/services/investment-consultation", name: "Investment Consultation", desc: "advice on office investments, yields and risk." },
-  { href: "/services/income-generating-property", name: "Income Generating Property", desc: "leased offices that already produce rental income." },
+  { href: "/services/income-generating-property", name: "Income Generating Property", desc: "find and buy units with real tenant demand and a realistic rental yield." },
 ];
 
 const LOCATIONS = Object.values(LOCATION_CONTENT);

@@ -5,6 +5,7 @@ import { attr, esc, injectBody, injectMeta } from "../server/seo/html";
 import { STATIC_PAGE_META } from "../client/src/lib/page-meta";
 import { renderDeveloperBodies } from "./ssr-developers";
 import { renderStaticPageBodies } from "./ssr-pages";
+import { TENANT_REP_FAQ_SECTIONS, tenantRepHtml } from "../client/src/lib/tenant-rep-cta";
 import { buildBlogData, collectBlogPosts, renderBlogHub, renderBlogPost } from "../server/seo/blog";
 import { FAQ_SECTIONS, countQuestionsInSection, faqSampleQuestions } from "../client/src/lib/faq";
 
@@ -790,6 +791,7 @@ export async function prerender() {
     let html = injectBody(
       injectMeta(shell, meta),
       `<h1>${esc(headingFrom(meta.title))}</h1><p>${esc(meta.description)}</p>${qa}` +
+        (TENANT_REP_FAQ_SECTIONS.has(slug) ? tenantRepHtml("advice", esc) : "") +
         `<p><a href="/faqs">All FAQs</a></p>`,
     );
     if (items.length > 0) {
