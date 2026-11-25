@@ -263,7 +263,9 @@ function lookupRedirect(rawPath: string): string | undefined {
 export function registerRedirects(app: Express) {
   app.use((req, res, next) => {
     if (req.method === "GET" || req.method === "HEAD") {
-      const target = lookupRedirect(req.path);
+      // Ignore a trailing slash here so /old-page/ goes to its target in one hop
+      // instead of /old-page/ → /old-page → target.
+      const target = lookupRedirect(req.path.length > 1 ? req.path.replace(/\/+$/, "") : req.path);
       if (target) {
         const query = req.url.slice(req.path.length);
         res.redirect(301, canonicalEncode(target) + query);
