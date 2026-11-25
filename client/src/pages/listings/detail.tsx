@@ -24,6 +24,7 @@ import { DEALS, eligibleLandingPages } from "@/lib/landing-pages";
 import { cleanListingTitle, listingSnippet, rentedLabel } from "@/lib/listing-text";
 import DOMPurify from "dompurify";
 import { marked } from "marked";
+import { TenantRepCallout } from "@/components/TenantRepCallout";
 import {
   ArrowRight,
   ChevronLeft,
@@ -602,6 +603,15 @@ function DetailView({ id, idSlug }: { id: number; idSlug: string }) {
           </div>
         </div>
       </section>
+
+      {/* Tenant representation — available rent listings only */}
+      {listing.transaction_type?.toLowerCase() === "rent" && listing.rental_status !== "rented" && (
+        <section className="pb-8">
+          <div className="container mx-auto px-6 md:px-10">
+            <TenantRepCallout variant="listing" />
+          </div>
+        </section>
+      )}
 
       {/* Similar units — score-ranked off-ramp for users who aren't sold */}
       {similarListings.length > 0 && (

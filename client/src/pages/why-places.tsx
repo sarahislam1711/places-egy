@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { COMPANY_PROFILE_DOWNLOAD_NAME, COMPANY_PROFILE_HREF } from "@/lib/company-profile";
 import { Footer } from "@/components/layout/Footer";
@@ -129,7 +130,8 @@ export default function WhyPlaces() {
             <p className="text-lg text-muted-foreground leading-relaxed max-w-5xl mx-auto text-left">
               To provide specialized real estate services focused entirely on
               administrative spaces across all sectors of the market. We offer
-              full support in securing suitable office spaces through leasing or
+              full support in securing suitable office spaces through{" "}
+              <Link href="/services/tenant-representation" className="text-accent font-medium hover:underline">leasing, where we represent the tenant</Link>, or
               acquisition — whether for income-generating leased assets or
               vacant properties with investment potential. Our mission is to
               ensure efficient operations while maximizing long-term asset

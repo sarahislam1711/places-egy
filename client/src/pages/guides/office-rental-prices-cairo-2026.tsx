@@ -428,7 +428,7 @@ export default function OfficeRentalPricesCairo2026Guide() {
           </strong>{" "}
           — tell us your size, budget, and district preferences and we'll
           send back a short-list of actual buildings that fit. There's no
-          fee for tenant representation.
+          fee for <Link href="/services/tenant-representation">tenant representation</Link>.
         </li>
       </ol>
 

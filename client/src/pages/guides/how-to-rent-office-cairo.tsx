@@ -391,7 +391,7 @@ export default function HowToRentOfficeCairoGuide() {
       </ol>
 
       <p>
-        Tenant representation with PLACES is free — landlords pay our
+        <Link href="/services/tenant-representation">Tenant representation with PLACES is free</Link> — landlords pay our
         fee. That means we're never paid by the same party we're
         negotiating with, which keeps the incentives aligned.
       </p>

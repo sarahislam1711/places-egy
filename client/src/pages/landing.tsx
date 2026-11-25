@@ -23,6 +23,7 @@ import {
 } from "@/lib/landing-pages";
 import { landingDevelopers, landingFaqTopics } from "@/lib/landing-related";
 import NotFound from "@/pages/not-found";
+import { TenantRepCallout } from "@/components/TenantRepCallout";
 
 const SITE = "https://places-egy.com";
 const CHIP =
@@ -129,6 +130,15 @@ export default function LandingPage() {
             {copy.intro.slice(1).map((p, i) => (
               <p key={i}>{p}</p>
             ))}
+          </div>
+        </section>
+      )}
+
+      {/* Tenant representation (rent pages only) */}
+      {dealSlug === "rent" && (
+        <section className="pb-8">
+          <div className="container mx-auto px-6 md:px-10">
+            <TenantRepCallout variant="rent" />
           </div>
         </section>
       )}

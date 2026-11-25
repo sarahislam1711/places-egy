@@ -26,6 +26,17 @@ import {
   type DealSlug,
 } from "../../client/src/lib/landing-pages";
 import { landingDevelopers, landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
+import { tenantRepHtml } from "../../client/src/lib/tenant-rep-cta";
+
+// Service pages linked from the homepage's server render (crawlers had no
+// path from / to any service page).
+const SERVICE_LINKS = [
+  { href: "/services/tenant-representation", name: "Tenant Representation", desc: "we represent companies, not landlords, when they lease an office. Free for tenants." },
+  { href: "/services/primary-property", name: "Primary Property", desc: "buy an office directly from the developer." },
+  { href: "/services/property-resale", name: "Property Resale", desc: "buy or sell an office on the resale market." },
+  { href: "/services/investment-consultation", name: "Investment Consultation", desc: "advice on office investments, yields and risk." },
+  { href: "/services/income-generating-property", name: "Income Generating Property", desc: "leased offices that already produce rental income." },
+];
 
 const LOCATIONS = Object.values(LOCATION_CONTENT);
 import { esc, injectBody, injectJsonLd, injectMeta, prerenderInner, type PageMeta } from "./html";
@@ -160,6 +171,7 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
     html,
     `<h1>${esc(copy.h1)}</h1>` +
       copy.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+      (deal === "rent" ? tenantRepHtml("rent", esc) : "") +
       `<h2>${esc(copy.listHeading)}</h2>` +
       listingLinks(rows) +
       `<h2>${esc(`${copy.h1}: FAQs`)}</h2>` +
@@ -193,6 +205,9 @@ export async function renderHome(): Promise<string> {
       `<p>Buy, lease, or resell administrative offices across Cairo's top districts: New Cairo, Sheikh Zayed, 6th October, Downtown, Sheraton and Maadi.</p>` +
       `<h2>Latest offices</h2>${listingLinks(latest)}` +
       `<p><a href="/listings">Browse all ${inventory.length} listings</a></p>` +
+      `<h2>Our services</h2><ul>` +
+      SERVICE_LINKS.map((sv) => `<li><a href="${sv.href}">${esc(sv.name)}</a>: ${esc(sv.desc)}</li>`).join("") +
+      `</ul>` +
       landingNav(inventory) +
       locationNav(),
   );
@@ -264,7 +279,7 @@ export async function renderLocation(slug: string): Promise<string | null> {
     : "";
   return injectBody(
     base,
-    intro + dealLinks + locationGuide(loc) +
+    intro + dealLinks + locationGuide(loc) + tenantRepHtml("rent", esc) +
       `<h2>Available offices in ${esc(loc.displayName)} (${rows.length})</h2>` + listingLinks(rows) + locationNav(),
   );
 }
@@ -357,6 +372,7 @@ export async function renderListing(l: SeoListing): Promise<string> {
     `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join("")}</dl>` +
     (descriptionParagraphs(l.description ?? "") || `<p>${esc(meta.description)}</p>`) +
     `</article>` +
+    (l.transaction_type === "rent" && l.rental_status !== "rented" ? tenantRepHtml("listing", esc) : "") +
     (landing ? `<p>See all <a href="${landing.path}">${esc(landing.heading)}</a></p>` : "") +
     (locSlug ? `<p><a href="/locations/${locSlug}">More offices in ${esc(l.location ?? "")}</a></p>` : "") +
     (similar.length ? `<h2>Similar units</h2>${listingLinks(similar)}` : "") +
