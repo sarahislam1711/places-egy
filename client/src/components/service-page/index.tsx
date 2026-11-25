@@ -487,12 +487,7 @@ const CLIENT_LOGOS: { name: string; src: string }[] = [
 export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: string }) {
   return (
     <div className="rounded-2xl bg-background p-7 md:p-9">
-      <div className="flex items-center justify-between gap-4 mb-7">
-        <h2 className="text-xl md:text-2xl font-serif font-bold text-primary">{title}</h2>
-        <Link href="/why-places" className="group inline-flex items-center text-accent font-semibold hover:underline shrink-0">
-          See all clients <ArrowRight className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
-        </Link>
-      </div>
+      <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-7">{title}</h2>
       <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
         {CLIENT_LOGOS.map((c) => (
           <li key={c.name} className="flex h-20 md:h-24 items-center justify-center rounded-xl bg-white px-2 md:px-3">
@@ -508,6 +503,52 @@ export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: 
           </li>
         ))}
       </ul>
+      <Link
+        href="/why-places"
+        aria-label="See all clients"
+        className="group mt-5 inline-flex items-center text-sm text-accent font-semibold hover:underline"
+      >
+        See all <ArrowRight className="ml-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" aria-hidden />
+      </Link>
     </div>
+  );
+}
+
+export interface AreaTile {
+  href: string;
+  name: string;
+  line: string;
+  image: string;
+  imageAlt: string;
+}
+
+/** Areas as photo tiles: the name on the photo, one line underneath. */
+export function AreaTiles({ items }: { items: AreaTile[] }) {
+  return (
+    <ul className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+      {items.map((a) => (
+        <li key={a.href}>
+          <Link href={a.href} className="group block overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)]">
+            <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+              <img
+                src={a.image}
+                alt={a.imageAlt}
+                width={600}
+                height={450}
+                loading="lazy"
+                decoding="async"
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/10 to-transparent" aria-hidden />
+              <span className="absolute left-3 right-3 bottom-3 md:left-5 md:bottom-4 flex items-end justify-between gap-2">
+                <span className="text-base md:text-xl font-serif font-bold text-white leading-tight">{a.name}</span>
+                <ArrowRight className="hidden md:block w-5 h-5 text-white shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
+              </span>
+            </div>
+            <p className="px-3 py-3 md:px-5 md:py-4 text-xs md:text-sm text-muted-foreground leading-snug">{a.line}</p>
+          </Link>
+        </li>
+      ))}
+    </ul>
   );
 }
