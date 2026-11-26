@@ -14,7 +14,7 @@ export const STATIC_PAGE_META = {
   "/services/tenant-representation": {
     title: "Tenant Representation in Cairo | Office Leasing | PLACES",
     description:
-      "PLACES represents companies, not landlords. We find, compare and negotiate your office in Cairo and review the lease. Free for tenants.",
+      "Tenant representation for companies in Cairo, Egypt. As your tenant rep broker, PLACES finds office space and negotiates your lease. Free for tenants.",
     url: `${SITE}/services/tenant-representation`,
   },
   "/services/primary-property": {
