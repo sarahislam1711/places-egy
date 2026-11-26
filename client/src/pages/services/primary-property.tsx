@@ -202,7 +202,7 @@ export default function PrimaryProperty() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Primary Property" }]}
           title="Buy Offices Directly From Developers in Egypt"
           intro="Our primary property service helps you buy directly from the developer: off-plan and newly launched units across Egypt's most active developments. It is for first-time buyers, investors and end users who want the unit, the developer and the payment plan evaluated before they commit."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "buy", pageName: "Primary property" } }}
           image="/images/hero-main.jpg"
           imageAlt="Primary property in Egypt"
           promise={{ title: "Independent perspective", text: "We're not employed by any developer. Our recommendations are based on the unit, not the commission." }}
@@ -331,7 +331,7 @@ export default function PrimaryProperty() {
         <CtaBand
           title="Ready to buy your first unit?"
           text="Tell us what you're looking for. We'll find the right opportunity."
-          primary={{ label: "Book a free consultation", href: "/contact" }}
+          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "buy", pageName: "Primary property" } }}
         />
       </main>
 

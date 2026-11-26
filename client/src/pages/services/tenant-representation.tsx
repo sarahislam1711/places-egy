@@ -192,7 +192,7 @@ export default function TenantRepresentation() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Tenant Representation" }]}
           title="Tenant Representation for Companies in Cairo"
           intro="PLACES works for you, not the landlord. We find, compare and negotiate your office across Cairo's business districts and review the lease before you sign."
-          primary={{ label: "Send us your requirements", href: "/contact" }}
+          primary={{ label: "Send us your requirements", href: "/contact", form: { intent: "rent", pageName: "Tenant representation" } }}
           image="/images/leasing.jpg"
           imageAlt="Reviewing an office lease before signing"
           promise={{ title: "Free for tenants", text: "The landlord pays our fee once the lease is signed. Your company gets its own advisor at no cost." }}
@@ -323,7 +323,7 @@ export default function TenantRepresentation() {
         <CtaBand
           title="Ready to find your next office?"
           text="Tell us your size, area, budget and move-in date. We'll come back with a shortlist."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "rent", pageName: "Tenant representation" } }}
         />
       </main>
 

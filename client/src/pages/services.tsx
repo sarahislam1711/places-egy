@@ -130,7 +130,7 @@ export default function Services() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services" }]}
           title="Office Real Estate Services in Egypt"
           intro="PLACES offers five specialized services covering the full lifecycle of administrative office real estate in Egypt, from leasing and acquisition to resale and investment advisory. Each one is built for a different decision: renting an office, buying one, selling one, or investing for income."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "other", pageName: "Services" } }}
           image="/images/general-office.jpg"
           imageAlt="Office space in Egypt"
           promise={{ title: "Free for tenants", text: "When we represent your company in an office lease, the landlord pays our fee once the lease is signed." }}
@@ -208,7 +208,7 @@ export default function Services() {
         <CtaBand
           title="Not sure which service fits?"
           text="Tell us what you're trying to accomplish and we'll recommend the right starting point."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "other", pageName: "Services" } }}
         />
       </main>
 

@@ -8,6 +8,7 @@ import { Link } from "wouter";
 import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqAccordionList } from "@/components/FaqAccordionList";
+import { RequirementsTrigger, type RequirementsFormConfig } from "@/components/RequirementsForm";
 
 const PHONE_DISPLAY = "+20 106 361 8217";
 const PHONE_TEL = "+201063618217";
@@ -60,7 +61,8 @@ export function ServiceHero({
   crumbs: Crumb[];
   title: string;
   intro: ReactNode;
-  primary: { label: string; href: string };
+  /** With `form`, the button opens the requirements form in place; `href` stays as the no-JS fallback. */
+  primary: { label: string; href: string; form?: RequirementsFormConfig };
   image: string;
   imageAlt: string;
   /** Short statement pinned on the photo, e.g. "Free for tenants". */
@@ -90,11 +92,11 @@ export function ServiceHero({
           <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">{intro}</p>
           {/* data-cta-row: the phone bottom bar hides while these buttons are on screen. */}
           <div data-cta-row className="mt-9 flex flex-wrap items-center gap-3">
-            <Link href={primary.href}>
+            <PrimaryAction primary={primary}>
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base shadow-[0_10px_30px_-10px_rgba(232,64,74,0.6)] transition-transform hover:-translate-y-0.5">
                 {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
               </Button>
-            </Link>
+            </PrimaryAction>
             <Button
               asChild
               size="lg"
@@ -301,7 +303,19 @@ export function FaqWithAdvisor({
 }
 
 /** Closing call to action on a dark band. */
-export function CtaBand({ title, text, primary }: { title: string; text: string; primary: { label: string; href: string } }) {
+/** The red main button: opens the requirements form when `form` is set, otherwise a plain link. */
+function PrimaryAction({ primary, children }: { primary: { href: string; form?: RequirementsFormConfig }; children: ReactNode }) {
+  if (primary.form) {
+    return (
+      <RequirementsTrigger config={primary.form} fallbackHref={primary.href}>
+        {children}
+      </RequirementsTrigger>
+    );
+  }
+  return <Link href={primary.href}>{children}</Link>;
+}
+
+export function CtaBand({ title, text, primary }: { title: string; text: string; primary: { label: string; href: string; form?: RequirementsFormConfig } }) {
   return (
     <section className="bg-primary text-white">
       <div className="container mx-auto px-6 md:px-10 max-w-6xl py-16 md:py-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
@@ -310,11 +324,11 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
           <p className="mt-4 text-lg text-white/75">{text}</p>
         </div>
         <div data-cta-row className="flex flex-wrap gap-3 shrink-0">
-          <Link href={primary.href}>
+          <PrimaryAction primary={primary}>
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base">
               {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
             </Button>
-          </Link>
+          </PrimaryAction>
           <Button
             asChild
             size="lg"

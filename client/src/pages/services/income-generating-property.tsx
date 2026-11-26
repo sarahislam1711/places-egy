@@ -140,7 +140,7 @@ export default function IncomeGeneratingProperty() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Income Generating Property" }]}
           title="Income Generating Property Advisory in Egypt"
           intro="We help investors identify and acquire units that generate consistent rental income across Egypt's most active business districts. It is for yield-focused investors, portfolio builders and passive investors who want income without active management."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "invest", pageName: "Income generating property" } }}
           image="/images/Allegria-Business-Park.jpg"
           imageAlt="Income generating property in Egypt"
           promise={{ title: "Yield-first thinking", text: "We evaluate every asset on its income potential, not just its location or price." }}
@@ -235,7 +235,7 @@ export default function IncomeGeneratingProperty() {
         <CtaBand
           title="Looking for consistent rental income?"
           text="We'll identify the right assets and evaluate them before you commit."
-          primary={{ label: "Book a free consultation", href: "/contact" }}
+          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "invest", pageName: "Income generating property" } }}
         />
       </main>
 

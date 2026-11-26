@@ -139,7 +139,7 @@ export default function InvestmentConsultation() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Investment Consultation" }]}
           title="Real Estate Investment Consultation in Egypt"
           intro="Our investment consultation is data-driven advisory for investors evaluating commercial and administrative assets in Egypt. It is for first-time investors, experienced investors who want a second opinion, and institutional buyers assessing assets at portfolio level."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "invest", pageName: "Investment consultation" } }}
           image="/images/investment-consultation.jpg"
           imageAlt="Real estate investment consultation in Egypt"
           promise={{ title: "Objective advisory", text: "We don't earn commission on what we recommend. Our advice is based on data, not on closing a deal." }}
@@ -241,7 +241,7 @@ export default function InvestmentConsultation() {
         <CtaBand
           title="Not sure where to invest?"
           text="We'll give you an honest, data-driven view of your options."
-          primary={{ label: "Book a free consultation", href: "/contact" }}
+          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "invest", pageName: "Investment consultation" } }}
         />
       </main>
 

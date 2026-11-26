@@ -410,6 +410,7 @@ const LEAD_SOURCE_LABELS: Record<string, string> = {
   favorites_email_me_now: "'Email my saved list' button",
   developer_survey_popup: "Developer survey popup (guide page)",
   developer_survey_inline: "Developer survey inline card (guide page)",
+  service_page_form: "Requirements form (service page)",
 };
 
 const MAGNET_LABELS: Record<string, string> = {

@@ -203,7 +203,7 @@ export default function PropertyResale() {
           crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Property Resale" }]}
           title="Buy or Sell a Resale Office in Egypt"
           intro="Our property resale service helps you buy or sell a unit that has already been transacted, with full market context on both sides. It is for buyers who want a unit that's ready now, sellers who want the best available price, and investors looking for undervalued resale units."
-          primary={{ label: "Talk to an advisor", href: "/contact" }}
+          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "buy", pageName: "Property resale" } }}
           image="/images/hero-section.jpg"
           imageAlt="Property resale in Egypt"
           promise={{ title: "Honest market pricing", text: "We tell you what the unit is actually worth, based on comparable transactions, not what the seller is asking." }}
@@ -324,7 +324,7 @@ export default function PropertyResale() {
         <CtaBand
           title="Buying or selling a resale unit?"
           text="Get honest market context before you commit to anything."
-          primary={{ label: "Book a free consultation", href: "/contact" }}
+          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "buy", pageName: "Property resale" } }}
         />
       </main>
 
