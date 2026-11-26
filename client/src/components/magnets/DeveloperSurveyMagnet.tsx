@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, FileText, ArrowRight, Check, Loader2, ChevronDown } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-import { detectPreferredLanguage } from "@/lib/detect-language";
+import { pageLanguage } from "@/lib/detect-language";
 
 // Developer survey lead magnet — the /guides/* magnet that hands out the
 // PLACES Cairo Developer Price Survey PDF in exchange for name + phone +
@@ -156,7 +156,7 @@ export function DeveloperSurveyMagnet({ variant, guideSlug }: Props) {
       }
       return;
     }
-    setLang(detectPreferredLanguage());
+    setLang(pageLanguage());
     if (isSuppressed()) return;
     // Guides get no concierge (see magnet-coord), so nothing to wait for.
     const t = setTimeout(() => {
@@ -168,10 +168,10 @@ export function DeveloperSurveyMagnet({ variant, guideSlug }: Props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Inline always uses browser language too — but for form validation
+  // Inline follows the page language too — but for form validation
   // strings only; no delayed mount logic to run.
   useEffect(() => {
-    if (variant === "inline") setLang(detectPreferredLanguage());
+    if (variant === "inline") setLang(pageLanguage());
   }, [variant]);
 
   // Focus name when popup expands.

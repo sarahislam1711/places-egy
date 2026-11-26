@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { MessageCircle, X, ArrowRight, Check, Loader2, ChevronDown } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
-import { detectPreferredLanguage } from "@/lib/detect-language";
+import { pageLanguage } from "@/lib/detect-language";
 import { useLocation } from "wouter";
 import {
   conciergeAllowed,
@@ -142,7 +142,6 @@ export function ConciergeWidget() {
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
   const [expanded, setExpanded] = useState(false);
-  const [lang, setLang] = useState<Lang>("en");
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -159,15 +158,13 @@ export function ConciergeWidget() {
   const [errorText, setErrorText] = useState<string | null>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
 
-  useEffect(() => {
-    setLang(detectPreferredLanguage());
-  }, []);
-
   // Shown only on pages the rules in magnet-coord give it, and never while the
   // market report popup is on screen. Leaving for a research page hides it
   // (typed answers are kept); coming back shows it again straight away.
   const [location] = useLocation();
   const allowed = conciergeAllowed(location);
+  // Wording follows the page: Arabic on /ar pages, English elsewhere.
+  const lang: Lang = pageLanguage(location);
   const shownRef = useRef(false);
   useEffect(() => {
     if (!allowed || isSuppressed()) {
@@ -307,7 +304,7 @@ export function ConciergeWidget() {
       // pinned under the navbar). Book-a-Meeting is desktop-only, and the
       // PDF magnet never shows at the same time (magnet-coord).
       // Desktop: top-right, below the navbar, sliding down on entry.
-      className={`fixed left-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:left-auto md:bottom-auto md:top-24 md:right-6 z-40 max-w-[calc(100vw-2rem)] transition-all duration-400 ease-out ${
+      className={`fixed left-4 bottom-[calc(var(--bottom-bar-offset,4.5rem)+env(safe-area-inset-bottom))] md:left-auto md:bottom-auto md:top-24 md:right-6 z-40 max-w-[calc(100vw-2rem)] transition-all duration-400 ease-out ${
         visible ? "translate-y-0 opacity-100" : "translate-y-8 md:-translate-y-8 opacity-0 pointer-events-none"
       }`}
     >

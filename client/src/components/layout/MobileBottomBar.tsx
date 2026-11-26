@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { LayoutGrid, MessageCircle, Phone } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
@@ -12,18 +13,62 @@ const PHONE_TEL = "tel:+201063618217";
 //     specific unit, primary intent is contact-a-human
 //   - everything else: Browse + WhatsApp
 //
+// While a page's own contact buttons are on screen (any element marked
+// data-cta-row, e.g. the service-page hero and closing band), the bar slides
+// away so phones never show two WhatsApp buttons at once. It also sets
+// --bottom-bar-offset so the help bubble (ConciergeWidget) sits just above
+// the bar when it's shown and drops to the corner when it's hidden.
+//
 // Book / Calendly button intentionally removed 2026-08-23 — calendar
 // bookings paused for now. When re-enabled, restore the third column
 // and switch the grid back to grid-cols-3.
 export function MobileBottomBar() {
   const [location] = useLocation();
+  const [ctaOnScreen, setCtaOnScreen] = useState(false);
+  const barShown = location !== "/listings" && !ctaOnScreen;
+
+  useEffect(() => {
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const vh = window.innerHeight;
+      const onScreen = Array.from(document.querySelectorAll("[data-cta-row]")).some((el) => {
+        const r = el.getBoundingClientRect();
+        return r.height > 0 && r.bottom > 64 && r.top < vh - 64;
+      });
+      setCtaOnScreen(onScreen);
+    };
+    const schedule = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    schedule();
+    // Pages render their content after data loads, so check again shortly.
+    const late = window.setTimeout(schedule, 600);
+    window.addEventListener("scroll", schedule, { passive: true });
+    window.addEventListener("resize", schedule);
+    return () => {
+      if (frame) cancelAnimationFrame(frame);
+      window.clearTimeout(late);
+      window.removeEventListener("scroll", schedule);
+      window.removeEventListener("resize", schedule);
+    };
+  }, [location]);
+
+  useEffect(() => {
+    document.documentElement.style.setProperty("--bottom-bar-offset", barShown ? "4.5rem" : "1rem");
+  }, [barShown]);
 
   if (location === "/listings") return null;
 
   const isDetail = location.startsWith("/listings/");
 
   return (
-    <div className="lg:hidden fixed bottom-0 left-0 right-0 z-40 bg-primary/95 backdrop-blur-lg border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.2)]">
+    <div
+      aria-hidden={!barShown}
+      className={`lg:hidden fixed bottom-0 left-0 right-0 z-40 transition-transform duration-300 ease-out ${
+        barShown ? "translate-y-0" : "translate-y-full pointer-events-none"
+      } bg-primary/95 backdrop-blur-lg border-t border-white/10 shadow-[0_-4px_20px_rgba(0,0,0,0.2)]`}
+    >
       <div className="grid grid-cols-2 gap-1.5 p-2 pb-[max(0.5rem,env(safe-area-inset-bottom))]">
         {isDetail ? (
           <a

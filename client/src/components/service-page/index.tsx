@@ -88,7 +88,8 @@ export function ServiceHero({
             {title}
           </h1>
           <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">{intro}</p>
-          <div className="mt-9 flex flex-wrap items-center gap-3">
+          {/* data-cta-row: the phone bottom bar hides while these buttons are on screen. */}
+          <div data-cta-row className="mt-9 flex flex-wrap items-center gap-3">
             <Link href={primary.href}>
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base shadow-[0_10px_30px_-10px_rgba(232,64,74,0.6)] transition-transform hover:-translate-y-0.5">
                 {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
@@ -308,7 +309,7 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
           <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-white">{title}</h2>
           <p className="mt-4 text-lg text-white/75">{text}</p>
         </div>
-        <div className="flex flex-wrap gap-3 shrink-0">
+        <div data-cta-row className="flex flex-wrap gap-3 shrink-0">
           <Link href={primary.href}>
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base">
               {primary.label} <ArrowRight className="ml-2 w-4 h-4" />

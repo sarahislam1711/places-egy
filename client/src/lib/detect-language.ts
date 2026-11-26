@@ -25,3 +25,19 @@ export function detectPreferredLanguage(): Lang {
   }
   return "en";
 }
+
+// Language of the page being shown: Arabic only on /ar pages, English
+// everywhere else. On-screen popups use this so their wording always matches
+// the content around them (an Arabic browser on an English page gets
+// English). Emails keep using detectPreferredLanguage().
+export function isArabicPath(path: string): boolean {
+  return path === "/ar" || path.startsWith("/ar/");
+}
+
+export function pageLanguage(path?: string): Lang {
+  if (path === undefined) {
+    if (typeof window === "undefined") return "en";
+    path = window.location.pathname;
+  }
+  return isArabicPath(path) ? "ar" : "en";
+}
