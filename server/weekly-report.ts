@@ -130,9 +130,10 @@ async function fetchMetrics(): Promise<WeeklyMetrics> {
   // Simple heuristic: viewing requests (someone asked to see a specific
   // unit) and magnet leads (market_report, developer_survey; price_unlock
   // before the price gate was removed on 2026-10-28) are hotter than plain
-  // contact-form leads because they explicitly asked for something. Then by
-  // created_at desc.
-  const HOT_SOURCES = new Set(["viewing_request"]);
+  // contact-form leads because they explicitly asked for something. So are
+  // service-page requirements forms (a company sent its office brief: rent /
+  // buy / invest, areas, size). Then by created_at desc.
+  const HOT_SOURCES = new Set(["viewing_request", "service_page_form"]);
   const HOT_MAGNETS = new Set([
     "price_unlock",
     "cairo_office_market_report_2026",
