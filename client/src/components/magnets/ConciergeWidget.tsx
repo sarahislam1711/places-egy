@@ -302,12 +302,13 @@ export function ConciergeWidget() {
   return (
     <div
       dir={isRtl ? "rtl" : "ltr"}
-      // Top-right, offset below the navbar. Slides down on entry so the
-      // motion cue reads as "notification arriving" rather than "sales
-      // popup rising up at you". Avoids the Book-a-Meeting float
-      // (bottom-left) and the PDF corner magnet (bottom-right).
-      className={`fixed top-20 right-4 md:top-24 md:right-6 z-40 max-w-[calc(100vw-2rem)] transition-all duration-400 ease-out ${
-        visible ? "translate-y-0 opacity-100" : "-translate-y-8 opacity-0 pointer-events-none"
+      // Phones: small pill bottom-left, just above the Browse/WhatsApp bar,
+      // so it never sits on the headline or breadcrumb (it used to be
+      // pinned under the navbar). Book-a-Meeting is desktop-only, and the
+      // PDF magnet never shows at the same time (magnet-coord).
+      // Desktop: top-right, below the navbar, sliding down on entry.
+      className={`fixed left-4 bottom-[calc(4.5rem+env(safe-area-inset-bottom))] md:left-auto md:bottom-auto md:top-24 md:right-6 z-40 max-w-[calc(100vw-2rem)] transition-all duration-400 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "translate-y-8 md:-translate-y-8 opacity-0 pointer-events-none"
       }`}
     >
       {expanded ? (
@@ -318,10 +319,9 @@ export function ConciergeWidget() {
         // bounded. Card becomes a flex column: header + scrollable body
         // + sticky submit footer. Guarantees the CTA is always visible.
         <div
-          className="w-[min(24rem,calc(100vw-2rem))] bg-white rounded-2xl shadow-2xl border border-primary/10 overflow-hidden flex flex-col"
-          style={{
-            maxHeight: "calc(100dvh - 6rem)",
-          }}
+          // Phones: anchored above the bottom bar, so leave room for the
+          // navbar (5rem) and the bar offset (4.5rem) plus breathing space.
+          className="w-[min(24rem,calc(100vw-2rem))] max-h-[calc(100dvh-11rem)] md:max-h-[calc(100dvh-6rem)] bg-white rounded-2xl shadow-2xl border border-primary/10 overflow-hidden flex flex-col"
         >
           <div className="bg-primary px-5 py-4 relative shrink-0">
             <button
@@ -580,22 +580,23 @@ export function ConciergeWidget() {
           // the site's cream backgrounds without hijacking the whole
           // viewport. The white card + text layout is kept intact for
           // md+ so desktop reads exactly as before.
-          className="group relative flex items-center gap-2.5 md:gap-4 bg-accent md:bg-white text-white md:text-primary rounded-full md:rounded-2xl shadow-2xl shadow-accent/40 md:shadow-primary/25 ring-2 ring-primary md:ring-1 md:ring-primary/10 pl-2 md:pl-4 pr-3 md:pr-7 py-2 md:py-4 max-w-md hover:shadow-accent/50 md:hover:shadow-primary/35 hover:ring-primary md:hover:ring-accent/40 transition-all duration-300 hover:-translate-y-0.5"
+          aria-label={isRtl ? "نساعدك؟" : "How can we help?"}
+          className="group relative flex items-center gap-2 md:gap-4 bg-accent md:bg-white text-white md:text-primary rounded-full md:rounded-2xl shadow-lg shadow-black/25 md:shadow-2xl md:shadow-primary/25 md:ring-1 md:ring-primary/10 pl-1.5 md:pl-4 pr-4 md:pr-7 py-1.5 md:py-4 max-w-md md:hover:shadow-primary/35 md:hover:ring-accent/40 transition-all duration-300 hover:-translate-y-0.5"
         >
-          <span className="relative flex h-12 w-12 md:h-12 md:w-12 items-center justify-center shrink-0">
+          <span className="relative flex h-8 w-8 md:h-12 md:w-12 items-center justify-center shrink-0">
             <span
-              className="absolute inline-flex h-full w-full rounded-full bg-white/40 md:bg-accent/30 animate-ping"
+              className="absolute hidden md:inline-flex h-full w-full rounded-full bg-accent/30 animate-ping"
               aria-hidden="true"
             />
-            <span className="relative inline-flex h-12 w-12 md:h-12 md:w-12 items-center justify-center rounded-full bg-white md:bg-accent text-accent md:text-white shadow-md">
-              <MessageCircle className="w-6 h-6" />
+            <span className="relative inline-flex h-8 w-8 md:h-12 md:w-12 items-center justify-center rounded-full bg-white md:bg-accent text-accent md:text-white md:shadow-md">
+              <MessageCircle className="w-4 h-4 md:w-6 md:h-6" />
             </span>
           </span>
 
           {/* Mobile: shows a short label next to the icon so the icon has
               a "handle" without feeling like a full text card. Desktop keeps
               the fuller two-line pitch. */}
-          <span className={`md:hidden text-sm font-semibold whitespace-nowrap pr-1 ${isRtl ? "text-right" : "text-left"}`}>
+          <span className={`md:hidden text-[13px] font-semibold whitespace-nowrap ${isRtl ? "text-right" : "text-left"}`}>
             {isRtl ? "نساعدك؟" : "How can we help?"}
           </span>
 
