@@ -206,7 +206,7 @@ function DetailView({ id, idSlug }: { id: number; idSlug: string }) {
     if (image) {
       setMetaTag("og:image", image, "property");
       // The static og:image:width/height/type/alt tags in index.html describe
-      // the site-level opengraph.jpg (1280x720 JPEG). When we override og:image
+      // the site-level og-image.jpg (1200x630 JPEG). When we override og:image
       // to a listing's own photo, those dimension tags become misleading —
       // scrapers will trust them and render the wrong aspect ratio. Drop them
       // so scrapers infer dims from the image URL itself.

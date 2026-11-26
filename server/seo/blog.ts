@@ -194,9 +194,9 @@ function articleJsonLd(post: BlogPostMeta, url: string, lang: BlogLang) {
       "@type": "Organization",
       "@id": `${SITE}/#organization`,
       name: "PLACES",
-      logo: { "@type": "ImageObject", url: `${SITE}/opengraph.jpg` },
+      logo: { "@type": "ImageObject", url: `${SITE}/images/places-logo.png` },
     },
-    image: { "@type": "ImageObject", url: post.featuredImage ?? `${SITE}/opengraph.jpg` },
+    image: { "@type": "ImageObject", url: post.featuredImage ?? `${SITE}/og-image.jpg` },
   };
 }
 

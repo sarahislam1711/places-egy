@@ -450,11 +450,11 @@ function buildContactJsonLd(): string {
     url: SITE,
     logo: {
       "@type": "ImageObject",
-      url: `${SITE}/opengraph.jpg`,
-      width: 1280,
-      height: 720,
+      url: `${SITE}/images/places-logo.png`,
+      width: 375,
+      height: 115,
     },
-    image: `${SITE}/opengraph.jpg`,
+    image: `${SITE}/og-image.jpg`,
     telephone: "+201063618217",
     email: "admin@places-egy.com",
     description:
