@@ -1636,6 +1636,28 @@ export const FAQ_SECTIONS: FAQSection[] = [
         ],
       },
       {
+        id: "tenant-representation",
+        title: "Tenant representation (renting an office)",
+        items: [
+          {
+            q: "What is tenant representation, and is it free?",
+            a: "Tenant representation means an advisor works only for the company renting the office, not for the landlord. The tenant representative defines what you need, searches the whole market, negotiates the lease and reviews the contract on your behalf. With PLACES it is free for the tenant: the landlord pays our fee when the lease is signed.",
+          },
+          {
+            q: "What does a tenant representative do for a company looking for an office in Egypt?",
+            a: "A tenant rep turns your headcount, budget and location needs into a brief, shortlists every suitable office across developers, business parks and buildings (including units not advertised online), arranges viewings, negotiates the rent, rent-free period, yearly increase, service charges and fit-out terms, and reviews the lease before you sign.",
+          },
+          {
+            q: "What is the difference between a tenant rep broker and the landlord's broker?",
+            a: "The landlord's broker is paid to fill the landlord's building on the landlord's terms. A tenant rep broker works for you: it compares options across the whole market and negotiates against the landlord, so the terms you sign reflect the market rather than one building's asking price.",
+          },
+          {
+            q: "When should a company start working with a tenant representative?",
+            a: "Ideally 6 to 9 months before you need to move or before your current lease ends. Most office searches in Cairo take 4 to 8 weeks to a signed lease, and a core and shell office then needs another 8 to 14 weeks of fit-out. Starting early gives you more options and more negotiating leverage, including on a renewal.",
+          },
+        ],
+      },
+      {
         id: "choosing-advisor",
         title: "Choosing the right advisor",
         items: [

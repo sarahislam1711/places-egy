@@ -2,6 +2,8 @@ export type GlossaryTerm = {
   term: string;
   definition: string;
   category: string; // First letter
+  // Optional page on the site that explains the term in full.
+  link?: { href: string; label: string };
 };
 
 export const GLOSSARY_TERMS: GlossaryTerm[] = [
@@ -63,6 +65,7 @@ export const GLOSSARY_TERMS: GlossaryTerm[] = [
   { term: "Square Meter Price", definition: "The cost per square meter of a property, a standard metric in Egyptian real estate.", category: "S" },
 
   { term: "Tenant", definition: "A person or group that rents and occupies land, a house, an office, or the like.", category: "T" },
+  { term: "Tenant Representation", definition: "A service where a real estate advisor works only for the company renting an office, not the landlord: defining the brief, searching the market, negotiating the lease and reviewing the contract. Also called tenant rep or tenant advisory. With PLACES it is free for tenants, as the landlord pays the fee.", category: "T", link: { href: "/services/tenant-representation", label: "Our tenant representation service" } },
   { term: "Turnkey", definition: "A property that is fully ready for occupation or use.", category: "T" },
 
   { term: "Utilities", definition: "Services provided by public utility companies, such as electricity, natural gas, and water.", category: "U" },

@@ -3,7 +3,8 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { ArrowRight, Search } from "lucide-react";
+import { Link } from "wouter";
 import { GLOSSARY_TERMS, GlossaryTerm } from "@/lib/glossary-data";
 import { Badge } from "@/components/ui/badge";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
@@ -145,6 +146,14 @@ export default function GlossaryPage() {
                       <p className="text-muted-foreground text-sm leading-relaxed">
                         {item.definition}
                       </p>
+                      {item.link && (
+                        <Link
+                          href={item.link.href}
+                          className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-accent hover:underline"
+                        >
+                          {item.link.label} <ArrowRight className="w-3.5 h-3.5" aria-hidden />
+                        </Link>
+                      )}
                     </div>
                   ))}
                 </div>

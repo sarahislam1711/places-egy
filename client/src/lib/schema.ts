@@ -221,7 +221,7 @@ export function listingSchema(listing: {
   };
 }
 
-export function glossarySchema(terms: { term: string; definition: string }[]) {
+export function glossarySchema(terms: { term: string; definition: string; link?: { href: string } }[]) {
   return {
     "@context": "https://schema.org",
     "@type": "DefinedTermSet",
@@ -232,6 +232,7 @@ export function glossarySchema(terms: { term: string; definition: string }[]) {
       name: t.term,
       description: t.definition,
       inDefinedTermSet: `${BASE_URL}/glossary`,
+      ...(t.link ? { url: `${BASE_URL}${t.link.href}` } : {}),
     })),
   };
 }
