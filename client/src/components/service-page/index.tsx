@@ -3,7 +3,7 @@
 // numbered process → comparison → FAQs beside an advisor panel → CTA band.
 // Everything renders without data, so the build-time crawler render
 // (script/ssr-pages.ts) carries the full text.
-import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "wouter";
 import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -349,6 +349,7 @@ export interface Audience {
 export function AudienceTabs({ items, label }: { items: Audience[]; label: string }) {
   const [active, setActive] = useState(0);
   const base = useId();
+  const trackRef = useRef<HTMLDivElement>(null);
   const onKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
     const next = e.key === "ArrowDown" || e.key === "ArrowRight" ? i + 1 : e.key === "ArrowUp" || e.key === "ArrowLeft" ? i - 1 : null;
     if (next === null) return;
@@ -357,9 +358,29 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
     setActive(n);
     document.getElementById(`${base}-tab-${n}`)?.focus();
   };
+
+  // Phones: the cards sit side by side in a swipeable row (the next one
+  // peeks in), with dots + arrows below. Desktop: list on the left, one card
+  // on the right. Every card stays in the HTML for crawlers either way.
+  const slideTo = (i: number) => {
+    const n = Math.max(0, Math.min(items.length - 1, i));
+    const slide = trackRef.current?.children[n] as HTMLElement | undefined;
+    slide?.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "start" });
+    setActive(n);
+  };
+  const onTrackScroll = () => {
+    const track = trackRef.current;
+    if (!track || window.matchMedia("(min-width: 1024px)").matches) return;
+    const first = track.children[0] as HTMLElement | undefined;
+    if (!first) return;
+    const step = first.offsetWidth + parseFloat(getComputedStyle(track).columnGap || "0");
+    const n = Math.round(track.scrollLeft / step);
+    if (n !== active && n >= 0 && n < items.length) setActive(n);
+  };
+
   return (
     <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-6 lg:gap-12 items-start">
-      <div role="tablist" aria-label={label} aria-orientation="vertical" className="flex lg:flex-col gap-2 overflow-x-auto pb-1 snap-x">
+      <div role="tablist" aria-label={label} aria-orientation="vertical" className="hidden lg:flex lg:flex-col gap-2">
         {items.map((it, i) => {
           const on = i === active;
           return (
@@ -373,42 +394,86 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`group snap-start shrink-0 lg:shrink flex items-center justify-between gap-4 text-left rounded-xl px-5 py-4 lg:py-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
-                on ? "bg-primary text-white" : "bg-white/60 lg:bg-transparent text-primary hover:bg-white"
+              className={`group flex items-center justify-between gap-4 text-left rounded-xl px-5 py-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                on ? "bg-primary text-white" : "bg-transparent text-primary hover:bg-white"
               }`}
             >
-              <span className="text-base lg:text-xl font-serif font-bold whitespace-nowrap lg:whitespace-normal">{it.title}</span>
-              <ArrowRight className={`hidden lg:block w-5 h-5 shrink-0 transition-transform ${on ? "text-accent translate-x-1" : "text-primary/30 group-hover:translate-x-1"}`} aria-hidden />
+              <span className="text-xl font-serif font-bold">{it.title}</span>
+              <ArrowRight className={`w-5 h-5 shrink-0 transition-transform ${on ? "text-accent translate-x-1" : "text-primary/30 group-hover:translate-x-1"}`} aria-hidden />
             </button>
           );
         })}
       </div>
-      <div>
-        {items.map((it, i) => (
-          <div
-            key={it.title}
-            id={`${base}-panel-${i}`}
-            role="tabpanel"
-            aria-labelledby={`${base}-tab-${i}`}
-            className={i === active ? "block" : "hidden"}
-          >
-            <div className="overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.35)]">
-              <div className="aspect-[16/9] bg-muted overflow-hidden">
-                <img src={it.image} alt={it.imageAlt} width={960} height={540} loading="lazy" decoding="async" className="w-full h-full object-cover" />
-              </div>
-              <div className="p-6 md:p-8">
-                <h3 className="text-2xl font-serif font-bold text-primary">{it.title}</h3>
-                <p className="mt-3 text-lg text-primary/80 leading-relaxed">{it.need}</p>
-                <p className="mt-4 flex items-start gap-3 text-primary font-medium leading-relaxed">
-                  <span className="mt-0.5 inline-flex w-6 h-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
-                    <Check className="w-3.5 h-3.5" strokeWidth={3} aria-hidden />
-                  </span>
-                  {it.help}
-                </p>
+      <div className="min-w-0">
+        <div
+          ref={trackRef}
+          onScroll={onTrackScroll}
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:-mx-10 md:px-10 scroll-px-6 md:scroll-px-10 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block lg:overflow-visible lg:mx-0 lg:px-0 lg:pb-0"
+        >
+          {items.map((it, i) => (
+            <div
+              key={it.title}
+              id={`${base}-panel-${i}`}
+              role="tabpanel"
+              aria-labelledby={`${base}-tab-${i}`}
+              aria-roledescription="slide"
+              aria-label={`${i + 1} of ${items.length}: ${it.title}`}
+              className={`flex w-[84%] sm:w-[60%] shrink-0 snap-start lg:w-auto ${i === active ? "" : "lg:hidden"}`}
+            >
+              <div className="flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.35)]">
+                <div className="aspect-[16/10] lg:aspect-[16/9] bg-muted overflow-hidden">
+                  <img src={it.image} alt={it.imageAlt} width={960} height={540} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+                </div>
+                <div className="flex-1 p-5 md:p-8">
+                  <h3 className="text-xl lg:text-2xl font-serif font-bold text-primary leading-snug">{it.title}</h3>
+                  <p className="mt-2 lg:mt-3 text-base lg:text-lg text-primary/80 leading-relaxed">{it.need}</p>
+                  <p className="mt-3 lg:mt-4 flex items-start gap-3 text-sm lg:text-base text-primary font-medium leading-relaxed">
+                    <span className="mt-0.5 inline-flex w-5 h-5 lg:w-6 lg:h-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                      <Check className="w-3 h-3 lg:w-3.5 lg:h-3.5" strokeWidth={3} aria-hidden />
+                    </span>
+                    {it.help}
+                  </p>
+                </div>
               </div>
             </div>
+          ))}
+        </div>
+
+        {/* Phone controls: where you are + how to move. */}
+        <div className="mt-5 flex items-center justify-between lg:hidden">
+          <div className="flex items-center gap-2">
+            {items.map((it, i) => (
+              <button
+                key={it.title}
+                type="button"
+                onClick={() => slideTo(i)}
+                aria-label={`Show ${it.title}`}
+                aria-current={i === active}
+                className={`h-2 rounded-full transition-all ${i === active ? "w-6 bg-primary" : "w-2 bg-primary/25"}`}
+              />
+            ))}
           </div>
-        ))}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => slideTo(active - 1)}
+              disabled={active === 0}
+              aria-label="Previous"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-white text-primary transition-opacity disabled:opacity-35"
+            >
+              <ArrowRight className="w-4 h-4 rotate-180" aria-hidden />
+            </button>
+            <button
+              type="button"
+              onClick={() => slideTo(active + 1)}
+              disabled={active === items.length - 1}
+              aria-label="Next"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white transition-opacity disabled:opacity-35"
+            >
+              <ArrowRight className="w-4 h-4" aria-hidden />
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
