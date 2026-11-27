@@ -196,7 +196,7 @@ export default function LandingPage() {
       {/* FAQs */}
       {copy && (
         <section className="py-12">
-          <div className="container mx-auto px-6 md:px-10 max-w-4xl">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl [&>*]:max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
               <HelpCircle className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
               <span>{copy.h1}: FAQs</span>

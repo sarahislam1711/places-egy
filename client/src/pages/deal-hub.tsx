@@ -10,18 +10,12 @@ import { FaqAccordionList } from "@/components/FaqAccordionList";
 import { TenantRepCallout } from "@/components/TenantRepCallout";
 import { supabase, type Listing } from "@/lib/supabase";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { DEALS, hubCopy, hubRows, medianFigure, type DealSlug } from "@/lib/landing-pages";
+import { DEALS, hubCopy, hubRows, landingStats, medianFigure, type DealSlug } from "@/lib/landing-pages";
 import { areaPhoto } from "@/lib/area-visuals";
-import { ServiceHero } from "@/components/service-page";
+import { RequirementsTrigger } from "@/components/RequirementsForm";
 import NotFound from "@/pages/not-found";
 
 const SITE = "https://places-egy.com";
-// Hero photo per hub (checked visually: office buildings, no homes).
-const HUB_IMAGE: Record<DealSlug, { image: string; alt: string }> = {
-  rent: { image: "/images/cairo-business-park.webp", alt: "Office buildings at Cairo Business Park, New Cairo" },
-  buy: { image: "/images/Mivida-Business-Park.jpg", alt: "Office buildings at Mivida Business Park, New Cairo" },
-  "income-property": { image: "/images/District-5.jpg", alt: "A leased office building at District 5, New Cairo" },
-};
 const BATCH = 24;
 const CARD_FIELDS =
   "id,title,transaction_type,property_type,subtype,developer,project,location,location_area,price,currency,area_sqm,furnishing,images,rental_status,rental_end,updated_at,price_per_meter,maintenance_fees,maintenance_status,floor,parking,delivery_date";
@@ -54,6 +48,18 @@ export default function DealHubPage() {
   const rows = useMemo(() => (deal ? hubRows(all, dealSlug) : []), [all, deal, dealSlug]);
   const copy = useMemo(() => (deal && rows.length ? hubCopy(dealSlug, all) : null), [all, deal, dealSlug, rows.length]);
   const heading = deal ? deal.heading("Cairo") : "";
+  const unitWord = dealSlug === "income-property" ? "income property" : `office ${deal?.label ?? ""}`;
+  const stats = useMemo(() => (rows.length ? landingStats(rows, "Cairo") : null), [rows]);
+  const heroStats: Array<{ label: string; value: string | null }> = [
+    { label: dealSlug === "income-property" ? "income properties available" : `offices ${deal?.label ?? ""}`, value: stats ? stats.count.toLocaleString("en-US") : null },
+    { label: copy?.areas.length === 1 ? "business district" : "business districts", value: copy ? String(copy.areas.length) : null },
+    // Figures only in the big type (units go in the label) so nothing wraps.
+    {
+      label: DEALS[dealSlug]?.tx === "rent" ? "EGP median rent per m² a month" : "EGP median price per m²",
+      value: stats?.perSqm ? medianFigure(dealSlug, stats.perSqm[1]).replace(/^EGP\s*/, "") : stats ? "—" : null,
+    },
+    { label: "m² sizes available", value: stats && stats.areaMin && stats.areaMax ? `${stats.areaMin.toLocaleString("en-US")}–${stats.areaMax.toLocaleString("en-US")}` : stats ? "—" : null },
+  ];
 
   useDocumentMeta({
     title: copy?.title ?? `${heading} | PLACES`,
@@ -69,39 +75,55 @@ export default function DealHubPage() {
       {/* Breadcrumb, ItemList and FAQPage JSON-LD come from the server render. */}
       <Navbar />
 
-      {/* Same split hero as the service pages: light, so it flows into the
-          page; the dark promise card on the photo matches the call-out below. */}
-      <ServiceHero
-        crumbs={[{ name: "Home", href: "/" }, { name: heading }]}
-        title={heading}
-        intro={copy ? copy.intro[0] : `Every available ${deal.label === "as income properties" ? "income property" : `office ${deal.label}`} across Cairo, by area.`}
-        primary={{
-          label: "Send us your requirements",
-          href: "/contact",
-          form: { intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: heading },
-        }}
-        image={HUB_IMAGE[dealSlug].image}
-        imageAlt={HUB_IMAGE[dealSlug].alt}
-        promise={{
-          title: rows.length ? `${rows.length} ${dealSlug === "income-property" ? "income properties" : `offices ${deal.label}`}` : heading,
-          text: copy ? `Across ${copy.areas.length} areas of Cairo, updated as units are listed${dealSlug === "rent" ? ", rented" : ", sold"} or withdrawn.` : "Updated as units are listed and withdrawn.",
-        }}
-        points={
-          dealSlug === "rent"
-            ? ["Compare prices by area", "Book a viewing on any office", "Free tenant representation"]
-            : dealSlug === "buy"
-              ? ["Compare prices by area", "Ready and off-plan units", "Advice before you buy"]
-              : ["Units with tenants in place", "Compare prices by area", "Advice before you buy"]
-        }
-      />
-
-      {dealSlug === "rent" && (
-        <section className="pb-4">
-          <div className="container mx-auto px-6 md:px-10 max-w-6xl">
-            <TenantRepCallout variant="rent" />
+      {/* Hub hero: the Cairo-wide overview. Light like the rest of the page;
+          the right side is the live market in numbers (the area pages have a
+          photo instead, so the two page types don't look the same). */}
+      <section className="pt-28 md:pt-36 pb-12 md:pb-16">
+        <div className="container mx-auto px-6 md:px-10 max-w-6xl grid lg:grid-cols-[1.1fr_1fr] gap-10 lg:gap-16 items-center">
+          <div>
+            <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground mb-8" aria-label="Breadcrumb">
+              <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+              <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+              <span className="text-primary font-medium" aria-current="page">{heading}</span>
+            </nav>
+            <h1 className="text-4xl md:text-[3.6rem] font-serif font-bold text-primary leading-[1.04] tracking-[-0.03em] text-balance">{heading}</h1>
+            <p className="mt-6 text-lg md:text-xl text-muted-foreground leading-relaxed max-w-xl">
+              {copy ? copy.intro[0] : `Every available ${unitWord} across Cairo, by area.`}
+            </p>
+            <div data-cta-row className="mt-9 flex flex-wrap items-center gap-3">
+              <a href="#areas">
+                <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base">
+                  Compare areas <ArrowRight className="ml-2 w-4 h-4" />
+                </Button>
+              </a>
+              <RequirementsTrigger
+                config={{ intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: heading }}
+                fallbackHref="/contact"
+              >
+                <Button size="lg" variant="outline" className="bg-white text-primary border-primary/20 hover:border-primary/50 font-semibold px-7 h-13 text-base">
+                  Send us your requirements
+                </Button>
+              </RequirementsTrigger>
+            </div>
           </div>
-        </section>
-      )}
+
+          <div className="rounded-3xl bg-primary text-white p-7 md:p-10">
+            <h2 className="text-xl md:text-2xl font-serif font-bold text-white">The market right now</h2>
+            <p className="mt-1 text-sm text-white/60">Live from our listings, updated as units change</p>
+            <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-8">
+              {heroStats.map((st) => (
+                <div key={st.label} className="flex flex-col-reverse justify-end gap-1">
+                  <dt className="text-sm text-white/65 leading-snug">{st.label}</dt>
+                  <dd className="font-serif text-3xl md:text-[2.6rem] font-bold leading-none tracking-[-0.03em] text-white whitespace-nowrap">
+                    {st.value ?? <span className="inline-block h-9 w-24 rounded bg-white/10 animate-pulse align-middle" />}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        </div>
+      </section>
+
 
       {/* By area */}
       <section id="areas" className="py-10 scroll-mt-24">
@@ -111,7 +133,7 @@ export default function DealHubPage() {
             <span>{heading} by area</span>
           </h2>
           {copy ? (
-            <ul className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+            <ul className="grid auto-rows-fr grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
               {copy.areas.map((a) => {
                 const photo = areaPhoto(a.loc.slug);
                 const rent = DEALS[dealSlug].tx === "rent";
@@ -122,50 +144,54 @@ export default function DealHubPage() {
                     : `${n === 1 ? "office" : "offices"} ${deal.label}`;
                 return (
                   <li key={a.loc.slug} className="flex">
+                    {/* Slim card, faded area photo behind the text (same style as the
+                        project cards on the area pages). */}
                     <Link
                       href={a.path}
-                      className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                      className="group relative flex w-full flex-col justify-between gap-4 overflow-hidden rounded-2xl bg-white p-4 md:p-6 min-h-[7.5rem] md:min-h-[10rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     >
-                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
-                        <img
-                          src={photo.image}
-                          alt={photo.alt}
-                          width={600}
-                          height={450}
-                          loading="lazy"
-                          decoding="async"
-                          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
-                        />
-                        {/* Neutral scrim so the name reads on any photo. */}
-                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" aria-hidden />
-                        <span className="absolute inset-x-3 bottom-3 md:inset-x-5 md:bottom-4 flex items-end justify-between gap-2">
-                          <span className="text-lg md:text-2xl font-serif font-bold leading-tight text-white">{a.loc.name}</span>
-                          <ArrowRight className="hidden md:block h-5 w-5 shrink-0 text-white transition-transform group-hover:translate-x-1" aria-hidden />
-                        </span>
-                      </div>
-                      {/* Phones: room for the price to wrap, so every tile is the same height. */}
-                      <div className="flex min-h-[5.0625rem] flex-1 flex-col justify-center gap-0.5 px-3 py-3 md:min-h-0 md:px-5 md:py-4">
+                      <img
+                        src={photo.image}
+                        alt=""
+                        aria-hidden
+                        loading="lazy"
+                        decoding="async"
+                        className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.28] transition-[opacity,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-[0.38]"
+                      />
+                      <span className="relative flex items-start justify-between gap-2">
+                        <span className="text-lg md:text-2xl font-serif font-bold leading-tight text-primary">{a.loc.name}</span>
+                        <ArrowRight className="mt-1 h-4 w-4 md:h-5 md:w-5 shrink-0 text-accent transition-transform group-hover:translate-x-1" aria-hidden />
+                      </span>
+                      <span className="relative flex flex-col gap-0.5">
                         <span className="text-sm md:text-base font-semibold text-primary">
                           {a.count} {kindLabel(a.count)}
                         </span>
-                        <span className="text-xs md:text-sm text-muted-foreground">
+                        <span className="text-xs md:text-sm text-primary/70">
                           {a.median ? `Median ${medianFigure(dealSlug, a.median)} / m²${rent ? " / month" : ""}` : "Prices on each listing"}
                         </span>
-                      </div>
+                      </span>
                     </Link>
                   </li>
                 );
               })}
             </ul>
           ) : (
-            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-[4/4.1] rounded-2xl bg-white animate-pulse" />
+                <div key={i} className="h-[8.5rem] md:h-[10rem] rounded-2xl bg-white animate-pulse" />
               ))}
             </div>
           )}
         </div>
       </section>
+
+      {dealSlug === "rent" && (
+        <section className="pt-4 pb-12">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl">
+            <TenantRepCallout variant="rent" />
+          </div>
+        </section>
+      )}
 
       {/* Latest units */}
       <section className="py-8 bg-secondary/40">
@@ -202,7 +228,7 @@ export default function DealHubPage() {
       {/* FAQs */}
       {copy && (
         <section className="py-12">
-          <div className="container mx-auto px-6 md:px-10 max-w-4xl">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl [&>*]:max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
               <HelpCircle className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
               <span>{heading}: FAQs</span>
@@ -212,34 +238,28 @@ export default function DealHubPage() {
         </section>
       )}
 
-      {/* Other deal types */}
-      <section className="py-10 bg-secondary/40">
-        <div className="container mx-auto px-6 md:px-10 max-w-4xl">
-          <h2 className="text-xl md:text-2xl font-serif font-bold text-primary flex items-center gap-3 mb-5">
-            <Building2 className="w-6 h-6 text-accent shrink-0" />
+      {/* Other deal types: same link rows as "Keep exploring" on the area pages. */}
+      <section className="pt-4 pb-16 md:pb-24">
+        <div className="container mx-auto px-6 md:px-10 max-w-6xl">
+          <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
+            <Building2 className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
             <span>More offices in Cairo</span>
           </h2>
-          <ul className="flex flex-wrap gap-3">
-            {(Object.keys(DEALS) as DealSlug[])
-              .filter((d) => d !== dealSlug)
-              .map((d) => (
-                <li key={d}>
-                  <Link
-                    href={`/${d}`}
-                    className="inline-flex items-center rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-primary hover:border-accent hover:text-accent transition-colors"
-                  >
-                    {DEALS[d].heading("Cairo")}
-                  </Link>
-                </li>
-              ))}
-            <li>
-              <Link
-                href="/listings"
-                className="inline-flex items-center rounded-full border border-border bg-white px-4 py-2 text-sm font-medium text-primary hover:border-accent hover:text-accent transition-colors"
-              >
-                All listings
-              </Link>
-            </li>
+          <ul className="grid gap-3 sm:grid-cols-3">
+            {[
+              ...(Object.keys(DEALS) as DealSlug[]).filter((d) => d !== dealSlug).map((d) => ({ href: `/${d}`, label: DEALS[d].heading("Cairo") })),
+              { href: "/listings", label: "All office listings" },
+            ].map((l) => (
+              <li key={l.href}>
+                <Link
+                  href={l.href}
+                  className="group flex h-full items-center justify-between gap-3 rounded-xl bg-white px-5 py-4 text-base font-semibold text-primary hover:text-accent transition-colors"
+                >
+                  <span>{l.label}</span>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
       </section>
