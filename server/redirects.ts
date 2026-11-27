@@ -199,6 +199,10 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   // No Arabic twin exists for the yield post, so it lands on the English one.
   "/ar/blog/office-investment-yield-new-cairo": "/blog/office-investment-yield-new-cairo",
   "/ar/blog/blog-north-90-street-offices-new-cairo": "/ar/blog/مكاتب-التسعين-الشمالى",
+  // GSC 404 (crawled 24 Nov): the Arabic copy of the old New Cairo rent guide.
+  // Its English twin already goes to /blog/offices-for-rent-new-cairo; this one
+  // goes to the live Arabic post on the same topic.
+  "/ar/blog/office-space-for-rent-in-new-cairo-a-practical-business-guide": "/ar/blog/مكاتب-إدارية-للإيجار-القاهرة-الجديدة",
   "/blog/where-to-buy-office-cairo-guide": "/blog/offices-for-sale-new-cairo",
   // Exact entry so this doesn't hop through the /resources/blog prefix rule
   // into the old 404 above.
