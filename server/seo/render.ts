@@ -29,7 +29,7 @@ import {
   landingStats,
   type DealSlug,
 } from "../../client/src/lib/landing-pages";
-import { landingDevelopers, landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
+import { landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
 import { tenantRepHtml } from "../../client/src/lib/tenant-rep-cta";
 
 // Service pages linked from the homepage's server render (crawlers had no
@@ -185,7 +185,6 @@ export async function renderLanding(dealSlug: string, locSlug: string): Promise<
         ? `<h2>More offices in ${esc(loc.name)}</h2><ul>${siblings.map((p) => `<li><a href="${p.path}">${esc(DEALS[p.deal].heading(loc.name))}</a></li>`).join("")}</ul>`
         : "") +
       `<p><a href="/${deal}">${esc(DEALS[deal].heading("Cairo"))}</a> · <a href="/locations/${loc.slug}">${esc(`${loc.name} area guide: projects, developers and market overview`)}</a></p>` +
-      relatedList(`Developers in ${loc.name}`, landingDevelopers(loc.name)) +
       relatedList(`Questions to settle before you ${deal === "rent" ? "sign a lease" : "buy"}`, landingFaqTopics(deal)) +
       landingNav(inventory, "Other popular searches") +
       locationNav(),

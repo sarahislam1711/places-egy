@@ -12,9 +12,16 @@ import { supabase, type Listing } from "@/lib/supabase";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { DEALS, hubCopy, hubRows, medianFigure, type DealSlug } from "@/lib/landing-pages";
 import { areaPhoto } from "@/lib/area-visuals";
+import { ServiceHero } from "@/components/service-page";
 import NotFound from "@/pages/not-found";
 
 const SITE = "https://places-egy.com";
+// Hero photo per hub (checked visually: office buildings, no homes).
+const HUB_IMAGE: Record<DealSlug, { image: string; alt: string }> = {
+  rent: { image: "/images/cairo-business-park.webp", alt: "Office buildings at Cairo Business Park, New Cairo" },
+  buy: { image: "/images/Mivida-Business-Park.jpg", alt: "Office buildings at Mivida Business Park, New Cairo" },
+  "income-property": { image: "/images/District-5.jpg", alt: "A leased office building at District 5, New Cairo" },
+};
 const BATCH = 24;
 const CARD_FIELDS =
   "id,title,transaction_type,property_type,subtype,developer,project,location,location_area,price,currency,area_sqm,furnishing,images,rental_status,rental_end,updated_at,price_per_meter,maintenance_fees,maintenance_status,floor,parking,delivery_date";
@@ -62,35 +69,35 @@ export default function DealHubPage() {
       {/* Breadcrumb, ItemList and FAQPage JSON-LD come from the server render. */}
       <Navbar />
 
-      {/* Hero */}
-      <section className="relative pt-32 pb-12 md:pb-16 overflow-hidden">
-        <div className="absolute inset-0 z-0">
-          <img src="/images/offices-hero.jpg" alt="Office buildings in Cairo" fetchPriority="high" decoding="async" className="w-full h-full object-cover" />
-          <div className="absolute inset-0 bg-primary/85" />
-        </div>
-        <div className="relative z-10 container mx-auto px-6 md:px-10">
-          <nav className="flex flex-wrap items-center gap-1.5 text-sm text-white/70 mb-6" aria-label="Breadcrumb">
-            <Link href="/" className="hover:text-white transition-colors">Home</Link>
-            <ChevronRight className="w-3.5 h-3.5" />
-            <span className="text-white">{heading}</span>
-          </nav>
-          <h1 className="text-3xl md:text-5xl font-serif font-bold text-white mb-4 leading-tight max-w-3xl">{heading}</h1>
-          {copy ? (
-            <p className="text-base md:text-lg text-white/90 font-medium mb-8 max-w-3xl">{copy.intro[0]}</p>
-          ) : (
-            <div className="h-14 max-w-2xl rounded bg-white/10 animate-pulse mb-8" />
-          )}
-          <a href="#areas">
-            <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-bold px-8 h-12 text-base shadow-xl shadow-accent/30 transition-all hover:scale-105">
-              Compare areas <ArrowRight className="ml-2 w-4 h-4" />
-            </Button>
-          </a>
-        </div>
-      </section>
+      {/* Same split hero as the service pages: light, so it flows into the
+          page; the dark promise card on the photo matches the call-out below. */}
+      <ServiceHero
+        crumbs={[{ name: "Home", href: "/" }, { name: heading }]}
+        title={heading}
+        intro={copy ? copy.intro[0] : `Every available ${deal.label === "as income properties" ? "income property" : `office ${deal.label}`} across Cairo, by area.`}
+        primary={{
+          label: "Send us your requirements",
+          href: "/contact",
+          form: { intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: heading },
+        }}
+        image={HUB_IMAGE[dealSlug].image}
+        imageAlt={HUB_IMAGE[dealSlug].alt}
+        promise={{
+          title: rows.length ? `${rows.length} ${dealSlug === "income-property" ? "income properties" : `offices ${deal.label}`}` : heading,
+          text: copy ? `Across ${copy.areas.length} areas of Cairo, updated as units are listed${dealSlug === "rent" ? ", rented" : ", sold"} or withdrawn.` : "Updated as units are listed and withdrawn.",
+        }}
+        points={
+          dealSlug === "rent"
+            ? ["Compare prices by area", "Book a viewing on any office", "Free tenant representation"]
+            : dealSlug === "buy"
+              ? ["Compare prices by area", "Ready and off-plan units", "Advice before you buy"]
+              : ["Units with tenants in place", "Compare prices by area", "Advice before you buy"]
+        }
+      />
 
       {dealSlug === "rent" && (
-        <section className="pt-10 pb-4">
-          <div className="container mx-auto px-6 md:px-10">
+        <section className="pb-4">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl">
             <TenantRepCallout variant="rent" />
           </div>
         </section>
@@ -98,7 +105,7 @@ export default function DealHubPage() {
 
       {/* By area */}
       <section id="areas" className="py-10 scroll-mt-24">
-        <div className="container mx-auto px-6 md:px-10">
+        <div className="container mx-auto px-6 md:px-10 max-w-6xl">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-8">
             <MapPin className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
             <span>{heading} by area</span>
@@ -108,11 +115,16 @@ export default function DealHubPage() {
               {copy.areas.map((a) => {
                 const photo = areaPhoto(a.loc.slug);
                 const rent = DEALS[dealSlug].tx === "rent";
+                // "749 offices for rent" / "12 offices for sale" / "3 income properties"
+                const kindLabel = (n: number) =>
+                  dealSlug === "income-property"
+                    ? n === 1 ? "income property" : "income properties"
+                    : `${n === 1 ? "office" : "offices"} ${deal.label}`;
                 return (
                   <li key={a.loc.slug} className="flex">
                     <Link
                       href={a.path}
-                      className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)] transition-shadow hover:shadow-[0_20px_44px_-24px_rgba(17,17,17,0.5)]"
+                      className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                     >
                       <div className="relative aspect-[4/3] overflow-hidden bg-muted">
                         <img
@@ -124,35 +136,21 @@ export default function DealHubPage() {
                           decoding="async"
                           className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/15 to-transparent" aria-hidden />
-                        <span className="absolute left-3 top-3 md:left-4 md:top-4 rounded-full bg-white/95 px-2.5 py-1 text-xs md:text-sm font-semibold text-primary shadow-sm">
-                          {a.count} {a.count === 1 ? "office" : "offices"}
-                        </span>
+                        {/* Neutral scrim so the name reads on any photo. */}
+                        <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/70 to-transparent" aria-hidden />
                         <span className="absolute inset-x-3 bottom-3 md:inset-x-5 md:bottom-4 flex items-end justify-between gap-2">
-                          <span className="min-w-0">
-                            <span className="block text-[11px] md:text-sm font-medium text-white/75">{deal.label === "as income properties" ? "Income properties" : `Offices ${deal.label}`}</span>
-                            <span className="block text-lg md:text-2xl font-serif font-bold leading-tight text-white">{a.loc.name}</span>
-                          </span>
+                          <span className="text-lg md:text-2xl font-serif font-bold leading-tight text-white">{a.loc.name}</span>
                           <ArrowRight className="hidden md:block h-5 w-5 shrink-0 text-white transition-transform group-hover:translate-x-1" aria-hidden />
                         </span>
                       </div>
                       {/* Phones: room for the price to wrap, so every tile is the same height. */}
-                      <div className="flex min-h-[5.0625rem] flex-1 items-center justify-between gap-2 px-3 py-3 md:min-h-0 md:px-5 md:py-4">
-                        {a.median ? (
-                          <span className="min-w-0">
-                            <span className="block text-[11px] md:text-xs text-muted-foreground">{rent ? "Median rent" : "Median price"}</span>
-                            <span className="block text-sm md:text-base font-semibold text-primary">
-                              {medianFigure(dealSlug, a.median)} <span className="font-normal text-muted-foreground">/ m²{rent ? " / month" : ""}</span>
-                            </span>
-                          </span>
-                        ) : (
-                          // Too few EGP prices for a median: same two lines, so every tile matches.
-                          <span className="min-w-0">
-                            <span className="block text-[11px] md:text-xs text-muted-foreground">Listings</span>
-                            <span className="block text-sm md:text-base font-semibold text-primary">See the offices</span>
-                          </span>
-                        )}
-                        <ArrowRight className="md:hidden h-4 w-4 shrink-0 text-accent" aria-hidden />
+                      <div className="flex min-h-[5.0625rem] flex-1 flex-col justify-center gap-0.5 px-3 py-3 md:min-h-0 md:px-5 md:py-4">
+                        <span className="text-sm md:text-base font-semibold text-primary">
+                          {a.count} {kindLabel(a.count)}
+                        </span>
+                        <span className="text-xs md:text-sm text-muted-foreground">
+                          {a.median ? `Median ${medianFigure(dealSlug, a.median)} / m²${rent ? " / month" : ""}` : "Prices on each listing"}
+                        </span>
                       </div>
                     </Link>
                   </li>
@@ -162,7 +160,7 @@ export default function DealHubPage() {
           ) : (
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
-                <div key={i} className="aspect-[4/3.9] rounded-2xl bg-white animate-pulse" />
+                <div key={i} className="aspect-[4/4.1] rounded-2xl bg-white animate-pulse" />
               ))}
             </div>
           )}
@@ -171,7 +169,7 @@ export default function DealHubPage() {
 
       {/* Latest units */}
       <section className="py-8 bg-secondary/40">
-        <div className="container mx-auto px-6 md:px-10">
+        <div className="container mx-auto px-6 md:px-10 max-w-6xl">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-8">
             <Home className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
             <span>{copy?.listHeading ?? heading}</span>

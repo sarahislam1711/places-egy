@@ -13,17 +13,32 @@ export interface RelatedLink {
   label: string;
 }
 
-// The FAQ topics a reader is most likely to need for each kind of search.
+// The four FAQ topics a reader is most likely to need for each kind of search
+// (27 Nov: trimmed from six, and shown as plain questions, not chapter titles).
 const DEAL_FAQ_TOPICS: Record<DealSlug, string[]> = {
-  rent: ["early-thinking", "admin-vs-commercial", "locations", "contracts-legal", "advisors-brokers", "risks-mistakes"],
-  buy: ["rent-buy-resale", "admin-vs-commercial", "developers", "pricing-value", "contracts-legal", "risks-mistakes"],
-  "income-property": ["investment-income", "rent-buy-resale", "pricing-value", "contracts-legal", "advisors-brokers", "risks-mistakes"],
+  rent: ["locations", "contracts-legal", "advisors-brokers", "risks-mistakes"],
+  buy: ["rent-buy-resale", "developers", "pricing-value", "contracts-legal"],
+  "income-property": ["investment-income", "pricing-value", "contracts-legal", "risks-mistakes"],
+};
+
+// How each FAQ section reads as a link on the landing pages.
+const FAQ_TOPIC_LABELS: Record<string, string> = {
+  "early-thinking": "Thinking it through before you start",
+  "admin-vs-commercial": "Admin office or commercial space?",
+  locations: "Which area suits your company?",
+  "contracts-legal": "What to check in the contract",
+  "advisors-brokers": "Should you use a broker?",
+  "risks-mistakes": "Mistakes to avoid",
+  "rent-buy-resale": "Rent, buy new or buy resale?",
+  developers: "How to choose a developer and project",
+  "pricing-value": "Is the price right?",
+  "investment-income": "Buying an office for rental income",
 };
 
 export function landingFaqTopics(deal: DealSlug): RelatedLink[] {
   return DEAL_FAQ_TOPICS[deal].flatMap((id) => {
     const s = FAQ_SECTIONS.find((x) => x.id === id);
-    return s ? [{ path: `/faqs/${s.id}`, label: s.title }] : [];
+    return s ? [{ path: `/faqs/${s.id}`, label: FAQ_TOPIC_LABELS[s.id] ?? s.title }] : [];
   });
 }
 
