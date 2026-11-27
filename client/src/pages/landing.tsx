@@ -126,17 +126,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Market summary from live data */}
-      {copy && copy.intro.length > 1 && (
-        <section className="py-8">
-          <div className="container mx-auto px-6 md:px-10 max-w-4xl space-y-4 text-base md:text-lg text-muted-foreground leading-relaxed">
-            {copy.intro.slice(1).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        </section>
-      )}
-
       {/* Tenant representation (rent pages only) */}
       {dealSlug === "rent" && (
         <section className="pb-8">

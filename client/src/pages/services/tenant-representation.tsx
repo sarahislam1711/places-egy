@@ -3,6 +3,7 @@ import { ArrowRight, Briefcase, Building2, Handshake } from "lucide-react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
+import { areaPhoto } from "@/lib/area-visuals";
 import {
   Band,
   Checklist,
@@ -46,12 +47,6 @@ const BENEFITS = [
 ];
 
 // All six areas, with each area guide's first highlight as the one-liner.
-// Area photos: each area page's hero, except two that don't show offices in
-// that area (6th October's is a villa; Sheraton's is the Nile hotel).
-const AREA_IMAGE: Record<string, { image: string; alt: string }> = {
-  "6th-october": { image: "/images/business-complex.jpg", alt: "A business park with office buildings" },
-  sheraton: { image: "/images/city-center-almaza.webp", alt: "City Centre Almaza in the Sheraton area" },
-};
 // Short versions of each area guide's first highlight, so every tile fits
 // the same space without cutting words.
 const AREA_LINE: Record<string, string> = {
@@ -66,8 +61,8 @@ const AREAS = Object.values(LOCATION_CONTENT).map((a) => ({
   href: `/locations/${a.slug}`,
   name: a.displayName,
   line: AREA_LINE[a.slug] ?? a.highlights?.[0] ?? a.subtitle,
-  image: AREA_IMAGE[a.slug]?.image ?? a.heroImage,
-  imageAlt: AREA_IMAGE[a.slug]?.alt ?? `${a.displayName}, Cairo`,
+  image: areaPhoto(a.slug).image,
+  imageAlt: areaPhoto(a.slug).alt,
 }));
 
 const STEPS = [

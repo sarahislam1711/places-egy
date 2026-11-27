@@ -262,6 +262,11 @@ export function landingProjects(rows: LandingListing[], locName: string, limit =
     });
 }
 
+/** Just the rounded figure, "EGP 1,300" / "EGP 190,000", for compact tiles. */
+export function medianFigure(dealSlug: DealSlug, median: number): string {
+  return DEALS[dealSlug].tx === "rent" ? `EGP ${fmt(roundNice(median))}` : `EGP ${fmtMoney(median)}`;
+}
+
 /** "median EGP 1,300 per m² a month" / "median EGP 190,000 per m²" */
 export function medianLabel(dealSlug: DealSlug, median: number): string {
   return DEALS[dealSlug].tx === "rent" ? `median EGP ${fmt(roundNice(median))} per m² a month` : `median EGP ${fmtMoney(median)} per m²`;
@@ -276,20 +281,13 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
   const sizes = s.areaMin && s.areaMax ? `from ${fmt(s.areaMin)} to ${fmt(s.areaMax)} m²` : "in a range of sizes";
   const kind = dealSlug === "income-property" ? "leased, income-generating offices" : "administrative offices";
 
-  const priceLine = s.perSqm
-    ? rent
-      ? `Typical asking rent is EGP ${fmt(roundNice(s.perSqm[0]))}–${fmt(roundNice(s.perSqm[2]))} ${perUnit} (median EGP ${fmt(roundNice(s.perSqm[1]))}).`
-      : `Typical asking prices are EGP ${fmtMoney(s.perSqm[0])}–${fmtMoney(s.perSqm[2])} ${perUnit} (median EGP ${fmtMoney(s.perSqm[1])}).`
-    : "";
 
+  // Browsing pages: one line under the H1, then straight to areas, projects
+  // and listings (27 Nov: the market-summary paragraphs were dropped; prices,
+  // sizes and projects are still answered in the FAQs).
   const intro = [
     `Browse ${s.count} ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}${where}. Office space ${sizes}, updated as units are listed, ${rent ? "rented" : "sold"} or withdrawn.`,
-    [priceLine, s.usdCount ? `${s.usdCount} of the units are priced in USD.` : ""].filter(Boolean).join(" "),
-    s.projects.length ? `Most of the available ${deal.variant(loc.name)} is in ${list(s.projects)}.` : "",
-    s.conditions.length
-      ? `Units are offered ${list(s.conditions.map(([c, n]) => `${c} (${n})`))}. Book a viewing on any listing, or ask PLACES for a shortlist that fits your size and budget.`
-      : "Book a viewing on any listing, or ask PLACES for a shortlist that fits your size and budget.",
-  ].filter(Boolean);
+  ];
 
   const faqs: LandingCopy["faqs"] = [];
   if (s.perSqm) {
@@ -342,7 +340,7 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
     description: landingDescription(dealSlug, loc.name, s),
     h1,
     intro,
-    listHeading: `${titleCase(deal.variant(loc.name)).replace(/ In /, " in ").replace(/ For /, " for ")} (${s.count})`,
+    listHeading: h1,
     faqs,
   };
 }

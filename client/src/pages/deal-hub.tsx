@@ -10,7 +10,8 @@ import { FaqAccordionList } from "@/components/FaqAccordionList";
 import { TenantRepCallout } from "@/components/TenantRepCallout";
 import { supabase, type Listing } from "@/lib/supabase";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { DEALS, hubCopy, hubRows, type DealSlug } from "@/lib/landing-pages";
+import { DEALS, hubCopy, hubRows, medianFigure, type DealSlug } from "@/lib/landing-pages";
+import { areaPhoto } from "@/lib/area-visuals";
 import NotFound from "@/pages/not-found";
 
 const SITE = "https://places-egy.com";
@@ -87,19 +88,8 @@ export default function DealHubPage() {
         </div>
       </section>
 
-      {/* Market summary */}
-      {copy && copy.intro.length > 1 && (
-        <section className="py-8">
-          <div className="container mx-auto px-6 md:px-10 max-w-4xl space-y-4 text-base md:text-lg text-muted-foreground leading-relaxed">
-            {copy.intro.slice(1).map((p, i) => (
-              <p key={i}>{p}</p>
-            ))}
-          </div>
-        </section>
-      )}
-
       {dealSlug === "rent" && (
-        <section className="pb-8">
+        <section className="pt-10 pb-4">
           <div className="container mx-auto px-6 md:px-10">
             <TenantRepCallout variant="rent" />
           </div>
@@ -114,29 +104,65 @@ export default function DealHubPage() {
             <span>{heading} by area</span>
           </h2>
           {copy ? (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {copy.areas.map((a) => (
-                <Link
-                  key={a.loc.slug}
-                  href={a.path}
-                  className="group flex items-start justify-between gap-4 rounded-2xl bg-white border border-border/40 p-5 hover:border-accent hover:shadow-md transition-all"
-                >
-                  <span>
-                    <span className="block text-lg font-serif font-bold text-primary group-hover:text-accent transition-colors">
-                      {deal.heading(a.loc.name)}
-                    </span>
-                    <span className="block mt-1 text-sm text-muted-foreground">
-                      {a.count} available{a.median ? ` · ${copy.medianLabel(a.median)}` : ""}
-                    </span>
-                  </span>
-                  <ArrowRight className="w-4 h-4 mt-1.5 text-accent shrink-0 transition-transform group-hover:translate-x-1" />
-                </Link>
-              ))}
-            </div>
+            <ul className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+              {copy.areas.map((a) => {
+                const photo = areaPhoto(a.loc.slug);
+                const rent = DEALS[dealSlug].tx === "rent";
+                return (
+                  <li key={a.loc.slug} className="flex">
+                    <Link
+                      href={a.path}
+                      className="group flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_12px_32px_-22px_rgba(17,17,17,0.4)] transition-shadow hover:shadow-[0_20px_44px_-24px_rgba(17,17,17,0.5)]"
+                    >
+                      <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                        <img
+                          src={photo.image}
+                          alt={photo.alt}
+                          width={600}
+                          height={450}
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-primary/90 via-primary/15 to-transparent" aria-hidden />
+                        <span className="absolute left-3 top-3 md:left-4 md:top-4 rounded-full bg-white/95 px-2.5 py-1 text-xs md:text-sm font-semibold text-primary shadow-sm">
+                          {a.count} {a.count === 1 ? "office" : "offices"}
+                        </span>
+                        <span className="absolute inset-x-3 bottom-3 md:inset-x-5 md:bottom-4 flex items-end justify-between gap-2">
+                          <span className="min-w-0">
+                            <span className="block text-[11px] md:text-sm font-medium text-white/75">{deal.label === "as income properties" ? "Income properties" : `Offices ${deal.label}`}</span>
+                            <span className="block text-lg md:text-2xl font-serif font-bold leading-tight text-white">{a.loc.name}</span>
+                          </span>
+                          <ArrowRight className="hidden md:block h-5 w-5 shrink-0 text-white transition-transform group-hover:translate-x-1" aria-hidden />
+                        </span>
+                      </div>
+                      {/* Phones: room for the price to wrap, so every tile is the same height. */}
+                      <div className="flex min-h-[5.0625rem] flex-1 items-center justify-between gap-2 px-3 py-3 md:min-h-0 md:px-5 md:py-4">
+                        {a.median ? (
+                          <span className="min-w-0">
+                            <span className="block text-[11px] md:text-xs text-muted-foreground">{rent ? "Median rent" : "Median price"}</span>
+                            <span className="block text-sm md:text-base font-semibold text-primary">
+                              {medianFigure(dealSlug, a.median)} <span className="font-normal text-muted-foreground">/ m²{rent ? " / month" : ""}</span>
+                            </span>
+                          </span>
+                        ) : (
+                          // Too few EGP prices for a median: same two lines, so every tile matches.
+                          <span className="min-w-0">
+                            <span className="block text-[11px] md:text-xs text-muted-foreground">Listings</span>
+                            <span className="block text-sm md:text-base font-semibold text-primary">See the offices</span>
+                          </span>
+                        )}
+                        <ArrowRight className="md:hidden h-4 w-4 shrink-0 text-accent" aria-hidden />
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="h-24 rounded-2xl bg-white border border-border/40 animate-pulse" />
+            <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 md:gap-5">
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="aspect-[4/3.9] rounded-2xl bg-white animate-pulse" />
               ))}
             </div>
           )}
