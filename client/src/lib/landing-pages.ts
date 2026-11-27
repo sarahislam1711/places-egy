@@ -286,7 +286,9 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
   // and listings (27 Nov: the market-summary paragraphs were dropped; prices,
   // sizes and projects are still answered in the FAQs).
   const intro = [
-    `Browse ${s.count} ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}${where}. Office space ${sizes}, updated as units are listed, ${rent ? "rented" : "sold"} or withdrawn.`,
+    // No counts or size ranges here (27 Nov): they change daily; the live
+    // figures sit in the hero panel / promise card and the FAQs.
+    `Browse ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}${where}. Updated as units are listed, ${rent ? "rented" : "sold"} or withdrawn.`,
   ];
 
   const faqs: LandingCopy["faqs"] = [];
