@@ -237,7 +237,7 @@ export default function Home() {
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             {/* Compact photo-background CTA tiles — icon + title + CTA only. */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Link href="/listings?transaction=sale" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
+              <Link href="/buy" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
                 <img src="/images/admin 1.jpg" alt="Buy an office" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-primary/70 transition-colors duration-500 group-hover:bg-primary/60" />
                 <div className="relative h-full flex flex-col justify-between p-5 md:p-6">
@@ -253,7 +253,7 @@ export default function Home() {
                 </div>
               </Link>
 
-              <Link href="/listings?transaction=rent" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
+              <Link href="/rent" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
                 <img src="/images/admin 2.jpg" alt="Rent an office" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-linear-to-t from-[#2E2A28]/85 via-[#2E2A28]/45 to-[#2E2A28]/30 transition-opacity duration-500 group-hover:opacity-90" />
                 <div className="relative h-full flex flex-col justify-between p-5 md:p-6">

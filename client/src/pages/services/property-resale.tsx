@@ -282,7 +282,7 @@ export default function PropertyResale() {
             <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-primary">
               Units currently available for sale
             </h2>
-            <a href="/listings?transaction=sale" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
+            <a href="/buy" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
               Browse all available units <ArrowRight className="ml-2 w-4 h-4" />
             </a>
           </div>

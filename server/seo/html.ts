@@ -78,7 +78,9 @@ export function injectJsonLd(html: string, jsonLd: unknown): string {
 
 const NAV_LINKS = {
   en: [
-    ["/", "Home"], ["/listings", "Office listings"], ["/locations", "Locations"],
+    ["/", "Home"], ["/listings", "Office listings"],
+    ["/rent", "Offices for rent"], ["/buy", "Offices for sale"], ["/income-property", "Income properties"],
+    ["/services", "Services"], ["/locations", "Locations"],
     ["/developers", "Developers"], ["/guides", "Guides"], ["/blog", "Blog"],
     ["/faqs", "FAQs"], ["/ar/blog", "Arabic blog"], ["/contact", "Contact"],
   ],

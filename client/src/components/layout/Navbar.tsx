@@ -306,21 +306,25 @@ export function Navbar({ solid = false }: { solid?: boolean } = {}) {
 // Each item has a lucide icon (for visual scanning in a 2x2 grid), a bold
 // title, and a one-line clarifier that removes any ambiguity about the
 // deal type.
+//
+// Rent / Sale / Income Property go to the /rent, /buy and /income-property
+// hubs (2026-11-27): same admin-office listings, but indexable pages built to
+// rank, instead of filtered /listings?… URLs that robots.txt blocks.
 const ADMIN_SUBTYPES = [
   {
-    href: "/listings?transaction=rent&type=admin",
+    href: "/rent",
     title: "Rent",
     tagline: "Lease admin office space",
     icon: Key,
   },
   {
-    href: "/listings?transaction=sale&type=admin",
+    href: "/buy",
     title: "Sale",
     tagline: "Buy admin office space",
     icon: Handshake,
   },
   {
-    href: "/listings?transaction=income-property&type=admin",
+    href: "/income-property",
     title: "Income Property",
     tagline: "Rented units generating yields",
     icon: TrendingUp,
