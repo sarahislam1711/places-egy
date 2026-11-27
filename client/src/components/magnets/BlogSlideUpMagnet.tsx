@@ -103,12 +103,12 @@ export function BlogSlideUpMagnet() {
 
   return (
     <div
-      className={`fixed bottom-4 right-4 md:bottom-6 md:right-6 z-50 max-w-[calc(100vw-2rem)] transition-all duration-500 ease-out ${
+      className={`fixed right-4 bottom-[calc(var(--bottom-bar-offset,4.5rem)+env(safe-area-inset-bottom))] lg:bottom-6 lg:right-6 z-50 max-w-[calc(100vw-2rem)] transition-all duration-500 ease-out ${
         visible ? "translate-y-0 opacity-100" : "translate-y-8 opacity-0 pointer-events-none"
       }`}
     >
       {expanded ? (
-        <div className="w-[min(26rem,calc(100vw-2rem))] bg-white rounded-2xl shadow-2xl border border-primary/10 overflow-hidden">
+        <div className="w-[min(26rem,calc(100vw-2rem))] max-h-[calc(100dvh-10rem)] lg:max-h-[calc(100dvh-3rem)] overflow-y-auto bg-white rounded-2xl shadow-2xl border border-primary/10">
           <div className="bg-primary px-6 py-5 relative">
             <button
               onClick={() => setExpanded(false)}

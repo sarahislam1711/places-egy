@@ -459,7 +459,8 @@ function buildContactJsonLd(): string {
     telephone: "+201063618217",
     email: "admin@places-egy.com",
     description:
-      "PLACES specializes in administrative office real estate across Egypt — buy, lease, or resell with trusted developers.",
+      "PLACES is a Cairo commercial real estate advisor for administrative offices: free tenant representation for companies renting an office, plus buying from developers, resale, investment consultation and income-generating property.",
+    knowsAbout: ["Tenant representation", "Office leasing for companies", "Administrative office real estate", "Commercial real estate in Egypt", "Office space in Cairo", "Office sales and acquisitions", "Real estate investment advisory", "Income-generating property"],
     address: {
       "@type": "PostalAddress",
       addressLocality: "Cairo",

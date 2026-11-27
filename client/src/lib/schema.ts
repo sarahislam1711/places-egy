@@ -38,14 +38,19 @@ export const organizationSchema = {
     addressLocality: "Cairo",
   },
   areaServed: LOCATIONS.map((name) => ({ "@type": "Place", name })),
-  knowsAbout: [
-    "Administrative office real estate",
-    "Administrative office leasing",
-    "Corporate leasing",
-    "Office space in Cairo",
-    "Office sales and acquisitions",
-    "Real estate investment advisory",
-  ],
+  knowsAbout: ["Tenant representation", "Office leasing for companies", "Administrative office real estate", "Commercial real estate in Egypt", "Office space in Cairo", "Office sales and acquisitions", "Real estate investment advisory", "Income-generating property"],
+  // The five services, so search engines and AI tools can name what PLACES does.
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "PLACES services",
+    itemListElement: [
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Tenant representation", url: `${BASE_URL}/services/tenant-representation`, description: "We represent companies, not landlords, when they rent an office: search, shortlist, negotiation and lease review. Free for tenants; the landlord pays the fee.", areaServed: "Cairo, Egypt" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Primary property", url: `${BASE_URL}/services/primary-property`, description: "Buying offices directly from developers, with the unit, developer and payment plan assessed.", areaServed: "Cairo, Egypt" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Property resale", url: `${BASE_URL}/services/property-resale`, description: "Buying or selling ready offices on the resale market.", areaServed: "Cairo, Egypt" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Real estate investment consultation", url: `${BASE_URL}/services/investment-consultation`, description: "Data-driven advice before investing in office real estate in Egypt.", areaServed: "Cairo, Egypt" } },
+      { "@type": "Offer", itemOffered: { "@type": "Service", name: "Income-generating property", url: `${BASE_URL}/services/income-generating-property`, description: "Finding leased offices and units with real tenant demand for rental income.", areaServed: "Cairo, Egypt" } },
+    ],
+  },
   founder: [
     {
       "@type": "Person",
@@ -68,7 +73,7 @@ export const organizationSchema = {
   },
   slogan: "Egypt's specialized partner for administrative office real estate.",
   description:
-    "PLACES specializes in administrative office real estate across Egypt — buy, lease, or resell with trusted developers.",
+    "PLACES is a Cairo commercial real estate advisor for administrative offices: free tenant representation for companies renting an office, plus buying from developers, resale, investment consultation and income-generating property.",
   sameAs: [
     "https://www.instagram.com/places.egy",
     "https://www.facebook.com/share/1CMGKrymLB/",
