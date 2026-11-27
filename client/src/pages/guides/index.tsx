@@ -58,10 +58,8 @@ export default function GuidesIndexPage() {
           </p>
         </section>
 
-        <hr className="my-14 border-border/30 max-w-5xl mx-auto" />
-
-        {/* Guide cards */}
-        <section className="container mx-auto px-4 md:px-8 max-w-5xl">
+        {/* Guide cards (no divider: it left ~110px of empty space under the intro) */}
+        <section className="container mx-auto px-4 md:px-8 max-w-5xl mt-8 md:mt-12">
           <div className="grid gap-6 md:grid-cols-2">
             {GUIDES.map((guide, idx) => (
               <Link
