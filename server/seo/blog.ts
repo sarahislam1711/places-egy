@@ -3,6 +3,7 @@
 // (server/seo/routes.ts), so a post published in WordPress is a proper page
 // immediately instead of after the next deploy.
 import { attr, esc, injectBody, injectJsonLd, injectMeta } from "./html";
+import { isRedirectedPath } from "../redirects";
 
 const SITE = "https://places-egy.com";
 const CMS = "https://cms.places-egy.com";
@@ -241,9 +242,9 @@ export function renderBlogPost(shell: string, post: BlogPostMeta, lang: BlogLang
   const url = `${SITE}${base(lang)}/${post.slug}`;
   const alternates: Array<{ hreflang: string; url: string }> = [{ hreflang: lang, url }];
   if (lang === "en") {
-    if (post.otherLangSlug) alternates.push({ hreflang: "ar", url: `${SITE}/ar/blog/${post.otherLangSlug}` });
+    if (post.otherLangSlug && !isRedirectedPath(`/ar/blog/${post.otherLangSlug}`)) alternates.push({ hreflang: "ar", url: `${SITE}/ar/blog/${post.otherLangSlug}` });
     alternates.push({ hreflang: "x-default", url });
-  } else if (post.otherLangSlug) {
+  } else if (post.otherLangSlug && !isRedirectedPath(`/blog/${post.otherLangSlug}`)) {
     alternates.push({ hreflang: "en", url: `${SITE}/blog/${post.otherLangSlug}` });
     alternates.push({ hreflang: "x-default", url: `${SITE}/blog/${post.otherLangSlug}` });
   } else {

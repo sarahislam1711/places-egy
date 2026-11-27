@@ -285,7 +285,8 @@ async function collectLocationMeta(): Promise<RouteMeta[]> {
     const [, slug, displayName, subtitle] = m;
     out.push({
       route: `/locations/${slug}`,
-      title: `Offices in ${displayName} — Rent & Buy Admin Office Space | PLACES`,
+      // Area guides (27 Nov): /rent|buy/{area} own "offices for rent/sale in X".
+      title: `${displayName} Business District: Projects & Prices | PLACES`,
       description: subtitle,
       url: `${SITE}/locations/${slug}`,
     });

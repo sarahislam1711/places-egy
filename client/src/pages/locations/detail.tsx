@@ -97,7 +97,7 @@ export default function LocationDetail() {
   // (invalid slug hits the NotFound fallback below).
   useDocumentMeta({
     title: content
-      ? `Offices in ${content.displayName} — Rent & Buy Admin Office Space | PLACES`
+      ? `${content.displayName} Business District: Projects & Prices | PLACES`
       : "Location — PLACES",
     description: content
       ? content.subtitle

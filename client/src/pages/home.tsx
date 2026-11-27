@@ -48,7 +48,7 @@ import {
 
 export default function Home() {
   useDocumentMeta({
-    title: "Buy & Rent Admin Offices Across Egypt | PLACES",
+    title: "PLACES | Office Real Estate Advisors in Cairo, Egypt",
     description:
       "Buy, lease, or resell administrative offices across Cairo's top districts — New Cairo, Sheikh Zayed, 6th October, Downtown, Sheraton, and Maadi. Verified listings from trusted developers.",
     url: "https://places-egy.com/",

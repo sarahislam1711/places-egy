@@ -202,6 +202,10 @@ const PERMANENT_REDIRECTS: Record<string, string> = {
   // GSC 404 (crawled 24 Nov): the Arabic copy of the old New Cairo rent guide.
   // Its English twin already goes to /blog/offices-for-rent-new-cairo; this one
   // goes to the live Arabic post on the same topic.
+  // 27 Nov: merged into the guide — the two split the same searches in Search
+  // Console (post 28 / guide 27 impressions in 90 days). The WordPress post is
+  // left out of the blog sitemap and hreflang (isRedirectedPath).
+  "/blog/how-much-office-space-do-i-need": "/guides/office-size-guide",
   "/ar/blog/office-space-for-rent-in-new-cairo-a-practical-business-guide": "/ar/blog/مكاتب-إدارية-للإيجار-القاهرة-الجديدة",
   "/blog/where-to-buy-office-cairo-guide": "/blog/offices-for-sale-new-cairo",
   // Exact entry so this doesn't hop through the /resources/blog prefix rule
@@ -242,6 +246,11 @@ function safeDecodePath(s: string): string {
   } catch {
     return s;
   }
+}
+
+/** True when this exact path 301s elsewhere: keep it out of sitemaps and hreflang. */
+export function isRedirectedPath(path: string): boolean {
+  return DECODED_REDIRECTS.has(safeDecodePath(path).normalize("NFC"));
 }
 
 function lookupRedirect(rawPath: string): string | undefined {

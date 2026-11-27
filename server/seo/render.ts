@@ -272,7 +272,7 @@ export async function renderListingsIndex(page: number): Promise<string | null> 
   const meta: PageMeta =
     page === 1
       ? {
-          title: "Office Listings in Egypt — Rent & Buy Admin Offices | PLACES",
+          title: "Office Listings in Egypt — All Available Offices | PLACES",
           description: `Browse ${inventory.length} administrative offices for rent and sale across New Cairo, Sheikh Zayed, 6th October, Maadi, Downtown and Sheraton.`,
           url: `${SITE}/listings`,
         }

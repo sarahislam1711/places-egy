@@ -6,6 +6,7 @@
 import type { Express } from "express";
 import { buildPostEntries, fetchAllPosts, type WpPost } from "../../script/build-sitemap";
 import { getInventory } from "./data";
+import { isRedirectedPath } from "../redirects";
 import { builtFile, SITE } from "./render";
 import { DEAL_SLUGS, eligibleLandingPages, hubRows, landingRows } from "../../client/src/lib/landing-pages";
 
@@ -44,7 +45,9 @@ let blogCache: { at: number; xml: string } | null = null;
 async function blogXml(): Promise<string> {
   if (blogCache && Date.now() - blogCache.at < BLOG_TTL) return blogCache.xml;
   try {
-    const [en, ar]: [WpPost[], WpPost[]] = await Promise.all([fetchAllPosts("en"), fetchAllPosts("ar")]);
+    const [enAll, ar]: [WpPost[], WpPost[]] = await Promise.all([fetchAllPosts("en"), fetchAllPosts("ar")]);
+    // Posts that now 301 elsewhere (merged into a guide) stay out of the sitemap.
+    const en = enAll.filter((p) => !isRedirectedPath(`/blog/${p.slug}`));
     const enSlugs = new Map(en.map((p) => [p.id, p.slug]));
     const arSlugs = new Map(ar.map((p) => [p.id, p.slug]));
     const xml = [
