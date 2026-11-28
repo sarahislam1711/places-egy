@@ -34,6 +34,7 @@ import { TENANT_REP_PATH, tenantRepHtml } from "../../client/src/lib/tenant-rep-
 import { arabicPath, hasArabicTwin, localHref } from "../../client/src/lib/i18n";
 import { CAIRO_AR, FAQ_TOPIC_LABELS_AR, areaCopyAr, dealHeadingAr, hubCopyAr, medianLabelAr, projectLineAr, unitsAr } from "../../client/src/lib/landing-pages-ar";
 import { arabicListingTitle, areaAr } from "../../client/src/lib/listing-text-ar";
+import { HOME_AR, SERVICES_AR } from "../../client/src/lib/home-ar";
 
 // Service pages linked from the homepage's server render (crawlers had no
 // path from / to any service page).
@@ -375,6 +376,52 @@ export async function renderHome(): Promise<string> {
       `</ul>` +
       landingNav(inventory) +
       locationNav(),
+  );
+}
+
+// Arabic home (/ar, 29 Nov): Arabic meta + FAQ JSON-LD, lang="ar" dir="rtl"
+// from the first byte, and the same sections as the page in Arabic. Links go
+// to Arabic pages where they're live, English ones until then.
+export async function renderHomeAr(): Promise<string> {
+  const inventory = await getInventory();
+  const ar = (p: string) => localHref(p, "ar");
+  const live = hasArabicTwin("/");
+  let html = injectMeta(
+    shell(),
+    { title: HOME_AR.title, description: HOME_AR.description, url: `${SITE}/ar`, ...(live ? {} : { robots: "noindex, follow" }) },
+    { lang: "ar" },
+  );
+  html = arabicSkipNav(html);
+  html = injectJsonLd(html, faqSchema([...HOME_AR.faqs]));
+  const latest = inventory.filter((l) => l.rental_status !== "rented").slice(0, 12);
+  const areas = eligibleLandingPages(inventory);
+  const { h1 } = HOME_AR;
+  return injectBody(
+    html,
+    `<h1>${esc(h1.before + h1.accent + h1.after)}</h1>` +
+      `<p>${esc(HOME_AR.subLong)}</p>` +
+      `<h2>${esc(HOME_AR.newUnits)}</h2><ul>` +
+      latest.map((l) => `<li><a href="${l.path}">${esc(arabicListingTitle(l))}</a></li>`).join("") +
+      `</ul>` +
+      `<p><a href="${ar("/rent")}">${esc(dealHeadingAr("rent", CAIRO_AR))}</a> · <a href="${ar("/buy")}">${esc(dealHeadingAr("buy", CAIRO_AR))}</a> · <a href="${ar("/income-property")}">${esc(dealHeadingAr("income-property", CAIRO_AR))}</a></p>` +
+      `<h2>${esc(HOME_AR.servicesLong)}</h2><ul>` +
+      SERVICES_AR.map((sv) => `<li><a href="${ar(sv.href)}">${esc(sv.title)}</a>: ${esc(sv.desc)}</li>`).join("") +
+      `</ul>` +
+      `<h2>${esc(HOME_AR.howTitle)}</h2><ol>` +
+      HOME_AR.steps.map((st) => `<li><strong>${esc(st.title)}</strong>: ${esc(st.desc)}</li>`).join("") +
+      `</ol>` +
+      (areas.length
+        ? `<h2>عمليات بحث شائعة</h2><ul>` +
+          areas.map((p) => `<li><a href="${ar(p.path)}">${esc(dealHeadingAr(p.deal, areaAr(p.loc.slug)))}</a></li>`).join("") +
+          `</ul>`
+        : "") +
+      `<h2>${esc(HOME_AR.locTitle)}</h2><p>${esc(HOME_AR.locSub)}</p><ul>` +
+      LOCATIONS.map((loc) => `<li><a href="${ar(`/locations/${loc.slug}`)}">${esc(areaAr(loc.slug))}</a></li>`).join("") +
+      `</ul>` +
+      `<h2>${esc(HOME_AR.faqTitle)}</h2>` +
+      HOME_AR.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
+      `<h2>${esc(HOME_AR.finalTitle)}</h2><p>${esc(HOME_AR.finalText)} <a href="${ar("/contact")}">${esc(HOME_AR.finalCta)}</a></p>`,
+    "ar",
   );
 }
 

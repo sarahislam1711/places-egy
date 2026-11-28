@@ -134,7 +134,9 @@ const PRERENDER_HEAD =
   `<style>.js #prerender{display:none}</style>`;
 
 export function injectBody(html: string, inner: string, lang: "en" | "ar" = "en"): string {
-  const nav = NAV_LINKS[lang].map(([href, label]) => `<li><a href="${href}">${esc(label)}</a></li>`).join("");
+  // Arabic pages link to the Arabic twin wherever one is live.
+  const link = (href: string) => (lang === "ar" && !href.startsWith("/ar") ? localHref(href, "ar") : href);
+  const nav = NAV_LINKS[lang].map(([href, label]) => `<li><a href="${link(href)}">${esc(label)}</a></li>`).join("");
   const block =
     `<div id="prerender" dir="${lang === "ar" ? "rtl" : "ltr"}" class="container mx-auto px-5 md:px-10 max-w-3xl py-16">` +
     `${inner}<nav><ul>${nav}</ul></nav></div>`;

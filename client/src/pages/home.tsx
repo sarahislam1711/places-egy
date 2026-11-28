@@ -1,4 +1,4 @@
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { CornerSlideMagnet } from "@/components/magnets/CornerSlideMagnet";
@@ -9,12 +9,15 @@ import { ServicesExplorer } from "@/components/ServicesExplorer";
 import { DeveloperStrip } from "@/components/DeveloperStrip";
 import { DealAnnouncementCarousel } from "@/components/DealAnnouncementCarousel";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { ListingCardAr } from "@/components/listings/ListingCardAr";
 import { ArrowRight, Building2, ClipboardList, BarChart3, ShieldCheck, CheckCircle2, Coins } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase, type Listing } from "@/lib/supabase";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { faqSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
+import { hasArabicTwin, langOfPath, localHref } from "@/lib/i18n";
+import { HOME_AR } from "@/lib/home-ar";
 
 const HOME_FAQS = [
   {
@@ -46,13 +49,33 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 
+// "/" and its Arabic twin "/ar" (29 Nov): one template, Arabic text from
+// lib/home-ar.ts. The server renders the same Arabic copy for crawlers
+// (renderHomeAr) including the Arabic FAQ JSON-LD.
 export default function Home() {
-  useDocumentMeta({
-    title: "PLACES | Office Real Estate Advisors in Cairo, Egypt",
-    description:
-      "Buy, lease, or resell administrative offices across Cairo's top districts — New Cairo, Sheikh Zayed, 6th October, Downtown, Sheraton, and Maadi. Verified listings from trusted developers.",
-    url: "https://places-egy.com/",
-  });
+  const [rawPath] = useLocation();
+  const isAr = langOfPath(rawPath) === "ar";
+  const lang = isAr ? "ar" : "en";
+  const L = (enPath: string) => localHref(enPath, lang);
+  const T = isAr ? HOME_AR : null;
+  // Arabic: "Find an office" opens the Arabic listings once they're live; the
+  // Arabic rent hub until then (keeps Arabic readers on Arabic pages).
+  const findHref = isAr && !hasArabicTwin("/listings") ? L("/rent") : L("/listings");
+  // Area cards: Arabic area guide when live, else the Arabic rent page for that
+  // area, else the English guide.
+  const areaHref = (slug: string) =>
+    !isAr || hasArabicTwin(`/locations/${slug}`) ? L(`/locations/${slug}`) : hasArabicTwin(`/rent/${slug}`) ? L(`/rent/${slug}`) : `/locations/${slug}`;
+
+  useDocumentMeta(
+    T
+      ? { title: T.title, description: T.description, url: "https://places-egy.com/ar" }
+      : {
+          title: "PLACES | Office Real Estate Advisors in Cairo, Egypt",
+          description:
+            "Buy, lease, or resell administrative offices across Cairo's top districts — New Cairo, Sheikh Zayed, 6th October, Downtown, Sheraton, and Maadi. Verified listings from trusted developers.",
+          url: "https://places-egy.com/",
+        },
+  );
 
   const { data: listings = [] } = useQuery<Listing[]>({
     // Own key + limit: the homepage shows 4 cards; fetching all listings
@@ -73,8 +96,9 @@ export default function Home() {
   });
 
   return (
-    <div className="min-h-screen font-sans flex flex-col bg-background">
-      <SchemaMarkup schema={faqSchema(HOME_FAQS)} />
+    <div className="min-h-screen font-sans flex flex-col bg-background" lang={isAr ? "ar" : undefined}>
+      {/* Arabic FAQ JSON-LD comes from the server render. */}
+      {!isAr && <SchemaMarkup schema={faqSchema(HOME_FAQS)} />}
       <Navbar />
 
       {/* Hero Section */}
@@ -82,7 +106,7 @@ export default function Home() {
         <div className="absolute inset-0 z-0">
           <img
             src="/images/hero-section.jpg"
-            alt="Modern Office Building"
+            alt={T ? T.heroAlt : "Modern Office Building"}
             fetchPriority="high"
             decoding="async"
             className="w-full h-full object-cover"
@@ -94,26 +118,36 @@ export default function Home() {
         <div className="relative z-10 container mx-auto px-6 md:px-10 max-w-7xl text-center text-white">
           <div className="animate-in fade-in zoom-in duration-1000 slide-in-from-bottom-10">
             <h1 className="font-serif text-4xl sm:text-5xl md:text-7xl font-bold mb-4 md:mb-6 tracking-tight leading-tight text-white">
-              Find <span className="text-accent">Your Office</span> in Egypt
+              {T ? (
+                <>
+                  {T.h1.before}
+                  <span className="text-accent">{T.h1.accent}</span>
+                  {T.h1.after}
+                </>
+              ) : (
+                <>
+                  Find <span className="text-accent">Your Office</span> in Egypt
+                </>
+              )}
             </h1>
             {/* Mobile gets the tight one-line subtitle; sm+ gets the fuller
                 statement. Prevents 3-line wrap on phones. */}
             <p className="text-base md:text-xl text-white mb-6 md:mb-10 max-w-2xl mx-auto font-medium leading-relaxed">
-              <span className="sm:hidden">Cairo offices, real advice, no pressure.</span>
+              <span className="sm:hidden">{T ? T.subShort : "Cairo offices, real advice, no pressure."}</span>
               <span className="hidden sm:inline">
-                Browse offices across Egypt's top business districts and get expert market guidance before you commit to anything.
+                {T ? T.subLong : "Browse offices across Egypt's top business districts and get expert market guidance before you commit to anything."}
               </span>
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
-              <Link href="/listings">
+              <Link href={findHref}>
                 <Button size="lg" className="bg-accent text-white hover:bg-accent/90 font-bold px-6 h-12 text-base md:px-8 md:h-14 md:text-lg shadow-xl shadow-accent/30 transition-all hover:scale-105">
-                  Find an Office
+                  {T ? T.ctaFind : "Find an Office"}
                 </Button>
               </Link>
-              <Link href="/contact">
+              <Link href={L("/contact")}>
                 <Button size="lg" variant="outline" className="border-white text-white hover:bg-white hover:text-primary font-medium px-6 h-12 text-base md:px-8 md:h-14 md:text-lg backdrop-blur-sm bg-white/10">
-                  Talk to Us
+                  {T ? T.ctaTalk : "Talk to Us"}
                 </Button>
               </Link>
             </div>
@@ -132,30 +166,30 @@ export default function Home() {
       <FadeInSection>
         <section className="pt-8 md:pt-10 pb-6 md:pb-8 relative z-20 bg-white/60 backdrop-blur-sm">
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 text-center md:divide-x md:divide-primary/10">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-y-6 text-center md:divide-x md:rtl:divide-x-reverse md:divide-primary/10">
               <div className="md:px-4">
-                <p className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
+                <p dir="ltr" className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
                   <CountUp end={50} duration={3500} suffix="+" />
                 </p>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">Developers</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">{T ? T.stats.developers : "Developers"}</p>
               </div>
               <div className="md:px-4">
-                <p className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
+                <p dir="ltr" className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
                   <CountUp end={1000} duration={3500} suffix="+" />
                 </p>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">Listings</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">{T ? T.stats.listings : "Listings"}</p>
               </div>
               <div className="md:px-4">
-                <p className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
+                <p dir="ltr" className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
                   <CountUp end={6} duration={3500} />
                 </p>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">Key Locations</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">{T ? T.stats.locations : "Key Locations"}</p>
               </div>
               <div className="md:px-4">
-                <p className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
+                <p dir="ltr" className="text-2xl md:text-4xl font-serif font-bold text-primary hover:text-accent transition-colors cursor-default mb-1">
                   <CountUp end={500} duration={3500} suffix="+" />
                 </p>
-                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">Businesses Helped</p>
+                <p className="text-[10px] md:text-xs text-muted-foreground uppercase tracking-widest">{T ? T.stats.businesses : "Businesses Helped"}</p>
               </div>
             </div>
           </div>
@@ -168,10 +202,10 @@ export default function Home() {
       <FadeInSection>
         <section className="pt-14 md:pt-20 pb-6">
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
-            <p className="text-[11px] font-bold uppercase tracking-widest text-accent mb-4 text-center md:text-left">
-              Recently Closed
+            <p className="text-[11px] font-bold uppercase tracking-widest text-accent mb-4 text-center md:text-start">
+              {T ? T.recentlyClosed : "Recently Closed"}
             </p>
-            <DealAnnouncementCarousel />
+            <DealAnnouncementCarousel lang={lang} />
           </div>
         </section>
       </FadeInSection>
@@ -186,23 +220,23 @@ export default function Home() {
                   <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 animate-ping" />
                   <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-accent" />
                 </span>
-                New Available Units
+                {T ? T.newUnits : "New Available Units"}
               </span>
-              <Link href="/listings" className="hidden md:inline-flex items-center text-primary font-medium hover:text-accent transition-colors group">
-                View all available offices <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" />
+              <Link href={findHref} className="hidden md:inline-flex items-center text-primary font-medium hover:text-accent transition-colors group">
+                {T ? T.viewAll : "View all available offices"} <ArrowRight className="ms-2 w-4 h-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
               </Link>
             </div>
 
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
               {listings.slice(0, 4).map((listing) => (
-                <ListingCard key={listing.id} listing={listing} />
+                isAr ? <ListingCardAr key={listing.id} listing={listing} /> : <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
 
             <div className="mt-12 text-center md:hidden">
-              <Link href="/listings">
+              <Link href={findHref}>
                 <Button variant="outline" className="w-full border-primary text-primary hover:bg-primary hover:text-white">
-                  View all listings
+                  {T ? T.viewAll : "View all listings"}
                 </Button>
               </Link>
             </div>
@@ -212,7 +246,7 @@ export default function Home() {
 
       {/* Developer Logo Strip */}
       <FadeInSection>
-        <DeveloperStrip />
+        <DeveloperStrip lang={lang} />
       </FadeInSection>
 
       {/* Services */}
@@ -221,12 +255,12 @@ export default function Home() {
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             <div className="mb-8 md:mb-16">
               <h2 className="text-3xl md:text-5xl font-serif font-bold text-primary mb-4 leading-tight">
-                <span className="md:hidden">Real estate services</span>
-                <span className="hidden md:inline">Comprehensive real estate services</span>
+                <span className="md:hidden">{T ? T.servicesShort : "Real estate services"}</span>
+                <span className="hidden md:inline">{T ? T.servicesLong : "Comprehensive real estate services"}</span>
               </h2>
             </div>
 
-            <ServicesExplorer />
+            <ServicesExplorer lang={lang} />
           </div>
         </section>
       </FadeInSection>
@@ -237,33 +271,33 @@ export default function Home() {
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             {/* Compact photo-background CTA tiles — icon + title + CTA only. */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-              <Link href="/buy" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
-                <img src="/images/admin 1.jpg" alt="Buy an office" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <Link href={L("/buy")} className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
+                <img src="/images/admin 1.jpg" alt={T ? T.buy.alt : "Buy an office"} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-primary/70 transition-colors duration-500 group-hover:bg-primary/60" />
                 <div className="relative h-full flex flex-col justify-between p-5 md:p-6">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white">
                     <Coins className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-serif text-xl md:text-2xl font-bold text-white mb-1">Buy an office</h3>
+                    <h3 className="font-serif text-xl md:text-2xl font-bold text-white mb-1">{T ? T.buy.title : "Buy an office"}</h3>
                     <span className="inline-flex items-center text-white font-bold uppercase tracking-wider text-[11px] md:text-xs group-hover:text-accent transition-colors">
-                      Browse offices for sale <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      {T ? T.buy.cta : "Browse offices for sale"} <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
                     </span>
                   </div>
                 </div>
               </Link>
 
-              <Link href="/rent" className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
-                <img src="/images/admin 2.jpg" alt="Rent an office" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <Link href={L("/rent")} className="group relative h-40 md:h-44 rounded-2xl overflow-hidden cursor-pointer block shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500">
+                <img src="/images/admin 2.jpg" alt={T ? T.rent.alt : "Rent an office"} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-linear-to-t from-[#2E2A28]/85 via-[#2E2A28]/45 to-[#2E2A28]/30 transition-opacity duration-500 group-hover:opacity-90" />
                 <div className="relative h-full flex flex-col justify-between p-5 md:p-6">
                   <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white/10 backdrop-blur-sm border border-white/20 text-white">
                     <Building2 className="h-5 w-5" />
                   </div>
                   <div>
-                    <h3 className="font-serif text-xl md:text-2xl font-bold text-white mb-1">Rent an office</h3>
+                    <h3 className="font-serif text-xl md:text-2xl font-bold text-white mb-1">{T ? T.rent.title : "Rent an office"}</h3>
                     <span className="inline-flex items-center text-white font-bold uppercase tracking-wider text-[11px] md:text-xs group-hover:text-accent transition-colors">
-                      Browse offices for rent <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      {T ? T.rent.cta : "Browse offices for rent"} <ArrowRight className="ms-2 h-4 w-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" />
                     </span>
                   </div>
                 </div>
@@ -279,9 +313,9 @@ export default function Home() {
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             <div className="bg-primary/95 text-white rounded-3xl p-10 md:p-14 shadow-lg shadow-primary/5">
               <div className="text-center mb-10 max-w-2xl mx-auto">
-                <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3 text-white">The right space for your business exists.</h2>
+                <h2 className="text-2xl md:text-4xl font-serif font-bold mb-3 text-white">{T ? T.howTitle : "The right space for your business exists."}</h2>
                 <p className="text-white/60 text-base">
-                  We're here to make sure you find it fast.
+                  {T ? T.howSub : "We're here to make sure you find it fast."}
                 </p>
               </div>
 
@@ -291,7 +325,7 @@ export default function Home() {
                   { icon: BarChart3, title: "Analyze", desc: "We survey the market, map competing supply & identify options that align with your office requirements." },
                   { icon: ShieldCheck, title: "Advise", desc: "We give you an objective view of your options, including the risks, the trade-offs & even what we'd do in your position." },
                   { icon: CheckCircle2, title: "Execute", desc: "We manage the transaction from offer to handover so nothing falls through the cracks." }
-                ].map((step, i) => (
+                ].map((step, i) => (T ? { ...step, ...T.steps[i] } : step)).map((step, i) => (
                   <div key={i} className="bg-white/[0.04] rounded-2xl p-6 hover:bg-white/[0.08] transition-all duration-300">
                     <div className="w-10 h-10 bg-accent/15 rounded-full flex items-center justify-center mb-4 text-accent">
                       <step.icon className="w-5 h-5" />
@@ -303,8 +337,8 @@ export default function Home() {
               </div>
 
               <div className="mt-10 text-center">
-                <Link href="/contact" className="inline-flex items-center text-accent font-medium hover:text-white transition-colors">
-                  Tell us what you need — we'll handle the rest <ArrowRight className="ml-2 w-4 h-4" />
+                <Link href={L("/contact")} className="inline-flex items-center text-accent font-medium hover:text-white transition-colors">
+                  {T ? T.howCta : "Tell us what you need — we'll handle the rest"} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
                 </Link>
               </div>
             </div>
@@ -318,38 +352,38 @@ export default function Home() {
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             <div className="flex flex-col md:flex-row justify-between items-end mb-12">
               <div>
-                <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">Prime locations</h2>
-                <p className="text-muted-foreground text-lg">Discover offices in Egypt's most sought-after business districts.</p>
+                <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-2">{T ? T.locTitle : "Prime locations"}</h2>
+                <p className="text-muted-foreground text-lg">{T ? T.locSub : "Discover offices in Egypt's most sought-after business districts."}</p>
               </div>
-              <Link href="/locations">
-                <Button variant="ghost" className="hidden md:flex">View All Locations <ArrowRight className="ml-2 w-4 h-4" /></Button>
+              <Link href={L("/locations")}>
+                <Button variant="ghost" className="hidden md:flex">{T ? T.locAll : "View All Locations"} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" /></Button>
               </Link>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
-              <Link href="/locations/new-cairo" className="group relative h-72 md:h-105 rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
-                <img src="/images/new-cairo.jpg" alt="New Cairo" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              <Link href={areaHref("new-cairo")} className="group relative h-72 md:h-105 rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
+                <img src="/images/new-cairo.jpg" alt={isAr ? "التجمع الخامس" : "New Cairo"} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                 <div className="absolute inset-0 bg-linear-to-t from-black/85 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 p-8">
-                  <h3 className="text-3xl font-serif text-white font-bold mb-2">New Cairo</h3>
-                  <p className="text-gray-300 mb-4">The new heart of business with premium administrative hubs.</p>
-                  <span className="text-accent text-sm font-bold uppercase tracking-wider flex items-center gap-2">Explore <ArrowRight className="w-4 h-4" /></span>
+                <div className="absolute bottom-0 start-0 p-8">
+                  <h3 className="text-3xl font-serif text-white font-bold mb-2">{isAr ? "التجمع الخامس" : "New Cairo"}</h3>
+                  <p className="text-gray-300 mb-4">{T ? T.newCairoBlurb : "The new heart of business with premium administrative hubs."}</p>
+                  <span className="text-accent text-sm font-bold uppercase tracking-wider flex items-center gap-2">{T ? T.explore : "Explore"} <ArrowRight className="w-4 h-4 rtl:rotate-180" /></span>
                 </div>
               </Link>
 
               <div className="grid grid-rows-2 gap-6 md:min-h-105">
-                <Link href="/locations/sheikh-zayed" className="group relative h-44 md:h-auto rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
-                  <img src="/images/Sheikh-zayed.jpg" alt="Sheikh Zayed" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Link href={areaHref("sheikh-zayed")} className="group relative h-44 md:h-auto rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
+                  <img src="/images/Sheikh-zayed.jpg" alt={isAr ? "الشيخ زايد" : "Sheikh Zayed"} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6">
-                    <h3 className="text-2xl font-serif text-white font-bold">Sheikh Zayed</h3>
+                  <div className="absolute bottom-0 start-0 p-6">
+                    <h3 className="text-2xl font-serif text-white font-bold">{isAr ? "الشيخ زايد" : "Sheikh Zayed"}</h3>
                   </div>
                 </Link>
-                <Link href="/locations/downtown-cairo" className="group relative h-44 md:h-auto rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
-                  <img src="/images/downtown-cairo.jpg" alt="Downtown Cairo" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                <Link href={areaHref("downtown-cairo")} className="group relative h-44 md:h-auto rounded-2xl overflow-hidden cursor-pointer shadow-lg shadow-primary/5 hover:shadow-2xl hover:shadow-primary/10 transition-all duration-500 block">
+                  <img src="/images/downtown-cairo.jpg" alt={isAr ? "وسط البلد" : "Downtown Cairo"} loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
                   <div className="absolute inset-0 bg-linear-to-t from-black/80 to-transparent" />
-                  <div className="absolute bottom-0 left-0 p-6">
-                    <h3 className="text-2xl font-serif text-white font-bold">Downtown Cairo</h3>
+                  <div className="absolute bottom-0 start-0 p-6">
+                    <h3 className="text-2xl font-serif text-white font-bold">{isAr ? "وسط البلد" : "Downtown Cairo"}</h3>
                   </div>
                 </Link>
               </div>
@@ -362,43 +396,18 @@ export default function Home() {
       <FadeInSection>
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
-            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary mb-8">Frequently asked questions</h2>
+            <h2 className="text-2xl md:text-4xl font-serif font-bold text-primary mb-8">{T ? T.faqTitle : "Frequently asked questions"}</h2>
             <Accordion type="single" collapsible className="w-full">
-              <AccordionItem value="item-1" className="border-b border-border/40">
-                <AccordionTrigger className="text-lg font-medium text-primary hover:text-accent hover:no-underline text-left">
-                  What types of properties does PLACES list?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                  PLACES is specialized in administrative office real estate across Cairo's top business districts. Listings include business parks, business buildings, and mixed-use developments, all available for sale or rent depending on the unit.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-2" className="border-b border-border/40">
-                <AccordionTrigger className="text-lg font-medium text-primary hover:text-accent hover:no-underline text-left">
-                  Which locations in Egypt does PLACES cover?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                  PLACES covers six key business districts in Cairo and Greater Cairo: New Cairo, Sheikh Zayed, 6th October, Downtown Cairo, Sheraton, and Maadi. These locations represent Egypt's most active administrative real estate markets.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-3" className="border-b border-border/40">
-                <AccordionTrigger className="text-lg font-medium text-primary hover:text-accent hover:no-underline text-left">
-                  Does PLACES help with both buying and leasing?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                  Yes. PLACES assists with leasing, primary property purchases, resale transactions, and investment acquisitions. Whether you are a business looking to rent office space or an investor buying an office for income, PLACES provides advisory and market access for both.
-                </AccordionContent>
-              </AccordionItem>
-
-              <AccordionItem value="item-5">
-                <AccordionTrigger className="text-lg font-medium text-primary hover:text-accent hover:no-underline text-left">
-                  How is PLACES different from a regular real estate broker?
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-base leading-relaxed">
-                  PLACES goes beyond listing availability. Before you commit to any space, we conduct a market survey, evaluate shortlisted units against your requirements, and perform due diligence on developer credibility, contract terms, and service charge history. The goal is to make sure you choose the right space — not just an available one.
-                </AccordionContent>
-              </AccordionItem>
+              {(T ? T.faqs : HOME_FAQS).map((f, i, all) => (
+                <AccordionItem key={f.question} value={`item-${i + 1}`} className={i < all.length - 1 ? "border-b border-border/40" : undefined}>
+                  <AccordionTrigger className="text-lg font-medium text-primary hover:text-accent hover:no-underline text-start">
+                    {f.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground text-base leading-relaxed">
+                    {f.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
             </Accordion>
           </div>
         </section>
@@ -409,13 +418,13 @@ export default function Home() {
         <section className="py-8 md:py-12">
           <div className="container mx-auto px-6 md:px-10 max-w-7xl">
             <div className="bg-white rounded-3xl shadow-xl shadow-primary/5 border border-border/40 p-12 md:p-20 text-center">
-              <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-6">Need personalized guidance?</h2>
+              <h2 className="text-4xl md:text-5xl font-serif font-bold text-primary mb-6">{T ? T.finalTitle : "Need personalized guidance?"}</h2>
               <p className="text-lg text-muted-foreground mb-10 max-w-2xl mx-auto leading-relaxed">
-                Our team is ready to listen to your requirements and offer tailored advice for your business. No pressure, just expert support.
+                {T ? T.finalText : "Our team is ready to listen to your requirements and offer tailored advice for your business. No pressure, just expert support."}
               </p>
-              <Link href="/contact">
+              <Link href={L("/contact")}>
                 <Button size="lg" className="bg-accent hover:bg-accent/90 text-white px-6 h-12 text-base md:px-10 md:h-14 md:text-lg font-medium shadow-lg shadow-accent/30 transition-all hover:scale-105">
-                  Talk to an Advisor
+                  {T ? T.finalCta : "Talk to an Advisor"}
                 </Button>
               </Link>
             </div>
@@ -424,7 +433,7 @@ export default function Home() {
       </FadeInSection>
 
       <Footer />
-      <CornerSlideMagnet />
+      {!isAr && <CornerSlideMagnet />}
     </div>
   );
 }

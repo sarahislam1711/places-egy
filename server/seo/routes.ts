@@ -1,5 +1,5 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { renderDealHub, renderDealHubAr, renderLandingAr, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
+import { renderDealHub, renderDealHubAr, renderHomeAr, renderLandingAr, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
 import { findBlogPost, getBlogData, renderBlogHub, renderBlogPost, type BlogLang } from "./blog";
 import { getListingById } from "./data";
 import { registerSitemapRoutes } from "./sitemap";
@@ -36,6 +36,8 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
     };
 
   app.get(["/", "/index.html"], send(() => renderHome()));
+  // Arabic home (29 Nov).
+  app.get("/ar", send(() => renderHomeAr()));
   // Cloudflare's page rule rewrites /listings to /listings/index.html at the edge.
   app.get(["/listings", "/listings/index.html"], send(() => renderListingsIndex(1)));
   app.get("/listings/page/:n", (req, res, next) => {

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { MapPin, X } from "lucide-react";
+import { DEAL_AR, dealValueAr } from "@/lib/home-ar";
 
 // Deal Announcement — a full-bleed "Done Deal" strip that deliberately breaks
 // the boxed-card rhythm of the homepage so a freshly-closed deal reads as an
@@ -24,6 +25,8 @@ export interface DealAnnouncementProps {
   leaseFormat: string;
   /** Show a dismiss control (for a persistent strip). */
   dismissible?: boolean;
+  /** "ar" on /ar pages: Arabic labels, RTL-mirrored ribbon and ghost figure. */
+  lang?: "en" | "ar";
 }
 
 function formatSqm(sqm: number | string): string {
@@ -39,7 +42,9 @@ export function DealAnnouncement({
   spaceType,
   leaseFormat,
   dismissible = false,
+  lang = "en",
 }: DealAnnouncementProps) {
+  const ar = lang === "ar";
   const [dismissed, setDismissed] = useState(false);
   if (dismissed) return null;
 
@@ -47,7 +52,7 @@ export function DealAnnouncement({
 
   return (
     <section
-      aria-label={`Latest closed deal: ${sqmLabel} square metres leased to ${clientName} in ${location}`}
+      aria-label={ar ? DEAL_AR.aria(sqmLabel, clientName, location) : `Latest closed deal: ${sqmLabel} square metres leased to ${clientName} in ${location}`}
       className="group relative overflow-hidden rounded-2xl border border-[#ECE7D8]/10 bg-[#16161A] text-[#ECE7D8] shadow-lg shadow-black/20 motion-safe:animate-[dealBreathe_3s_ease-in-out_infinite] motion-safe:will-change-transform"
     >
       {/* Animated coral hue — a soft radial wash that drifts/pulses behind the
@@ -88,7 +93,7 @@ export function DealAnnouncement({
           the card is more legible without it. Kept on md+. */}
       <span
         aria-hidden
-        className="pointer-events-none absolute -right-4 top-1/2 -translate-y-1/2 select-none font-serif font-bold leading-none text-[#ECE7D8]/[0.045] hidden md:block md:text-[15rem]"
+        className={`pointer-events-none absolute ${ar ? "-left-4" : "-right-4"} top-1/2 -translate-y-1/2 select-none font-serif font-bold leading-none text-[#ECE7D8]/[0.045] hidden md:block md:text-[15rem]`}
       >
         {sqmLabel}
       </span>
@@ -99,9 +104,9 @@ export function DealAnnouncement({
           fully readable. */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-[52px] top-[22px] z-20 hidden w-[180px] rotate-45 bg-accent py-1 text-center text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground shadow-md sm:block"
+        className={`pointer-events-none absolute ${ar ? "-left-[52px] -rotate-45 tracking-normal" : "-right-[52px] rotate-45 tracking-[0.22em]"} top-[22px] z-20 hidden w-[180px] bg-accent py-1 text-center text-[10px] font-bold uppercase text-accent-foreground shadow-md sm:block`}
       >
-        Just Closed
+        {ar ? DEAL_AR.justClosed : "Just Closed"}
       </div>
 
       {dismissible && (
@@ -109,7 +114,7 @@ export function DealAnnouncement({
           type="button"
           onClick={() => setDismissed(true)}
           aria-label="Dismiss deal announcement"
-          className="absolute right-3 top-3 z-30 flex h-8 w-8 items-center justify-center rounded-full text-[#ECE7D8]/50 transition-colors hover:bg-[#ECE7D8]/10 hover:text-[#ECE7D8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="absolute end-3 top-3 z-30 flex h-8 w-8 items-center justify-center rounded-full text-[#ECE7D8]/50 transition-colors hover:bg-[#ECE7D8]/10 hover:text-[#ECE7D8] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           <X className="h-4 w-4" />
         </button>
@@ -126,7 +131,7 @@ export function DealAnnouncement({
               <span className="absolute inline-flex h-full w-full rounded-full bg-accent opacity-75 motion-safe:animate-ping" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-accent" />
             </span>
-            New Deal
+            {ar ? DEAL_AR.newDeal : "New Deal"}
           </span>
           <div className="flex items-baseline gap-2">
             {/* Hero number — smaller on mobile so it doesn't overrun the
@@ -135,9 +140,9 @@ export function DealAnnouncement({
               {sqmLabel}
             </span>
             <span className="text-[9px] md:text-[10px] font-bold uppercase leading-tight tracking-[0.2em] text-[#ECE7D8]/55">
-              SQM
+              {ar ? DEAL_AR.sqm : "SQM"}
               <br />
-              Leased
+              {ar ? DEAL_AR.leased : "Leased"}
             </span>
           </div>
         </div>
@@ -149,10 +154,10 @@ export function DealAnnouncement({
             width), Location spanning the full width below them. */}
         <div className="flex flex-col gap-2">
           <div className="flex gap-2">
-            <DealTag category="Space Type" value={spaceType} variant="filled" className="flex-1" />
-            <DealTag category="Term" value={leaseFormat} variant="outline" className="flex-1" />
+            <DealTag category={ar ? DEAL_AR.spaceType : "Space Type"} value={ar ? dealValueAr(spaceType) : spaceType} variant="filled" className="flex-1" />
+            <DealTag category={ar ? DEAL_AR.term : "Term"} value={ar ? dealValueAr(leaseFormat) : leaseFormat} variant="outline" className="flex-1" />
           </div>
-          <DealTag category="Location" value={location} variant="outline" icon={<MapPin className="h-3 w-3" />} className="w-full" />
+          <DealTag category={ar ? DEAL_AR.location : "Location"} value={location} variant="outline" icon={<MapPin className="h-3 w-3" />} className="w-full" />
         </div>
 
         {/* Client logo — sized to hold real visual weight against the
@@ -162,11 +167,11 @@ export function DealAnnouncement({
             Mobile stays compact so the card doesn't need extra vertical
             room to fit the logo. */}
         {clientLogo && (
-          <div className="flex shrink-0 items-center md:border-l md:border-[#ECE7D8]/15 md:pl-6 md:pr-10">
+          <div className="flex shrink-0 items-center md:border-s md:border-[#ECE7D8]/15 md:ps-6 md:pe-10">
             <div className="flex h-12 w-36 md:h-32 md:w-80 items-center justify-center mx-auto md:mx-0">
               <img
                 src={clientLogo}
-                alt={`${clientName} logo`}
+                alt={ar ? `شعار ${clientName}` : `${clientName} logo`}
                 loading="lazy"
                 decoding="async"
                 className="w-full h-full object-contain opacity-95 brightness-0 invert"

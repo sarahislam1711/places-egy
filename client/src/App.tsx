@@ -342,6 +342,7 @@ function Router() {
       <Route path="/buy" component={DealHubPage} />
       <Route path="/income-property" component={DealHubPage} />
       {/* Arabic site (28 Nov): hubs. Listed in AR_LIVE (lib/i18n.ts) only once checked. */}
+      <Route path="/ar" component={Home} />
       <Route path="/ar/rent" component={DealHubPage} />
       <Route path="/ar/buy" component={DealHubPage} />
       <Route path="/ar/income-property" component={DealHubPage} />

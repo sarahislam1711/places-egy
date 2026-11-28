@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Link } from "wouter";
 import { Handshake, Building2, Repeat, TrendingUp, Coins, ArrowRight } from "lucide-react";
+import { HOME_AR, SERVICES_AR } from "@/lib/home-ar";
+import { localHref, type Lang } from "@/lib/i18n";
 
 const services = [
   {
@@ -35,21 +37,27 @@ const services = [
   },
 ];
 
-export function ServicesExplorer() {
+export function ServicesExplorer({ lang = "en" }: { lang?: Lang } = {}) {
   const [active, setActive] = useState(0);
-  const current = services[active];
+  // Arabic: same icons and order, Arabic text (lib/home-ar.ts); links go to the
+  // Arabic service pages once they are live, the English ones until then.
+  const list =
+    lang === "ar"
+      ? services.map((s, i) => ({ ...s, title: SERVICES_AR[i].title, desc: SERVICES_AR[i].desc, link: localHref(SERVICES_AR[i].href, "ar") }))
+      : services;
+  const current = list[active];
 
   return (
     <div className="grid md:grid-cols-[280px_1fr] gap-6 items-stretch">
       {/* Left — service list */}
       <div className="flex md:flex-col gap-2 overflow-x-auto md:overflow-visible pb-2 md:pb-0 md:justify-between">
-        {services.map((service, i) => {
+        {list.map((service, i) => {
           const isActive = i === active;
           return (
             <button
               key={i}
               onClick={() => setActive(i)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-left transition-all whitespace-nowrap md:whitespace-normal shrink-0 md:shrink ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-start transition-all whitespace-nowrap md:whitespace-normal shrink-0 md:shrink ${
                 isActive
                   ? "bg-primary text-white shadow-md"
                   : "bg-white text-primary hover:bg-primary/5 border border-border/40"
@@ -77,7 +85,7 @@ export function ServicesExplorer() {
           href={current.link}
           className="inline-flex items-center text-accent font-medium hover:text-primary transition-colors mt-6"
         >
-          Learn more <ArrowRight className="ml-2 w-4 h-4" />
+          {lang === "ar" ? HOME_AR.learnMore : "Learn more"} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
         </Link>
       </div>
     </div>

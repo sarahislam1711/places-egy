@@ -1,4 +1,6 @@
 import { Link } from "wouter";
+import { HOME_AR } from "@/lib/home-ar";
+import { localHref, type Lang } from "@/lib/i18n";
 
 // Add `slug` for a developer once its detail page is created.
 // Logos with a slug become clickable links; logos without stay static.
@@ -16,15 +18,17 @@ const DEVELOPERS: { name: string; logo: string; slug?: string }[] = [
   { name: "Arabella", logo: "/images/arabella-developments.png", slug: "arabella" },
 ];
 
-export function DeveloperStrip() {
+export function DeveloperStrip({ lang = "en" }: { lang?: Lang } = {}) {
+  const ar = lang === "ar";
   return (
     <section className="py-6">
       <div className="container mx-auto px-4 text-center">
         <h3 className="text-sm font-bold text-accent uppercase tracking-widest mb-4">
-          Trusted developer partners
+          {ar ? HOME_AR.developers : "Trusted developer partners"}
         </h3>
       </div>
-      <div className="overflow-hidden">
+      {/* Logos only: kept left-to-right so the marquee also scrolls cleanly on Arabic pages. */}
+      <div className="overflow-hidden" dir="ltr">
         <div
           className="flex items-center gap-0 w-max"
           style={{ animation: "marquee 30s linear infinite" }}
@@ -33,7 +37,7 @@ export function DeveloperStrip() {
             const logo = (
               <img
                 src={dev.logo}
-                alt={`${dev.name} logo`}
+                alt={ar ? `شعار ${dev.name}` : `${dev.name} logo`}
                 loading="lazy"
                 decoding="async"
                 className="max-h-full max-w-full object-contain grayscale opacity-50 group-hover:grayscale-0 group-hover:opacity-100 transition-all duration-300"
@@ -44,9 +48,9 @@ export function DeveloperStrip() {
             return dev.slug ? (
               <Link
                 key={i}
-                href={`/developers/${dev.slug}`}
+                href={localHref(`/developers/${dev.slug}`, lang)}
                 className={`${baseClass} cursor-pointer`}
-                aria-label={`View ${dev.name} developer page`}
+                aria-label={ar ? `صفحة المطور ${dev.name}` : `View ${dev.name} developer page`}
               >
                 {logo}
               </Link>

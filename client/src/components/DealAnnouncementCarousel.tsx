@@ -4,13 +4,15 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { DealAnnouncement } from "@/components/DealAnnouncement";
 import type { Deal } from "@/lib/deals";
 import { trackEvent } from "@/lib/analytics";
+import { DEAL_AR } from "@/lib/home-ar";
 
 // Homepage carousel of the latest closed deals. Fetches up to 20 active deals
 // from /api/deals (managed in the admin dashboard) and renders each as a
 // DealAnnouncement slide. With one deal it's a static banner; with 2–3 it
 // becomes a swipeable/auto-advancing carousel. Renders nothing when there are
 // no active deals.
-export function DealAnnouncementCarousel() {
+export function DealAnnouncementCarousel({ lang = "en" }: { lang?: "en" | "ar" } = {}) {
+  const ar = lang === "ar";
   const { data: deals = [] } = useQuery<Deal[]>({
     queryKey: ["deals"],
     queryFn: async () => {
@@ -65,7 +67,7 @@ export function DealAnnouncementCarousel() {
       className="relative"
       role={multiple ? "group" : undefined}
       aria-roledescription={multiple ? "carousel" : undefined}
-      aria-label={multiple ? "Latest closed deals" : undefined}
+      aria-label={multiple ? (ar ? DEAL_AR.carousel : "Latest closed deals") : undefined}
     >
       <DealAnnouncement
         clientName={current.client_name}
@@ -74,6 +76,7 @@ export function DealAnnouncementCarousel() {
         location={current.location ?? ""}
         spaceType={current.space_type ?? ""}
         leaseFormat={current.lease_format ?? ""}
+        lang={lang}
       />
 
       {multiple && (
@@ -85,18 +88,18 @@ export function DealAnnouncementCarousel() {
           <button
             type="button"
             onClick={() => go(index - 1)}
-            aria-label="Previous deal"
-            className="absolute left-2 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#ECE7D8]/10 text-[#ECE7D8] backdrop-blur-sm transition-colors hover:bg-[#ECE7D8]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={ar ? DEAL_AR.prev : "Previous deal"}
+            className="absolute start-2 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#ECE7D8]/10 text-[#ECE7D8] backdrop-blur-sm transition-colors hover:bg-[#ECE7D8]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <ChevronLeft className="h-5 w-5 md:h-4 md:w-4" />
+            <ChevronLeft className="h-5 w-5 md:h-4 md:w-4 rtl:rotate-180" />
           </button>
           <button
             type="button"
             onClick={() => go(index + 1)}
-            aria-label="Next deal"
-            className="absolute right-2 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#ECE7D8]/10 text-[#ECE7D8] backdrop-blur-sm transition-colors hover:bg-[#ECE7D8]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            aria-label={ar ? DEAL_AR.next : "Next deal"}
+            className="absolute end-2 top-1/2 -translate-y-1/2 z-30 flex h-11 w-11 md:h-8 md:w-8 items-center justify-center rounded-full bg-[#ECE7D8]/10 text-[#ECE7D8] backdrop-blur-sm transition-colors hover:bg-[#ECE7D8]/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
           >
-            <ChevronRight className="h-5 w-5 md:h-4 md:w-4" />
+            <ChevronRight className="h-5 w-5 md:h-4 md:w-4 rtl:rotate-180" />
           </button>
 
           {/* Position indicator — bottom-center. For a handful of deals it's a
@@ -117,7 +120,7 @@ export function DealAnnouncementCarousel() {
                     key={deal.id}
                     type="button"
                     onClick={() => go(i)}
-                    aria-label={`Go to deal ${i + 1}`}
+                    aria-label={ar ? DEAL_AR.goTo(i + 1) : `Go to deal ${i + 1}`}
                     aria-current={i === index}
                     className={`h-1.5 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${size}`}
                   />
