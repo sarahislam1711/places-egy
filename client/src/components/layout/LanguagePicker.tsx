@@ -86,18 +86,22 @@ export function LanguagePicker({ className }: { className?: string }) {
         <span>{current.short}</span>
         <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      {/* Opens right under the button, centred, same panel style as Resources. */}
-      <DropdownMenuContent align="center" sideOffset={6} className="w-40 rounded-md p-2 shadow">
+      {/* Small dark panel right under the button, same colours as the menu bar. */}
+      <DropdownMenuContent
+        align="center"
+        sideOffset={6}
+        className="min-w-0 w-auto rounded-lg border border-white/10 bg-primary p-1 text-white shadow-lg shadow-black/30"
+      >
         {OPTIONS.map((o) => (
           <DropdownMenuItem
             key={o.lang}
             asChild
-            className="group cursor-pointer gap-2.5 rounded-md px-3 py-2 text-sm font-medium focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+            className="group cursor-pointer gap-2 rounded-md px-2.5 py-1.5 text-[13px] font-medium text-white/85 focus:bg-white/10 focus:text-white data-[highlighted]:bg-white/10 data-[highlighted]:text-white"
           >
             <Link href={hrefFor(o.lang)} hrefLang={o.lang} lang={o.lang} onClick={() => pick(o.lang)}>
               <o.Flag className={flagClass} />
               <span className="flex-1">{o.label}</span>
-              {o.lang === lang && <Check className="h-4 w-4 text-accent group-data-[highlighted]:text-current" />}
+              {o.lang === lang && <Check className="h-3.5 w-3.5 text-accent" />}
             </Link>
           </DropdownMenuItem>
         ))}
