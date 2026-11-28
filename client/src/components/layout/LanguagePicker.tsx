@@ -77,21 +77,27 @@ export function LanguagePicker({ className }: { className?: string }) {
       <DropdownMenuTrigger
         aria-label={lang === "ar" ? "اختر اللغة" : "Choose language"}
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full px-2.5 h-9 text-sm font-medium text-white/85 hover:text-white hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent",
+          // Same look as the menu's other dropdown buttons (Resources …): red while open.
+          "group inline-flex items-center gap-1.5 rounded-md px-3 h-9 text-sm font-medium text-white/85 hover:text-accent hover:bg-white/10 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent data-[state=open]:bg-accent data-[state=open]:text-white",
           className,
         )}
       >
         <current.Flag className={flagClass} />
         <span>{current.short}</span>
-        <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+        <ChevronDown className="h-3.5 w-3.5 opacity-70 transition-transform group-data-[state=open]:rotate-180" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" sideOffset={8} className="min-w-[10rem]">
+      {/* Opens right under the button, centred, same panel style as Resources. */}
+      <DropdownMenuContent align="center" sideOffset={6} className="w-40 rounded-md p-2 shadow">
         {OPTIONS.map((o) => (
-          <DropdownMenuItem key={o.lang} asChild className="cursor-pointer gap-2.5">
+          <DropdownMenuItem
+            key={o.lang}
+            asChild
+            className="group cursor-pointer gap-2.5 rounded-md px-3 py-2 text-sm font-medium focus:bg-accent focus:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+          >
             <Link href={hrefFor(o.lang)} hrefLang={o.lang} lang={o.lang} onClick={() => pick(o.lang)}>
               <o.Flag className={flagClass} />
               <span className="flex-1">{o.label}</span>
-              {o.lang === lang && <Check className="h-4 w-4 text-accent" />}
+              {o.lang === lang && <Check className="h-4 w-4 text-accent group-data-[highlighted]:text-current" />}
             </Link>
           </DropdownMenuItem>
         ))}
