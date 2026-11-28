@@ -37,6 +37,12 @@ export const AR_LIVE: readonly string[] = [
   // 29 Nov: tenant representation service page + contact (reviewed in the preview).
   "/services/tenant-representation",
   "/contact",
+  // 29 Nov: services page + the other four service pages (reviewed in the preview).
+  "/services",
+  "/services/primary-property",
+  "/services/property-resale",
+  "/services/investment-consultation",
+  "/services/income-generating-property",
 ];
 
 /** "/ar/rent" → "/rent", "/ar" → "/", English paths unchanged. */
