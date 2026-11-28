@@ -97,7 +97,7 @@ export function ServiceHero({
           <div data-cta-row className="mt-9 flex flex-wrap items-center gap-3">
             <PrimaryAction primary={primary}>
               <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base shadow-[0_10px_30px_-10px_rgba(232,64,74,0.6)] transition-transform hover:-translate-y-0.5">
-                {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
+                {primary.label} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
               </Button>
             </PrimaryAction>
             <Button
@@ -367,7 +367,7 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
         <div data-cta-row className="flex flex-wrap gap-3 shrink-0">
           <PrimaryAction primary={primary}>
             <Button size="lg" className="bg-accent hover:bg-accent/90 text-white font-semibold px-7 h-13 text-base">
-              {primary.label} <ArrowRight className="ml-2 w-4 h-4" />
+              {primary.label} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
             </Button>
           </PrimaryAction>
           <Button

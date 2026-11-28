@@ -11,6 +11,7 @@ import { trackEvent } from "@/lib/analytics";
 import { openCalendly } from "@/lib/calendly";
 import { TenantRepCallout } from "@/components/TenantRepCallout";
 import { DeveloperSurveyMagnet, openDeveloperSurvey } from "@/components/magnets/DeveloperSurveyMagnet";
+import { scrollToSection, useActiveSection, useAutoToc, useReadingProgress } from "@/lib/reading";
 
 // Shared layout for every /guides/* page (redesigned 28 Nov). Handles:
 //   - <title>, meta description, canonical, og:* and Article + Breadcrumb JSON-LD
@@ -29,80 +30,6 @@ type Props = {
   wordCount?: number;
   children: ReactNode;
 };
-
-type TocItem = { id: string; text: string };
-
-// Contents from every <h2 id> in the rendered article (no hand-kept lists).
-function useAutoToc(contentRef: React.RefObject<HTMLDivElement | null>): TocItem[] {
-  const [items, setItems] = useState<TocItem[]>([]);
-  useEffect(() => {
-    if (!contentRef.current) return;
-    const list: TocItem[] = [];
-    contentRef.current.querySelectorAll<HTMLHeadingElement>("h2[id]").forEach((h) => {
-      list.push({ id: h.id, text: h.textContent?.trim() ?? "" });
-    });
-    setItems(list);
-  }, [contentRef]);
-  return items;
-}
-
-// The section currently being read: the last H2 above a line ~30% down the screen.
-function useActiveSection(ids: string[]): string | null {
-  const [active, setActive] = useState<string | null>(null);
-  useEffect(() => {
-    if (!ids.length) return;
-    let frame = 0;
-    const check = () => {
-      frame = 0;
-      const line = window.innerHeight * 0.3;
-      let current: string | null = null;
-      for (const id of ids) {
-        const el = document.getElementById(id);
-        if (el && el.getBoundingClientRect().top <= line) current = id;
-      }
-      setActive(current ?? ids[0]);
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(check);
-    };
-    check();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [ids.join("|")]);
-  return active;
-}
-
-// 0–1 progress through the article.
-function useReadingProgress(ref: React.RefObject<HTMLElement | null>): number {
-  const [p, setP] = useState(0);
-  useEffect(() => {
-    let frame = 0;
-    const check = () => {
-      frame = 0;
-      const el = ref.current;
-      if (!el) return;
-      const r = el.getBoundingClientRect();
-      const total = r.height - window.innerHeight * 0.6;
-      setP(Math.min(1, Math.max(0, (window.innerHeight * 0.4 - r.top) / Math.max(total, 1))));
-    };
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(check);
-    };
-    check();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
-      if (frame) cancelAnimationFrame(frame);
-    };
-  }, [ref]);
-  return p;
-}
-
 
 // The developer-survey lead magnet as a calm card in the page (28 Nov): the
 // timed popup covered what people were reading. Clicking opens the popup form.
@@ -159,16 +86,7 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
   const goToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string, onPick?: () => void) => {
     e.preventDefault();
     onPick?.();
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        const el = document.getElementById(id);
-        if (!el) return;
-        const bar = document.querySelector("header");
-        const offset = Math.max(bar ? bar.getBoundingClientRect().bottom : 0, 81) + 20;
-        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
-        history.replaceState(null, "", `#${id}`);
-      }),
-    );
+    scrollToSection(id);
   };
 
   const tocList = (onPick?: () => void) => (
