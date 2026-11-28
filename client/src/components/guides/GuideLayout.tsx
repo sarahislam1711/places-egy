@@ -153,6 +153,24 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
 
   const showUpdated = guide.updatedAt !== guide.publishedAt;
 
+  // Jump to the start of a section, just below the fixed navbar. Done by hand
+  // because on phones the contents menu closes on tap, which shifts the page
+  // mid-scroll and made the browser's own anchor jump stop short.
+  const goToSection = (e: React.MouseEvent<HTMLAnchorElement>, id: string, onPick?: () => void) => {
+    e.preventDefault();
+    onPick?.();
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        const bar = document.querySelector("header");
+        const offset = Math.max(bar ? bar.getBoundingClientRect().bottom : 0, 81) + 20;
+        window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - offset, behavior: "smooth" });
+        history.replaceState(null, "", `#${id}`);
+      }),
+    );
+  };
+
   const tocList = (onPick?: () => void) => (
     <ul className="space-y-1">
       {toc.map((item) => {
@@ -161,7 +179,7 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
           <li key={item.id}>
             <a
               href={`#${item.id}`}
-              onClick={onPick}
+              onClick={(e) => goToSection(e, item.id, onPick)}
               aria-current={on ? "location" : undefined}
               className={`block rounded-lg px-3 py-2 text-sm leading-snug transition-colors ${
                 on ? "bg-primary text-white font-semibold" : "text-primary/75 hover:bg-[#F5F0EA] hover:text-primary"
