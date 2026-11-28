@@ -34,6 +34,9 @@ export const AR_LIVE: readonly string[] = [
   "/income-property/new-cairo",
   "/rent/sheikh-zayed",
   "/rent/maadi",
+  // 29 Nov: tenant representation service page + contact (reviewed in the preview).
+  "/services/tenant-representation",
+  "/contact",
 ];
 
 /** "/ar/rent" → "/rent", "/ar" → "/", English paths unchanged. */
