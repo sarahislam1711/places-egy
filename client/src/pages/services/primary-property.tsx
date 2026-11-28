@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { ListingCardAr } from "@/components/listings/ListingCardAr";
 import {
   AudienceTabs,
   Band,
@@ -23,7 +24,11 @@ import {
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { STATIC_PAGE_META } from "@/lib/page-meta";
+import { AR_PAGE_META, STATIC_PAGE_META } from "@/lib/page-meta";
+import { useLang } from "@/lib/ui-text";
+import { arabicPath } from "@/lib/i18n";
+import { FAQ_TOPIC_LABELS_AR } from "@/lib/landing-pages-ar";
+import { SERVICE_COMMON_AR, PRIMARY_AR } from "@/lib/services-ar";
 
 const PATH = "/services/primary-property";
 
@@ -123,6 +128,7 @@ const FAQS = [
 
 /** Neutral side-by-side table: neither column is "wrong", so no ticks or crosses. */
 function SideBySide({ left, right, rows }: { left: string; right: string; rows: { label: string; a: string; b: string }[] }) {
+  const { isAr } = useLang();
   return (
     <>
       <div className="md:hidden space-y-3">
@@ -138,15 +144,15 @@ function SideBySide({ left, right, rows }: { left: string; right: string; rows: 
         <table className="w-full text-[15px]">
           <thead>
             <tr>
-              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
-              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
-              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-primary" scope="col">{right}</th>
+              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">{isAr ? SERVICE_COMMON_AR.comparedOn : "Compared on"}</span></th>
+              <th className="px-5 py-4 text-start font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
+              <th className="px-5 py-4 text-start font-serif text-lg font-bold text-primary" scope="col">{right}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.label} className="border-t border-primary/10">
-                <th className="px-5 py-3.5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <th className="px-5 py-3.5 text-start font-semibold text-primary align-top" scope="row">{r.label}</th>
                 <td className="px-5 py-3.5 align-top bg-primary/[0.03] text-primary">{r.a}</td>
                 <td className="px-5 py-3.5 align-top text-muted-foreground">{r.b}</td>
               </tr>
@@ -159,7 +165,21 @@ function SideBySide({ left, right, rows }: { left: string; right: string; rows: 
 }
 
 export default function PrimaryProperty() {
-  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { isAr, href: L } = useLang();
+  const A = isAr ? PRIMARY_AR : null;
+  const C = SERVICE_COMMON_AR;
+  useDocumentMeta(isAr ? AR_PAGE_META[arabicPath(PATH)] : STATIC_PAGE_META[PATH]);
+  const pagePath = isAr ? arabicPath(PATH) : PATH;
+  const who: Audience[] = A ? WHO.map((w, i) => ({ ...w, ...A.who[i] })) : WHO;
+  const faqs = A ? A.faqs : FAQS;
+  const crumbs = A
+    ? [{ name: C.home, href: L("/") }, { name: C.services, href: L("/services") }, { name: A.crumb }]
+    : [{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Primary Property" }];
+  const breadcrumb = A
+    ? [{ name: C.home, url: L("/") }, { name: C.services, url: L("/services") }, { name: A.crumb, url: pagePath }]
+    : [{ name: "Home", url: "/" }, { name: "Services", url: "/services" }, { name: "Primary Property", url: PATH }];
+  const why: Reason[] = A ? WHY.map((r, i) => ({ ...r, ...A.why[i] })) : WHY;
+  const form = { intent: "buy" as const, pageName: "Primary property" };
   const { data: saleListings = [], isPending } = useQuery<Listing[]>({
     queryKey: ["primary-property-listings"],
     queryFn: async () => {
@@ -178,40 +198,41 @@ export default function PrimaryProperty() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       <SchemaMarkup
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Services", url: "/services" },
-          { name: "Primary Property", url: PATH },
-        ])}
+        schema={breadcrumbSchema(breadcrumb)}
       />
       <SchemaMarkup
-        schema={serviceSchema({
-          name: "Primary Property in Egypt",
-          description:
-            "Buy directly from the developer: off-plan and newly launched units across Egypt's most active developments, with unit evaluation and transaction management.",
-          url: PATH,
-          serviceType: "Primary Real Estate Sales",
-        })}
+        schema={serviceSchema(
+          A
+            ? { name: A.schemaName, description: A.schemaDescription, url: pagePath, serviceType: A.schemaName }
+            : {
+                name: "Primary Property in Egypt",
+                description:
+                  "Buy directly from the developer: off-plan and newly launched units across Egypt's most active developments, with unit evaluation and transaction management.",
+                url: PATH,
+                serviceType: "Primary Real Estate Sales",
+              },
+        )}
       />
-      <SchemaMarkup schema={faqSchema(FAQS)} />
+      <SchemaMarkup schema={faqSchema(faqs)} />
       <Navbar />
 
       <main className="flex-1">
         <ServiceHero
-          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Primary Property" }]}
-          title="Buy Offices Directly From Developers in Egypt"
-          intro="Our primary property service helps you buy directly from the developer: off-plan and newly launched units across Egypt's most active developments. It is for first-time buyers, investors and end users who want the unit, the developer and the payment plan evaluated before they commit."
-          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "buy", pageName: "Primary property" } }}
+          crumbs={crumbs}
+          title={A ? A.h1 : "Buy Offices Directly From Developers in Egypt"}
+          intro={A ? A.intro : "Our primary property service helps you buy directly from the developer: off-plan and newly launched units across Egypt's most active developments. It is for first-time buyers, investors and end users who want the unit, the developer and the payment plan evaluated before they commit."}
+          primary={{ label: A ? C.talk : "Talk to an advisor", href: L("/contact"), form }}
           image="/images/hero-main.jpg"
-          imageAlt="Primary property in Egypt"
-          promise={{ title: "Independent perspective", text: "We're not employed by any developer. Our recommendations are based on the unit, not on who's selling it." }}
-          points={["Pre-launch and off-market access", "Unit, developer and payment plan assessed", "Managed from reservation to handover"]}
+          imageAlt={A ? A.heroAlt : "Primary property in Egypt"}
+          promise={A ? A.promise : { title: "Independent perspective", text: "We're not employed by any developer. Our recommendations are based on the unit, not on who's selling it." }}
+          points={A ? A.points : ["Pre-launch and off-market access", "Unit, developer and payment plan assessed", "Managed from reservation to handover"]}
         />
 
         <Band tone="white">
-          <IntroSplit title="What is primary property?" cardTitle="What PLACES does for you" items={WHAT_WE_DO}>
+          <IntroSplit title={A ? A.whatTitle : "What is primary property?"} cardTitle={A ? A.whatCard : "What PLACES does for you"} items={A ? A.whatWeDo : WHAT_WE_DO}>
+            {A ? A.whatText.map((t) => <p key={t}>{t}</p>) : <>
                 <p>
                   Primary property means buying a unit directly from the developer, usually off-plan or at a new
                   launch, instead of from an existing owner. Primary units are usually sold on developer installment
@@ -222,16 +243,17 @@ export default function PrimaryProperty() {
                   units before they hit the secondary market. But not all launches are equal, so we assess the unit,
                   the developer and the payment plan, not just the brochure.
                 </p>
+            </>}
               </IntroSplit>
         </Band>
 
         <Band tone="cream" tight>
-          <SectionHead title="Who this service is for"  compact />
-          <AudienceTabs items={WHO} label="Who this service is for" />
+          <SectionHead title={A ? C.whoTitle : "Who this service is for"} compact />
+          <AudienceTabs items={who} label={A ? C.whoTitle : "Who this service is for"} />
           <p className="mt-10 text-muted-foreground">
-            Renting instead of buying?{" "}
-            <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
-              Our tenant representation is free for tenants
+            {A ? C.rentingInstead : <>Renting instead of buying?{" "}</>}
+            <Link href={L("/services/tenant-representation")} className="text-accent font-semibold hover:underline">
+              {A ? C.tenantRepFree : "Our tenant representation is free for tenants"}
             </Link>
             .
           </p>
@@ -240,24 +262,24 @@ export default function PrimaryProperty() {
         <Band tone="dark">
           <SectionHead
             dark
-            title="Why choose PLACES for primary property"
-            lead="We work across developers, not for one of them, and stay with you from the first shortlist to handover."
+            title={A ? A.whyTitle : "Why choose PLACES for primary property"}
+            lead={A ? A.whyLead : "We work across developers, not for one of them, and stay with you from the first shortlist to handover."}
           />
-          <ReasonGrid items={WHY} dark />
+          <ReasonGrid items={why} dark />
         </Band>
 
         <Band tone="white" tight>
           <SectionHead
-            title="How buying from a developer works"
-            lead="Buying a commercial unit runs from defining your goal and budget to handover. We manage every step from reservation to handover."
+            title={A ? A.processTitle : "How buying from a developer works"}
+            lead={A ? A.processLead : "Buying a commercial unit runs from defining your goal and budget to handover. We manage every step from reservation to handover."}
           
             compact
           />
-          <StepList steps={STEPS} />
+          <StepList steps={A ? A.steps : STEPS} />
           <p className="mt-10 text-muted-foreground">
-            Still deciding whether to buy at all? Read our{" "}
-            <Link href="/guides/buy-vs-rent-office-cairo" className="text-accent font-semibold hover:underline">
-              guide to buying vs renting an office in Cairo
+            {A ? A.guideBefore : <>Still deciding whether to buy at all? Read our{" "}</>}
+            <Link href={L("/guides/buy-vs-rent-office-cairo")} className="text-accent font-semibold hover:underline">
+              {A ? A.guideLink : "guide to buying vs renting an office in Cairo"}
             </Link>
             .
           </p>
@@ -265,15 +287,15 @@ export default function PrimaryProperty() {
 
         <Band tone="cream" tight>
           <SectionHead
-            title="Primary vs resale property"
-            lead="Primary suits buyers with longer time horizons who want developer payment plans. Resale suits buyers who want the unit now and want to skip handover delays."
+            title={A ? A.compareTitle : "Primary vs resale property"}
+            lead={A ? A.compareLead : "Primary suits buyers with longer time horizons who want developer payment plans. Resale suits buyers who want the unit now and want to skip handover delays."}
             compact
           />
-          <SideBySide left="Primary (from the developer)" right="Resale (from an owner)" rows={COMPARISON} />
+          <SideBySide left={A ? A.left : "Primary (from the developer)"} right={A ? A.right : "Resale (from an owner)"} rows={A ? A.comparison : COMPARISON} />
           <p className="mt-10 text-muted-foreground">
-            Prefer a ready unit?{" "}
-            <Link href="/services/property-resale" className="text-accent font-semibold hover:underline">
-              See our property resale service
+            {A ? A.resaleBefore : <>Prefer a ready unit?{" "}</>}
+            <Link href={L("/services/property-resale")} className="text-accent font-semibold hover:underline">
+              {A ? A.resaleLink : "See our property resale service"}
             </Link>
             .
           </p>
@@ -282,28 +304,40 @@ export default function PrimaryProperty() {
         <Band tone="white">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 md:mb-14">
             <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-primary">
-              Units currently available for sale
+              {A ? C.forSaleTitle : "Units currently available for sale"}
             </h2>
-            <a href="/buy" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
-              Browse all available units <ArrowRight className="ml-2 w-4 h-4" />
+            <a href={L("/buy")} className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
+              {A ? C.browseUnits : "Browse all available units"} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
             </a>
           </div>
           {saleListings.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {saleListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} compact />
+                isAr ? <ListingCardAr key={listing.id} listing={listing} /> : <ListingCard key={listing.id} listing={listing} compact />
               ))}
             </div>
           ) : (
-            !isPending && <p className="text-muted-foreground py-8">No sale listings available yet.</p>
+            !isPending && <p className="text-muted-foreground py-8">{A ? C.noSale : "No sale listings available yet."}</p>
           )}
         </Band>
 
         <Band tone="cream">
           <FaqWithAdvisor
-            title="Primary property FAQs"
-            faqs={FAQS}
+            title={A ? A.faqTitle : "Primary property FAQs"}
+            faqs={faqs}
             footer={
+              A ? (
+                <>
+                  {C.moreFaqs}
+                  {A.faqLinks.map((slug) => (
+                    <span key={slug}>
+                      <Link href={L(`/faqs/${slug}`)} className="text-accent font-medium hover:underline">{FAQ_TOPIC_LABELS_AR[slug]}</Link>
+                      {" · "}
+                    </span>
+                  ))}
+                  <Link href={L("/faqs")} className="text-accent font-medium hover:underline">{C.allFaqs}</Link>
+                </>
+              ) : (
               <>
                 More FAQs:{" "}
                 <Link href="/faqs/rent-buy-resale" className="text-accent font-medium hover:underline">Rent vs buy vs resale</Link>
@@ -314,19 +348,20 @@ export default function PrimaryProperty() {
                 {" · "}
                 <Link href="/faqs" className="text-accent font-medium hover:underline">Browse all FAQs</Link>
               </>
+              )
             }
           />
         </Band>
 
         <Band tone="white">
-          <SectionHead title="Explore other services" />
+          <SectionHead title={A ? C.otherServices : "Explore other services"} />
           <RelatedServices current="/services/primary-property" order={["/services/property-resale", "/services/tenant-representation", "/services/investment-consultation", "/services/income-generating-property"]} />
         </Band>
 
         <CtaBand
-          title="Ready to buy your first unit?"
-          text="Tell us what you're looking for. We'll find the right opportunity."
-          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "buy", pageName: "Primary property" } }}
+          title={A ? A.ctaTitle : "Ready to buy your first unit?"}
+          text={A ? A.ctaText : "Tell us what you're looking for. We'll find the right opportunity."}
+          primary={{ label: A ? C.book : "Book a free consultation", href: L("/contact"), form }}
         />
       </main>
 

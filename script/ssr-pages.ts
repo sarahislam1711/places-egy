@@ -39,6 +39,11 @@ export const STATIC_PAGE_COMPONENTS: Record<string, string> = {
   // Arabic twins (29 Nov): same components; the route makes them render in Arabic.
   "/ar/services/tenant-representation": "services/tenant-representation",
   "/ar/contact": "contact",
+  "/ar/services": "services",
+  "/ar/services/primary-property": "services/primary-property",
+  "/ar/services/property-resale": "services/property-resale",
+  "/ar/services/investment-consultation": "services/investment-consultation",
+  "/ar/services/income-generating-property": "services/income-generating-property",
   "/privacy-policy": "privacy-policy",
   "/terms-of-service": "terms-of-service",
 };

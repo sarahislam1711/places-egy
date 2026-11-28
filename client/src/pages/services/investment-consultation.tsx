@@ -21,7 +21,11 @@ import {
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { STATIC_PAGE_META } from "@/lib/page-meta";
+import { AR_PAGE_META, STATIC_PAGE_META } from "@/lib/page-meta";
+import { useLang } from "@/lib/ui-text";
+import { arabicPath } from "@/lib/i18n";
+import { FAQ_TOPIC_LABELS_AR } from "@/lib/landing-pages-ar";
+import { SERVICE_COMMON_AR, INVEST_AR } from "@/lib/services-ar";
 
 const PATH = "/services/investment-consultation";
 
@@ -113,42 +117,57 @@ const FAQS = [
 ];
 
 export default function InvestmentConsultation() {
-  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { isAr, href: L } = useLang();
+  const A = isAr ? INVEST_AR : null;
+  const C = SERVICE_COMMON_AR;
+  useDocumentMeta(isAr ? AR_PAGE_META[arabicPath(PATH)] : STATIC_PAGE_META[PATH]);
+  const pagePath = isAr ? arabicPath(PATH) : PATH;
+  const who: Audience[] = A ? WHO.map((w, i) => ({ ...w, ...A.who[i] })) : WHO;
+  const faqs = A ? A.faqs : FAQS;
+  const crumbs = A
+    ? [{ name: C.home, href: L("/") }, { name: C.services, href: L("/services") }, { name: A.crumb }]
+    : [{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Investment Consultation" }];
+  const breadcrumb = A
+    ? [{ name: C.home, url: L("/") }, { name: C.services, url: L("/services") }, { name: A.crumb, url: pagePath }]
+    : [{ name: "Home", url: "/" }, { name: "Services", url: "/services" }, { name: "Investment Consultation", url: PATH }];
+  const why: Reason[] = A ? WHY.map((r, i) => ({ ...r, ...A.why[i] })) : WHY;
+  const form = { intent: "invest" as const, pageName: "Investment consultation" };
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       <SchemaMarkup
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Services", url: "/services" },
-          { name: "Investment Consultation", url: PATH },
-        ])}
+        schema={breadcrumbSchema(breadcrumb)}
       />
       <SchemaMarkup
-        schema={serviceSchema({
-          name: "Real Estate Investment Consultation in Egypt",
-          description:
-            "Data-driven advisory for investors evaluating commercial and administrative assets in Egypt, from portfolio assessment to ongoing post-acquisition support.",
-          url: PATH,
-          serviceType: "Real Estate Investment Advisory",
-        })}
+        schema={serviceSchema(
+          A
+            ? { name: A.schemaName, description: A.schemaDescription, url: pagePath, serviceType: A.schemaName }
+            : {
+                name: "Real Estate Investment Consultation in Egypt",
+                description:
+                  "Data-driven advisory for investors evaluating commercial and administrative assets in Egypt, from portfolio assessment to ongoing post-acquisition support.",
+                url: PATH,
+                serviceType: "Real Estate Investment Advisory",
+              },
+        )}
       />
-      <SchemaMarkup schema={faqSchema(FAQS)} />
+      <SchemaMarkup schema={faqSchema(faqs)} />
       <Navbar />
 
       <main className="flex-1">
         <ServiceHero
-          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Investment Consultation" }]}
-          title="Real Estate Investment Consultation in Egypt"
-          intro="Our investment consultation is data-driven advisory for investors evaluating commercial and administrative assets in Egypt. It is for first-time investors, experienced investors who want a second opinion, and institutional buyers assessing assets at portfolio level."
-          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "invest", pageName: "Investment consultation" } }}
+          crumbs={crumbs}
+          title={A ? A.h1 : "Real Estate Investment Consultation in Egypt"}
+          intro={A ? A.intro : "Our investment consultation is data-driven advisory for investors evaluating commercial and administrative assets in Egypt. It is for first-time investors, experienced investors who want a second opinion, and institutional buyers assessing assets at portfolio level."}
+          primary={{ label: A ? C.talk : "Talk to an advisor", href: L("/contact"), form }}
           image="/images/investment-consultation.jpg"
-          imageAlt="Real estate investment consultation in Egypt"
-          promise={{ title: "Objective advisory", text: "Our advice is based on data and your goals, not on closing a deal." }}
-          points={["Yield, vacancy and growth analyzed", "We tell you when a unit doesn't fit", "Available after the acquisition"]}
+          imageAlt={A ? A.heroAlt : "Real estate investment consultation in Egypt"}
+          promise={A ? A.promise : { title: "Objective advisory", text: "Our advice is based on data and your goals, not on closing a deal." }}
+          points={A ? A.points : ["Yield, vacancy and growth analyzed", "We tell you when a unit doesn't fit", "Available after the acquisition"]}
         />
 
         <Band tone="white">
-          <IntroSplit title="What is real estate investment consultation?" cardTitle="What we analyze before you invest" items={WHAT_WE_LOOK_AT}>
+          <IntroSplit title={A ? A.whatTitle : "What is real estate investment consultation?"} cardTitle={A ? A.whatCard : "What we analyze before you invest"} items={A ? A.whatWeLookAt : WHAT_WE_LOOK_AT}>
+            {A ? A.whatText.map((t) => <p key={t}>{t}</p>) : <>
                 <p>
                   Investment consultation is objective analysis of market opportunities, property types, locations and
                   developers, based on your own goals, budget and risk tolerance. It comes before you buy, so the
@@ -159,16 +178,17 @@ export default function InvestmentConsultation() {
                   wrong location can take years to recover from, which is why we start with your objectives, risk
                   appetite and target return before recommending anything.
                 </p>
+            </>}
               </IntroSplit>
         </Band>
 
         <Band tone="cream" tight>
-          <SectionHead title="Who this service is for"  compact />
-          <AudienceTabs items={WHO} label="Who this service is for" />
+          <SectionHead title={A ? C.whoTitle : "Who this service is for"} compact />
+          <AudienceTabs items={who} label={A ? C.whoTitle : "Who this service is for"} />
           <p className="mt-10 text-muted-foreground">
-            Renting an office rather than investing?{" "}
-            <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
-              Our tenant representation is free for tenants
+            {A ? C.rentingInsteadInvest : <>Renting an office rather than investing?{" "}</>}
+            <Link href={L("/services/tenant-representation")} className="text-accent font-semibold hover:underline">
+              {A ? C.tenantRepFree : "Our tenant representation is free for tenants"}
             </Link>
             .
           </p>
@@ -177,33 +197,33 @@ export default function InvestmentConsultation() {
         <Band tone="dark">
           <SectionHead
             dark
-            title="Why choose PLACES for investment consultation"
-            lead="Advice based on data, from the first assessment to the decisions that come after your acquisition."
+            title={A ? A.whyTitle : "Why choose PLACES for investment consultation"}
+            lead={A ? A.whyLead : "Advice based on data, from the first assessment to the decisions that come after your acquisition."}
           />
-          <ReasonGrid items={WHY} dark />
+          <ReasonGrid items={why} dark />
         </Band>
 
         <Band tone="white" tight>
           <SectionHead
-            title="How the consultation works"
-            lead="Four stages, starting with your objectives and continuing after the transaction."
+            title={A ? A.processTitle : "How the consultation works"}
+            lead={A ? A.processLead : "Four stages, starting with your objectives and continuing after the transaction."}
           
             compact
           />
-          <StepList steps={STEPS} />
+          <StepList steps={A ? A.steps : STEPS} />
         </Band>
 
         <Band tone="cream">
           <SectionHead
-            title="Independent advisor vs developer sales agent"
-            lead="A developer's sales agent sells only that developer's projects. An independent advisor compares options across developers and projects."
+            title={A ? A.compareTitle : "Independent advisor vs developer sales agent"}
+            lead={A ? A.compareLead : "A developer's sales agent sells only that developer's projects. An independent advisor compares options across developers and projects."}
             compact
           />
-          <ComparisonTable usLabel="Independent advisor (PLACES)" themLabel="Developer's sales agent" rows={COMPARISON} />
+          <ComparisonTable usLabel={A ? A.usLabel : "Independent advisor (PLACES)"} themLabel={A ? A.themLabel : "Developer's sales agent"} rows={A ? A.comparison : COMPARISON} />
           <p className="mt-10 text-muted-foreground">
-            More on choosing an advisor in our{" "}
-            <Link href="/faqs/advisors-brokers" className="text-accent font-semibold hover:underline">
-              advisors &amp; brokers FAQs
+            {A ? A.advisorsBefore : <>More on choosing an advisor in our{" "}</>}
+            <Link href={L("/faqs/advisors-brokers")} className="text-accent font-semibold hover:underline">
+              {A ? A.advisorsLink : <>advisors &amp; brokers FAQs</>}
             </Link>
             .
           </p>
@@ -211,9 +231,21 @@ export default function InvestmentConsultation() {
 
         <Band tone="white">
           <FaqWithAdvisor
-            title="Investment consultation FAQs"
-            faqs={FAQS}
+            title={A ? A.faqTitle : "Investment consultation FAQs"}
+            faqs={faqs}
             footer={
+              A ? (
+                <>
+                  {C.moreFaqs}
+                  {A.faqLinks.map((slug) => (
+                    <span key={slug}>
+                      <Link href={L(`/faqs/${slug}`)} className="text-accent font-medium hover:underline">{FAQ_TOPIC_LABELS_AR[slug]}</Link>
+                      {" · "}
+                    </span>
+                  ))}
+                  <Link href={L("/faqs")} className="text-accent font-medium hover:underline">{C.allFaqs}</Link>
+                </>
+              ) : (
               <>
                 More FAQs:{" "}
                 <Link href="/faqs/early-thinking" className="text-accent font-medium hover:underline">Early thinking &amp; understanding the decision</Link>
@@ -224,19 +256,20 @@ export default function InvestmentConsultation() {
                 {" · "}
                 <Link href="/faqs" className="text-accent font-medium hover:underline">Browse all FAQs</Link>
               </>
+              )
             }
           />
         </Band>
 
         <Band tone="cream">
-          <SectionHead title="Explore other services" />
+          <SectionHead title={A ? C.otherServices : "Explore other services"} />
           <RelatedServices current="/services/investment-consultation" order={["/services/income-generating-property", "/services/primary-property", "/services/property-resale", "/services/tenant-representation"]} />
         </Band>
 
         <CtaBand
-          title="Not sure where to invest?"
-          text="We'll give you an honest, data-driven view of your options."
-          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "invest", pageName: "Investment consultation" } }}
+          title={A ? A.ctaTitle : "Not sure where to invest?"}
+          text={A ? A.ctaText : "We'll give you an honest, data-driven view of your options."}
+          primary={{ label: A ? C.book : "Book a free consultation", href: L("/contact"), form }}
         />
       </main>
 

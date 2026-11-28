@@ -5,6 +5,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { ListingCard } from "@/components/listings/ListingCard";
+import { ListingCardAr } from "@/components/listings/ListingCardAr";
 import {
   AudienceTabs,
   Band,
@@ -23,7 +24,11 @@ import {
 import { supabase, type Listing } from "@/lib/supabase";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { STATIC_PAGE_META } from "@/lib/page-meta";
+import { AR_PAGE_META, STATIC_PAGE_META } from "@/lib/page-meta";
+import { useLang } from "@/lib/ui-text";
+import { arabicPath } from "@/lib/i18n";
+import { FAQ_TOPIC_LABELS_AR } from "@/lib/landing-pages-ar";
+import { SERVICE_COMMON_AR, RESALE_AR } from "@/lib/services-ar";
 
 const PATH = "/services/property-resale";
 
@@ -124,6 +129,7 @@ const FAQS = [
 
 /** Neutral side-by-side table: neither column is "wrong", so no ticks or crosses. */
 function SideBySide({ left, right, rows }: { left: string; right: string; rows: { label: string; a: string; b: string }[] }) {
+  const { isAr } = useLang();
   return (
     <>
       <div className="md:hidden space-y-3">
@@ -139,15 +145,15 @@ function SideBySide({ left, right, rows }: { left: string; right: string; rows: 
         <table className="w-full text-[15px]">
           <thead>
             <tr>
-              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
-              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
-              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-primary" scope="col">{right}</th>
+              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">{isAr ? SERVICE_COMMON_AR.comparedOn : "Compared on"}</span></th>
+              <th className="px-5 py-4 text-start font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
+              <th className="px-5 py-4 text-start font-serif text-lg font-bold text-primary" scope="col">{right}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.label} className="border-t border-primary/10">
-                <th className="px-5 py-3.5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <th className="px-5 py-3.5 text-start font-semibold text-primary align-top" scope="row">{r.label}</th>
                 <td className="px-5 py-3.5 align-top bg-primary/[0.03] text-primary">{r.a}</td>
                 <td className="px-5 py-3.5 align-top text-muted-foreground">{r.b}</td>
               </tr>
@@ -160,7 +166,21 @@ function SideBySide({ left, right, rows }: { left: string; right: string; rows: 
 }
 
 export default function PropertyResale() {
-  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { isAr, href: L } = useLang();
+  const A = isAr ? RESALE_AR : null;
+  const C = SERVICE_COMMON_AR;
+  useDocumentMeta(isAr ? AR_PAGE_META[arabicPath(PATH)] : STATIC_PAGE_META[PATH]);
+  const pagePath = isAr ? arabicPath(PATH) : PATH;
+  const who: Audience[] = A ? WHO.map((w, i) => ({ ...w, ...A.who[i] })) : WHO;
+  const faqs = A ? A.faqs : FAQS;
+  const crumbs = A
+    ? [{ name: C.home, href: L("/") }, { name: C.services, href: L("/services") }, { name: A.crumb }]
+    : [{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Property Resale" }];
+  const breadcrumb = A
+    ? [{ name: C.home, url: L("/") }, { name: C.services, url: L("/services") }, { name: A.crumb, url: pagePath }]
+    : [{ name: "Home", url: "/" }, { name: "Services", url: "/services" }, { name: "Property Resale", url: PATH }];
+  const services: Reason[] = A ? SERVICES.map((r, i) => ({ ...r, ...A.services[i] })) : SERVICES;
+  const form = { intent: "buy" as const, pageName: "Property resale" };
   const { data: saleListings = [], isPending } = useQuery<Listing[]>({
     queryKey: ["resale-listings"],
     queryFn: async () => {
@@ -179,40 +199,41 @@ export default function PropertyResale() {
   });
 
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       <SchemaMarkup
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Services", url: "/services" },
-          { name: "Property Resale", url: PATH },
-        ])}
+        schema={breadcrumbSchema(breadcrumb)}
       />
       <SchemaMarkup
-        schema={serviceSchema({
-          name: "Property Resale in Egypt",
-          description:
-            "Buy or sell a unit that has already been transacted, with full market context on both sides, honest pricing, and end-to-end transaction management.",
-          url: PATH,
-          serviceType: "Secondary Real Estate Sales",
-        })}
+        schema={serviceSchema(
+          A
+            ? { name: A.schemaName, description: A.schemaDescription, url: pagePath, serviceType: A.schemaName }
+            : {
+                name: "Property Resale in Egypt",
+                description:
+                  "Buy or sell a unit that has already been transacted, with full market context on both sides, honest pricing, and end-to-end transaction management.",
+                url: PATH,
+                serviceType: "Secondary Real Estate Sales",
+              },
+        )}
       />
-      <SchemaMarkup schema={faqSchema(FAQS)} />
+      <SchemaMarkup schema={faqSchema(faqs)} />
       <Navbar />
 
       <main className="flex-1">
         <ServiceHero
-          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Property Resale" }]}
-          title="Buy or Sell a Resale Office in Egypt"
-          intro="Our property resale service helps you buy or sell a unit that has already been transacted, with full market context on both sides. It is for buyers who want a unit that's ready now, sellers who want the best available price, and investors looking for undervalued resale units."
-          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "buy", pageName: "Property resale" } }}
+          crumbs={crumbs}
+          title={A ? A.h1 : "Buy or Sell a Resale Office in Egypt"}
+          intro={A ? A.intro : "Our property resale service helps you buy or sell a unit that has already been transacted, with full market context on both sides. It is for buyers who want a unit that's ready now, sellers who want the best available price, and investors looking for undervalued resale units."}
+          primary={{ label: A ? C.talk : "Talk to an advisor", href: L("/contact"), form }}
           image="/images/hero-section.jpg"
-          imageAlt="Property resale in Egypt"
-          promise={{ title: "Honest market pricing", text: "We tell you what the unit is actually worth, based on comparable transactions, not what the seller is asking." }}
-          points={["For buyers and sellers", "Priced on comparable transactions", "Transfer to handover managed"]}
+          imageAlt={A ? A.heroAlt : "Property resale in Egypt"}
+          promise={A ? A.promise : { title: "Honest market pricing", text: "We tell you what the unit is actually worth, based on comparable transactions, not what the seller is asking." }}
+          points={A ? A.points : ["For buyers and sellers", "Priced on comparable transactions", "Transfer to handover managed"]}
         />
 
         <Band tone="white">
-          <IntroSplit title="What is property resale?" cardTitle="Why choose PLACES for property resale" items={WHY_SHORT}>
+          <IntroSplit title={A ? A.whatTitle : "What is property resale?"} cardTitle={A ? A.whatCard : "Why choose PLACES for property resale"} items={A ? A.whyShort : WHY_SHORT}>
+            {A ? A.whatText.map((t) => <p key={t}>{t}</p>) : <>
                 <p>
                   Property resale, or the secondary market, means buying a unit from its existing owner instead of
                   from the developer. It can be a ready unit or a partially-paid contract transferred to a new buyer.
@@ -222,16 +243,17 @@ export default function PropertyResale() {
                   often because neither side has full market context. We give buyers and sellers that context and
                   manage the transaction to completion.
                 </p>
+            </>}
               </IntroSplit>
         </Band>
 
         <Band tone="cream" tight>
-          <SectionHead title="Who this service is for"  compact />
-          <AudienceTabs items={WHO} label="Who this service is for" />
+          <SectionHead title={A ? C.whoTitle : "Who this service is for"} compact />
+          <AudienceTabs items={who} label={A ? C.whoTitle : "Who this service is for"} />
           <p className="mt-10 text-muted-foreground">
-            Renting instead of buying?{" "}
-            <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
-              Our tenant representation is free for tenants
+            {A ? C.rentingInstead : <>Renting instead of buying?{" "}</>}
+            <Link href={L("/services/tenant-representation")} className="text-accent font-semibold hover:underline">
+              {A ? C.tenantRepFree : "Our tenant representation is free for tenants"}
             </Link>
             .
           </p>
@@ -240,33 +262,33 @@ export default function PropertyResale() {
         <Band tone="dark">
           <SectionHead
             dark
-            title="Our property resale services"
-            lead="We act for both sides. Buyers and sellers get the same standard of honesty and diligence from our team."
+            title={A ? A.servicesTitle : "Our property resale services"}
+            lead={A ? A.servicesLead : "We act for both sides. Buyers and sellers get the same standard of honesty and diligence from our team."}
           />
-          <ReasonGrid items={SERVICES} dark />
+          <ReasonGrid items={services} dark />
         </Band>
 
         <Band tone="white" tight>
           <SectionHead
-            title="How a resale deal works"
-            lead="From an honest valuation to handover, we manage the transaction from start to finish."
+            title={A ? A.processTitle : "How a resale deal works"}
+            lead={A ? A.processLead : "From an honest valuation to handover, we manage the transaction from start to finish."}
           
             compact
           />
-          <StepList steps={STEPS} />
+          <StepList steps={A ? A.steps : STEPS} />
         </Band>
 
         <Band tone="cream" tight>
           <SectionHead
-            title="Resale vs primary property"
-            lead="Resale suits buyers who want the unit now, want to skip handover delays, or want to see the delivered product before buying. Primary suits longer time horizons and developer payment plans."
+            title={A ? A.compareTitle : "Resale vs primary property"}
+            lead={A ? A.compareLead : "Resale suits buyers who want the unit now, want to skip handover delays, or want to see the delivered product before buying. Primary suits longer time horizons and developer payment plans."}
             compact
           />
-          <SideBySide left="Resale (from an owner)" right="Primary (from the developer)" rows={COMPARISON} />
+          <SideBySide left={A ? A.left : "Resale (from an owner)"} right={A ? A.right : "Primary (from the developer)"} rows={A ? A.comparison : COMPARISON} />
           <p className="mt-10 text-muted-foreground">
-            Buying off-plan instead?{" "}
-            <Link href="/services/primary-property" className="text-accent font-semibold hover:underline">
-              See our primary property service
+            {A ? A.primaryBefore : <>Buying off-plan instead?{" "}</>}
+            <Link href={L("/services/primary-property")} className="text-accent font-semibold hover:underline">
+              {A ? A.primaryLink : "See our primary property service"}
             </Link>
             .
           </p>
@@ -275,28 +297,40 @@ export default function PropertyResale() {
         <Band tone="white">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 md:mb-14">
             <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-primary">
-              Units currently available for sale
+              {A ? C.forSaleTitle : "Units currently available for sale"}
             </h2>
-            <a href="/buy" className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
-              Browse all available units <ArrowRight className="ml-2 w-4 h-4" />
+            <a href={L("/buy")} className="inline-flex items-center text-accent font-semibold hover:underline shrink-0">
+              {A ? C.browseUnits : "Browse all available units"} <ArrowRight className="ms-2 w-4 h-4 rtl:rotate-180" />
             </a>
           </div>
           {saleListings.length > 0 ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
               {saleListings.map((listing) => (
-                <ListingCard key={listing.id} listing={listing} compact />
+                isAr ? <ListingCardAr key={listing.id} listing={listing} /> : <ListingCard key={listing.id} listing={listing} compact />
               ))}
             </div>
           ) : (
-            !isPending && <p className="text-muted-foreground py-8">No sale listings available yet.</p>
+            !isPending && <p className="text-muted-foreground py-8">{A ? C.noSale : "No sale listings available yet."}</p>
           )}
         </Band>
 
         <Band tone="cream">
           <FaqWithAdvisor
-            title="Property resale FAQs"
-            faqs={FAQS}
+            title={A ? A.faqTitle : "Property resale FAQs"}
+            faqs={faqs}
             footer={
+              A ? (
+                <>
+                  {C.moreFaqs}
+                  {A.faqLinks.map((slug) => (
+                    <span key={slug}>
+                      <Link href={L(`/faqs/${slug}`)} className="text-accent font-medium hover:underline">{FAQ_TOPIC_LABELS_AR[slug]}</Link>
+                      {" · "}
+                    </span>
+                  ))}
+                  <Link href={L("/faqs")} className="text-accent font-medium hover:underline">{C.allFaqs}</Link>
+                </>
+              ) : (
               <>
                 More FAQs:{" "}
                 <Link href="/faqs/rent-buy-resale" className="text-accent font-medium hover:underline">Rent vs buy vs resale</Link>
@@ -307,19 +341,20 @@ export default function PropertyResale() {
                 {" · "}
                 <Link href="/faqs" className="text-accent font-medium hover:underline">Browse all FAQs</Link>
               </>
+              )
             }
           />
         </Band>
 
         <Band tone="white">
-          <SectionHead title="Explore other services" />
+          <SectionHead title={A ? C.otherServices : "Explore other services"} />
           <RelatedServices current="/services/property-resale" order={["/services/primary-property", "/services/tenant-representation", "/services/investment-consultation", "/services/income-generating-property"]} />
         </Band>
 
         <CtaBand
-          title="Buying or selling a resale unit?"
-          text="Get honest market context before you commit to anything."
-          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "buy", pageName: "Property resale" } }}
+          title={A ? A.ctaTitle : "Buying or selling a resale unit?"}
+          text={A ? A.ctaText : "Get honest market context before you commit to anything."}
+          primary={{ label: A ? C.book : "Book a free consultation", href: L("/contact"), form }}
         />
       </main>
 

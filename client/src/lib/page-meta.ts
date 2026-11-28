@@ -72,6 +72,36 @@ export const AR_PAGE_META: Record<string, StaticPageMeta> = {
       "PLACES وسيط عقاري يمثل الشركات لا الملاك في إيجار المكاتب الإدارية بالقاهرة: نبحث ونقارن ونتفاوض ونراجع عقد الإيجار. الخدمة مجانية للمستأجرين.",
     url: `${SITE}/ar/services/tenant-representation`,
   },
+  "/ar/services": {
+    title: "خدمات المكاتب الإدارية في مصر | إيجار وشراء واستثمار | PLACES",
+    description:
+      "خدمات المكاتب الإدارية في مصر: وسيط عقاري للشركات (مجاني للمستأجرين)، والشراء من المطور، وإعادة البيع، والاستشارات الاستثمارية، والعقارات المدرة للدخل.",
+    url: `${SITE}/ar/services`,
+  },
+  "/ar/services/primary-property": {
+    title: "الشراء من المطور في مصر: مكاتب إدارية مباشرة من المطورين | PLACES",
+    description:
+      "اشترِ مكتبك الإداري مباشرة من المطور في مصر، تحت الإنشاء أو عند الطرح، بعد تقييم الوحدة والمطور وخطة السداد. وصول مبكر قبل الطرح ومتابعة حتى الاستلام.",
+    url: `${SITE}/ar/services/primary-property`,
+  },
+  "/ar/services/property-resale": {
+    title: "إعادة بيع المكاتب الإدارية في مصر: شراء وبيع | PLACES",
+    description:
+      "اشترِ أو بِع مكتبًا إداريًا إعادة بيع في مصر بتسعير صادق مبني على صفقات مشابهة، مع مشترين جادين ومتابعة نقل الملكية حتى الاستلام.",
+    url: `${SITE}/ar/services/property-resale`,
+  },
+  "/ar/services/investment-consultation": {
+    title: "استشارات الاستثمار العقاري في مصر | PLACES",
+    description:
+      "استشارات استثمار عقاري مبنية على البيانات للأصول التجارية والإدارية في مصر: العائد ومعدلات الشغور ونمو القيمة وسجل المطور، قبل أن تستثمر.",
+    url: `${SITE}/ar/services/investment-consultation`,
+  },
+  "/ar/services/income-generating-property": {
+    title: "عقارات مدرة للدخل في مصر: مكاتب بعائد إيجاري | PLACES",
+    description:
+      "اعثر على مكاتب ووحدات تجارية تحقق دخلًا إيجاريًا ثابتًا في مصر: نتحقق من طلب المستأجرين ونحسب العائد الصافي ونراجع عقد الإيجار قبل أن تشتري.",
+    url: `${SITE}/ar/services/income-generating-property`,
+  },
   "/ar/contact": {
     title: "تواصل مع PLACES | استشارة في إيجار وشراء المكاتب الإدارية",
     description:

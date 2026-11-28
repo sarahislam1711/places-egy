@@ -343,7 +343,12 @@ function Router() {
       <Route path="/income-property" component={DealHubPage} />
       {/* Arabic site (28 Nov): hubs. Listed in AR_LIVE (lib/i18n.ts) only once checked. */}
       <Route path="/ar" component={Home} />
+      <Route path="/ar/services" component={ServicesIndex} />
       <Route path="/ar/services/tenant-representation" component={TenantRepresentationPage} />
+      <Route path="/ar/services/primary-property" component={PrimaryProperty} />
+      <Route path="/ar/services/property-resale" component={PropertyResale} />
+      <Route path="/ar/services/investment-consultation" component={InvestmentConsultation} />
+      <Route path="/ar/services/income-generating-property" component={IncomeGeneratingProperty} />
       <Route path="/ar/contact" component={Contact} />
       <Route path="/ar/rent" component={DealHubPage} />
       <Route path="/ar/buy" component={DealHubPage} />

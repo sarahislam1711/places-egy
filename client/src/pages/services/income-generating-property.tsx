@@ -21,7 +21,11 @@ import {
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { STATIC_PAGE_META } from "@/lib/page-meta";
+import { AR_PAGE_META, STATIC_PAGE_META } from "@/lib/page-meta";
+import { useLang } from "@/lib/ui-text";
+import { arabicPath } from "@/lib/i18n";
+import { FAQ_TOPIC_LABELS_AR } from "@/lib/landing-pages-ar";
+import { SERVICE_COMMON_AR, INCOME_AR } from "@/lib/services-ar";
 
 const PATH = "/services/income-generating-property";
 
@@ -114,42 +118,57 @@ const FAQS = [
 ];
 
 export default function IncomeGeneratingProperty() {
-  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { isAr, href: L } = useLang();
+  const A = isAr ? INCOME_AR : null;
+  const C = SERVICE_COMMON_AR;
+  useDocumentMeta(isAr ? AR_PAGE_META[arabicPath(PATH)] : STATIC_PAGE_META[PATH]);
+  const pagePath = isAr ? arabicPath(PATH) : PATH;
+  const who: Audience[] = A ? WHO.map((w, i) => ({ ...w, ...A.who[i] })) : WHO;
+  const faqs = A ? A.faqs : FAQS;
+  const crumbs = A
+    ? [{ name: C.home, href: L("/") }, { name: C.services, href: L("/services") }, { name: A.crumb }]
+    : [{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Income Generating Property" }];
+  const breadcrumb = A
+    ? [{ name: C.home, url: L("/") }, { name: C.services, url: L("/services") }, { name: A.crumb, url: pagePath }]
+    : [{ name: "Home", url: "/" }, { name: "Services", url: "/services" }, { name: "Income Generating Property", url: PATH }];
+  const why: Reason[] = A ? WHY.map((r, i) => ({ ...r, ...A.why[i] })) : WHY;
+  const form = { intent: "invest" as const, pageName: "Income generating property" };
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       <SchemaMarkup
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Services", url: "/services" },
-          { name: "Income Generating Property", url: PATH },
-        ])}
+        schema={breadcrumbSchema(breadcrumb)}
       />
       <SchemaMarkup
-        schema={serviceSchema({
-          name: "Income Generating Property in Egypt",
-          description:
-            "Identify and acquire units that generate consistent rental income across Egypt's most active business districts: yield-first thinking, tenant demand data, and lease structuring.",
-          url: PATH,
-          serviceType: "Income Generating Real Estate Advisory",
-        })}
+        schema={serviceSchema(
+          A
+            ? { name: A.schemaName, description: A.schemaDescription, url: pagePath, serviceType: A.schemaName }
+            : {
+                name: "Income Generating Property in Egypt",
+                description:
+                  "Identify and acquire units that generate consistent rental income across Egypt's most active business districts: yield-first thinking, tenant demand data, and lease structuring.",
+                url: PATH,
+                serviceType: "Income Generating Real Estate Advisory",
+              },
+        )}
       />
-      <SchemaMarkup schema={faqSchema(FAQS)} />
+      <SchemaMarkup schema={faqSchema(faqs)} />
       <Navbar />
 
       <main className="flex-1">
         <ServiceHero
-          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Income Generating Property" }]}
-          title="Income Generating Property Advisory in Egypt"
-          intro="We help investors identify and acquire units that generate consistent rental income across Egypt's most active business districts. It is for yield-focused investors, portfolio builders and passive investors who want income without active management."
-          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "invest", pageName: "Income generating property" } }}
+          crumbs={crumbs}
+          title={A ? A.h1 : "Income Generating Property Advisory in Egypt"}
+          intro={A ? A.intro : "We help investors identify and acquire units that generate consistent rental income across Egypt's most active business districts. It is for yield-focused investors, portfolio builders and passive investors who want income without active management."}
+          primary={{ label: A ? C.talk : "Talk to an advisor", href: L("/contact"), form }}
           image="/images/Allegria-Business-Park.jpg"
-          imageAlt="Income generating property in Egypt"
-          promise={{ title: "Yield-first thinking", text: "We evaluate every asset on its income potential, not just its location or price." }}
-          points={["Tenant demand checked first", "Realistic net yield", "Leases that protect your income"]}
+          imageAlt={A ? A.heroAlt : "Income generating property in Egypt"}
+          promise={A ? A.promise : { title: "Yield-first thinking", text: "We evaluate every asset on its income potential, not just its location or price." }}
+          points={A ? A.points : ["Tenant demand checked first", "Realistic net yield", "Leases that protect your income"]}
         />
 
         <Band tone="white">
-          <IntroSplit title="What is income generating property?" cardTitle="What makes a unit a good income investment" items={GOOD_INCOME_UNIT}>
+          <IntroSplit title={A ? A.whatTitle : "What is income generating property?"} cardTitle={A ? A.whatCard : "What makes a unit a good income investment"} items={A ? A.goodUnit : GOOD_INCOME_UNIT}>
+            {A ? A.whatText.map((t) => <p key={t}>{t}</p>) : <>
                 <p>
                   Income generating property is a commercial unit bought to earn rental income from tenants. Our
                   service helps you identify and acquire units that generate consistent rental income across Egypt's
@@ -160,16 +179,17 @@ export default function IncomeGeneratingProperty() {
                   quality all determine whether a unit performs or sits vacant, so we evaluate every asset on its
                   income potential, not just its location or price.
                 </p>
+            </>}
               </IntroSplit>
         </Band>
 
         <Band tone="cream" tight>
-          <SectionHead title="Who this service is for"  compact />
-          <AudienceTabs items={WHO} label="Who this service is for" />
+          <SectionHead title={A ? C.whoTitle : "Who this service is for"} compact />
+          <AudienceTabs items={who} label={A ? C.whoTitle : "Who this service is for"} />
           <p className="mt-10 text-muted-foreground">
-            Renting an office for your own company?{" "}
-            <Link href="/services/tenant-representation" className="text-accent font-semibold hover:underline">
-              Our tenant representation is free for tenants
+            {A ? C.rentingOwnCompany : <>Renting an office for your own company?{" "}</>}
+            <Link href={L("/services/tenant-representation")} className="text-accent font-semibold hover:underline">
+              {A ? C.tenantRepFree : "Our tenant representation is free for tenants"}
             </Link>
             .
           </p>
@@ -178,36 +198,48 @@ export default function IncomeGeneratingProperty() {
         <Band tone="dark">
           <SectionHead
             dark
-            title="Why choose PLACES for income generating property"
-            lead="Income depends on tenant demand, the lease and the building. We check all three before you commit capital."
+            title={A ? A.whyTitle : "Why choose PLACES for income generating property"}
+            lead={A ? A.whyLead : "Income depends on tenant demand, the lease and the building. We check all three before you commit capital."}
           />
-          <ReasonGrid items={WHY} dark />
+          <ReasonGrid items={why} dark />
         </Band>
 
         <Band tone="white" tight>
           <SectionHead
-            title="How we evaluate an income property"
-            lead="Four checks, in order, before you buy and while you set up the lease."
+            title={A ? A.processTitle : "How we evaluate an income property"}
+            lead={A ? A.processLead : "Four checks, in order, before you buy and while you set up the lease."}
           
             compact
           />
-          <StepList steps={STEPS} />
+          <StepList steps={A ? A.steps : STEPS} />
         </Band>
 
         <Band tone="cream">
           <SectionHead
-            title="A unit bought for income vs a unit left to chance"
-            lead="The difference shows after handover: a unit chosen and leased for income starts earning sooner, while a unit bought without a plan can wait months for a tenant."
+            title={A ? A.compareTitle : "A unit bought for income vs a unit left to chance"}
+            lead={A ? A.compareLead : "The difference shows after handover: a unit chosen and leased for income starts earning sooner, while a unit bought without a plan can wait months for a tenant."}
             compact
           />
-          <ComparisonTable usLabel="Bought for income, with PLACES" themLabel="Bought without an income plan" rows={COMPARISON} />
+          <ComparisonTable usLabel={A ? A.usLabel : "Bought for income, with PLACES"} themLabel={A ? A.themLabel : "Bought without an income plan"} rows={A ? A.comparison : COMPARISON} />
         </Band>
 
         <Band tone="white">
           <FaqWithAdvisor
-            title="Income generating property FAQs"
-            faqs={FAQS}
+            title={A ? A.faqTitle : "Income generating property FAQs"}
+            faqs={faqs}
             footer={
+              A ? (
+                <>
+                  {C.moreFaqs}
+                  {A.faqLinks.map((slug) => (
+                    <span key={slug}>
+                      <Link href={L(`/faqs/${slug}`)} className="text-accent font-medium hover:underline">{FAQ_TOPIC_LABELS_AR[slug]}</Link>
+                      {" · "}
+                    </span>
+                  ))}
+                  <Link href={L("/faqs")} className="text-accent font-medium hover:underline">{C.allFaqs}</Link>
+                </>
+              ) : (
               <>
                 More FAQs:{" "}
                 <Link href="/faqs/investment-income" className="text-accent font-medium hover:underline">Investment &amp; income-generating properties</Link>
@@ -218,19 +250,20 @@ export default function IncomeGeneratingProperty() {
                 {" · "}
                 <Link href="/faqs" className="text-accent font-medium hover:underline">Browse all FAQs</Link>
               </>
+              )
             }
           />
         </Band>
 
         <Band tone="cream">
-          <SectionHead title="Explore other services" />
+          <SectionHead title={A ? C.otherServices : "Explore other services"} />
           <RelatedServices current="/services/income-generating-property" order={["/services/investment-consultation", "/services/primary-property", "/services/property-resale", "/services/tenant-representation"]} />
         </Band>
 
         <CtaBand
-          title="Looking for consistent rental income?"
-          text="We'll identify the right assets and evaluate them before you commit."
-          primary={{ label: "Book a free consultation", href: "/contact", form: { intent: "invest", pageName: "Income generating property" } }}
+          title={A ? A.ctaTitle : "Looking for consistent rental income?"}
+          text={A ? A.ctaText : "We'll identify the right assets and evaluate them before you commit."}
+          primary={{ label: A ? C.book : "Book a free consultation", href: L("/contact"), form }}
         />
       </main>
 
