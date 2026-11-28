@@ -1,23 +1,52 @@
-// /sitemap.xml is an index of four sitemaps generated on request:
+// /sitemap.xml is an index of the sitemaps below, generated on request:
 //   static    — hand-maintained routes + guides (from the built sitemap file)
 //   locations — /locations hub, each location page, and live landing pages (/rent/new-cairo, …)
 //   listings  — every published listing, lastmod from updated_at
 //   blog      — WordPress posts (EN + AR, hreflang pairs), lastmod from modified
+//   ar-pages  — Arabic site pages (only listed once at least one is live)
+// Every page with a live Arabic twin carries en / ar / x-default <xhtml:link>
+// alternates in both its English and Arabic entries — same source as the
+// <head> tags (alternatesFor in client/src/lib/i18n.ts).
 import type { Express } from "express";
 import { buildPostEntries, fetchAllPosts, type WpPost } from "../../script/build-sitemap";
 import { getInventory } from "./data";
 import { isRedirectedPath } from "../redirects";
 import { builtFile, SITE } from "./render";
 import { DEAL_SLUGS, eligibleLandingPages, hubRows, landingRows } from "../../client/src/lib/landing-pages";
+import { AR_LIVE, alternatesFor, arabicPath } from "../../client/src/lib/i18n";
 
 const XML_HEAD = `<?xml version="1.0" encoding="UTF-8"?>\n`;
 const URLSET_OPEN = `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">\n`;
-const PARTS = ["static", "locations", "listings", "blog"] as const;
+const PARTS = ["static", "locations", "listings", "blog", "ar-pages"] as const;
+// Parts in the index right now: the Arabic one only once it has pages.
+const activeParts = () => PARTS.filter((p) => p !== "ar-pages" || AR_LIVE.length > 0);
 
 const day = (iso: string | null | undefined) => (iso ? new Date(iso).toISOString().slice(0, 10) : null);
 const url = (loc: string, lastmod: string | null, changefreq: string, priority: string) =>
   `  <url>\n    <loc>${loc}</loc>\n${lastmod ? `    <lastmod>${lastmod}</lastmod>\n` : ""}` +
   `    <changefreq>${changefreq}</changefreq>\n    <priority>${priority}</priority>\n  </url>`;
+
+const xhtmlLinks = (path: string) =>
+  alternatesFor(path, SITE)
+    .map((a) => `    <xhtml:link rel="alternate" hreflang="${a.hreflang}" href="${a.url}"/>\n`)
+    .join("");
+
+/** Add the language alternates to a <url> block whose page has an Arabic twin. */
+function withAlternates(block: string): string {
+  if (block.includes("<xhtml:link")) return block;
+  const loc = block.match(/<loc>([^<]+)<\/loc>/)?.[1];
+  if (!loc || !loc.startsWith(SITE)) return block;
+  const links = xhtmlLinks(loc.slice(SITE.length) || "/");
+  return links ? block.replace(/(<\/loc>\n)/, `$1${links}`) : block;
+}
+
+/** Arabic twins of the live pages, each with its en / ar / x-default links. */
+function arPagesXml(): string {
+  return AR_LIVE.map((en) => {
+    const block = url(`${SITE}${arabicPath(en)}`, null, "weekly", "0.8");
+    return block.replace(/(<\/loc>\n)/, `$1${xhtmlLinks(en)}`);
+  }).join("\n");
+}
 
 // <url> blocks from the built sitemap, minus everything now generated live.
 function staticEntries(): { staticXml: string; locationXml: string } {
@@ -81,8 +110,10 @@ async function landingXml(): Promise<string> {
 async function part(name: (typeof PARTS)[number]): Promise<string> {
   if (name === "listings") return listingsXml();
   if (name === "blog") return blogXml();
+  if (name === "ar-pages") return arPagesXml();
   const { staticXml, locationXml } = staticEntries();
-  return name === "static" ? staticXml : [locationXml, await landingXml()].filter(Boolean).join("\n");
+  const xml = name === "static" ? staticXml : [locationXml, await landingXml()].filter(Boolean).join("\n");
+  return xml.replace(/<url>[\s\S]*?<\/url>/g, withAlternates);
 }
 
 export function registerSitemapRoutes(app: Express): void {
@@ -91,7 +122,7 @@ export function registerSitemapRoutes(app: Express): void {
     const body =
       XML_HEAD +
       `<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-      PARTS.map((p) => `  <sitemap>\n    <loc>${SITE}/sitemap-${p}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>`).join("\n") +
+      activeParts().map((p) => `  <sitemap>\n    <loc>${SITE}/sitemap-${p}.xml</loc>\n    <lastmod>${today}</lastmod>\n  </sitemap>`).join("\n") +
       `\n</sitemapindex>\n`;
     res.setHeader("Cache-Control", "public, max-age=600");
     res.type("application/xml").send(body);
@@ -99,7 +130,7 @@ export function registerSitemapRoutes(app: Express): void {
 
   app.get("/sitemap-:name.xml", async (req, res, next) => {
     const name = String(req.params.name) as (typeof PARTS)[number];
-    if (!PARTS.includes(name)) return next();
+    if (!activeParts().includes(name)) return next();
     try {
       const entries = await part(name);
       res.setHeader("Cache-Control", "public, max-age=600");

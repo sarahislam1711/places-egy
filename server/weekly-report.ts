@@ -581,6 +581,20 @@ function renderReport(m: WeeklyMetrics): string {
     </table>`}`
       : ""}
 
+    ${m.crawlerView && m.crawlerView.hreflang.pairs > 0
+      ? `<!-- Section 8: Arabic site language pairs -->
+    <h2 style="margin:32px 0 12px 0; font-size:16px; font-weight:700; color:#171717;">Arabic pages: language pairing</h2>
+    ${m.crawlerView.hreflang.issues.length === 0
+      ? `<p style="margin:0; font-size:14px; color:#166534;">All ${m.crawlerView.hreflang.pairs} English/Arabic page pairs are set up correctly (both load, both point to each other, each is its own canonical).</p>`
+      : `<p style="margin:0 0 12px 0; font-size:14px; color:#475569;"><strong style="color:#B91C1C;">${m.crawlerView.hreflang.issues.length} problem(s)</strong> across ${m.crawlerView.hreflang.pairs} English/Arabic page pairs. Google may show the wrong language or ignore the pairing until fixed.</p>
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#ffffff; border:1px solid #EAE4DA; border-radius:12px; overflow:hidden;">
+      ${m.crawlerView.hreflang.issues
+        .slice(0, 25)
+        .map((i) => `<tr><td style="padding:10px 14px; border-bottom:1px solid #F1ECE4; font-size:13px;">${escapeHtml(i.path)} <span style="color:#64748B;">· ${escapeHtml(i.problem)}</span></td></tr>`)
+        .join("")}
+    </table>`}`
+      : ""}
+
     <div style="margin:32px 0 8px 0; padding:16px 20px; background:#171717; border-radius:12px; text-align:center;">
       <a href="https://places-egy.com/dashboard" style="display:inline-block; color:#ffffff; text-decoration:none; font-weight:600; font-size:14px;">
         Open the leads dashboard →

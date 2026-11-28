@@ -3,6 +3,8 @@ import { renderDealHub, renderDeveloper, renderHome, renderLanding, renderListin
 import { findBlogPost, getBlogData, renderBlogHub, renderBlogPost, type BlogLang } from "./blog";
 import { getListingById } from "./data";
 import { registerSitemapRoutes } from "./sitemap";
+import { ensureAlternates } from "./html";
+import { alternatesFor } from "../../client/src/lib/i18n";
 
 // Server-rendered pages. Registered before express.static so they win over
 // build-time files. On any error, fall through to the normal static/SPA path.
@@ -21,8 +23,10 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
   const send = (render: (req: Request) => Promise<string | null>) =>
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const html = await render(req);
-        if (html === null) return next();
+        const rendered = await render(req);
+        if (rendered === null) return next();
+        // Pages with a live Arabic twin carry en / ar / x-default hreflang.
+        const html = ensureAlternates(rendered, alternatesFor(req.path));
         res.setHeader("Cache-Control", "no-cache");
         res.type("html").send(html);
       } catch (err) {

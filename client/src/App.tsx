@@ -13,6 +13,7 @@ import { ConciergeWidget } from "@/components/magnets/ConciergeWidget";
 import { ChunkErrorBoundary } from "@/components/ChunkErrorBoundary";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { organizationSchema, websiteSchema } from "@/lib/schema";
+import { alternatesFor, langOfPath } from "@/lib/i18n";
 
 // Eager imports — Home loads on first paint, NotFound is imported as a
 // component by faqs-section + locations/detail (React.lazy can't be used
@@ -202,6 +203,38 @@ function CanonicalTag() {
   return null;
 }
 
+// Arabic site (28 Nov): <html lang dir> follows the address, and pages with a
+// live Arabic twin get the en / ar / x-default hreflang links. The server puts
+// the same tags in the first HTML; this keeps them right during in-app
+// navigation. The blog manages its own hreflang (WordPress pairs), so its
+// pages are left alone here.
+function LanguageTags() {
+  const [location] = useLocation();
+  useEffect(() => {
+    const path = location.split("?")[0].split("#")[0];
+    const lang = langOfPath(path);
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === "ar" ? "rtl" : "ltr";
+
+    // Our own tags never carry over to the next page.
+    document.head.querySelectorAll('link[rel="alternate"][data-i18n]').forEach((el) => el.remove());
+    const isBlog = /^\/(ar\/)?blog(\/|$)/.test(path);
+    if (isBlog) return;
+    // Outside the blog, also clear hreflang tags left by the server HTML or a
+    // blog page visited earlier in this tab.
+    document.head.querySelectorAll('link[rel="alternate"][hreflang]').forEach((el) => el.remove());
+    for (const a of alternatesFor(path)) {
+      const el = document.createElement("link");
+      el.setAttribute("rel", "alternate");
+      el.setAttribute("hreflang", a.hreflang);
+      el.setAttribute("href", a.url);
+      el.setAttribute("data-i18n", "");
+      document.head.appendChild(el);
+    }
+  }, [location]);
+  return null;
+}
+
 // Suspense fallback shown while React.lazy() is fetching the chunk for a
 // route the user just navigated to. Renders a full-height branded screen
 // with the site background — deliberately NOT a bare white flash + tiny
@@ -342,6 +375,7 @@ function App() {
         <Toaster />
         <ScrollToTop />
         <CanonicalTag />
+        <LanguageTags />
         <PageViewTracker />
         <OutboundClickTracker />
         <Router />

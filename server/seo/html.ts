@@ -71,6 +71,19 @@ export function injectMeta(
   return html;
 }
 
+/**
+ * Add hreflang links to a finished page when it has none yet (pages rendered
+ * on request). Same tags as the build-time pages and the sitemaps, all from
+ * alternatesFor() in client/src/lib/i18n.ts.
+ */
+export function ensureAlternates(html: string, alternates: Array<{ hreflang: string; url: string }>): string {
+  if (!alternates.length || /<link\s+rel="alternate"\s+hreflang=/i.test(html)) return html;
+  const tags = alternates
+    .map((a) => `<link rel="alternate" hreflang="${attr(a.hreflang)}" href="${attr(a.url)}" />`)
+    .join("\n");
+  return swap(html, /<\/head>/i, `${tags}\n</head>`);
+}
+
 export function injectJsonLd(html: string, jsonLd: unknown): string {
   const encoded = JSON.stringify(jsonLd).replace(/<\/script/gi, "<\\/script");
   return swap(html, /<\/head>/i, `<script type="application/ld+json">${encoded}</script>\n</head>`);

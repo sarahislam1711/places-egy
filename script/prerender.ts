@@ -3,6 +3,7 @@ import path from "path";
 import ts from "typescript";
 import { attr, esc, injectBody, injectMeta } from "../server/seo/html";
 import { STATIC_PAGE_META } from "../client/src/lib/page-meta";
+import { alternatesFor } from "../client/src/lib/i18n";
 import { renderDeveloperBodies } from "./ssr-developers";
 import { renderStaticPageBodies } from "./ssr-pages";
 import { TENANT_REP_FAQ_SECTIONS, tenantRepHtml } from "../client/src/lib/tenant-rep-cta";
@@ -693,7 +694,7 @@ export async function prerender() {
               { hreflang: "x-default", url: `${SITE}/blog` },
             ],
           })
-        : injectMeta(shell, meta);
+        : injectMeta(shell, meta, { alternates: alternatesFor(meta.route, SITE) });
     // Route-specific JSON-LD: /contact gets the enriched RealEstateAgent with opening hours.
     if (meta.route === "/contact") {
       // The enriched block has the same @id as the shell's base RealEstateAgent
