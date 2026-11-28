@@ -9,7 +9,7 @@ import { breadcrumbSchema, guidesCollectionSchema } from "@/lib/schema";
 import { GUIDES, type Guide } from "@/lib/guides";
 import { ArrowRight, Check, ChevronRight, Clock } from "lucide-react";
 import { DeveloperSurveyMagnet } from "@/components/magnets/DeveloperSurveyMagnet";
-import { SurveyCard } from "@/components/guides/GuideLayout";
+import { ChecklistCard, SurveyCard } from "@/components/guides/GuideLayout";
 
 // /guides — hub index page. Auto-populates from GUIDES in lib/guides.ts and
 // emits a CollectionPage JSON-LD block listing every guide, so AI answer
@@ -189,7 +189,8 @@ export default function GuidesIndexPage() {
                 </li>
               ))}
             </ul>
-            <SurveyCard className="mt-8 md:flex md:items-center md:gap-6 [&>p]:md:mt-0 [&>button]:md:mt-0 [&>button]:md:ml-auto" />
+            <ChecklistCard className="mt-10" />
+            <SurveyCard className="mt-5 md:flex md:items-center md:gap-6 [&>p]:md:mt-0 [&>button]:md:mt-0 [&>button]:md:ml-auto" />
           </div>
         </section>
 

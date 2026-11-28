@@ -24,6 +24,26 @@ const SHOW_AFTER_MS = 5_000;
 type Intent = "buy" | "rent" | "browsing" | "other";
 type AreaRange = "under-100" | "100-300" | "300-500" | "500-plus";
 type Lang = "en" | "ar";
+export type MagnetOffer = "developer_survey" | "office_checklist";
+
+// Text that changes when the popup is opened for the office search checklist
+// (guides, 28 Nov) instead of the developer survey. Everything else is shared.
+const CHECKLIST_COPY = {
+  en: {
+    hookHeadline: "The Cairo office search checklist",
+    submit: "Send me the checklist",
+    successTitle: "The checklist is on its way. Check your inbox.",
+    validationEmail: "We need a valid email to send the checklist.",
+    badge: "Free checklist · PDF",
+  },
+  ar: {
+    hookHeadline: "قائمة البحث عن مكتب في القاهرة",
+    submit: "أرسل لي القائمة",
+    successTitle: "القائمة في طريقها إليك. تحقق من بريدك.",
+    validationEmail: "نحتاج بريدًا إلكترونيًا صحيحًا لإرسال القائمة.",
+    badge: "قائمة مجانية · PDF",
+  },
+} as const;
 
 const COPY = {
   en: {
@@ -116,7 +136,7 @@ type Props = {
 };
 
 /** Ask the survey popup on this page to open with its form (used by survey cards). */
-export function openDeveloperSurvey(detail: { source: string; guide_slug?: string | null }) {
+export function openDeveloperSurvey(detail: { source: string; guide_slug?: string | null; offer?: MagnetOffer }) {
   window.dispatchEvent(new CustomEvent("places-open-developer-survey", { detail }));
 }
 
@@ -151,6 +171,8 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorText, setErrorText] = useState<string | null>(null);
+  const [offer, setOffer] = useState<MagnetOffer>("developer_survey");
+  const offerRef = useRef<MagnetOffer>("developer_survey");
   const nameInputRef = useRef<HTMLInputElement>(null);
 
   // Popup: delayed reveal + coord flag so PDF magnet doesn't stack with us.
@@ -180,7 +202,15 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
   // Popup: open with the form when a survey card on the page asks for it.
   useEffect(() => {
     if (!isPopup) return;
-    const open = () => {
+    const open = (e: Event) => {
+      const next: MagnetOffer = (e as CustomEvent).detail?.offer ?? "developer_survey";
+      // Switching offer: clear a finished/failed form (name, email and phone stay filled).
+      if (offerRef.current !== next) {
+        setStatus("idle");
+        setErrorText(null);
+      }
+      offerRef.current = next;
+      setOffer(next);
       setLang(pageLanguage());
       setMounted(true);
       setExpanded(true);
@@ -204,7 +234,8 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
     }
   }, [expanded, isPopup]);
 
-  const t = COPY[lang];
+  const isChecklist = offer === "office_checklist";
+  const t = isChecklist ? { ...COPY[lang], ...CHECKLIST_COPY[lang] } : COPY[lang];
   const isRtl = lang === "ar";
 
   const dismiss = () => {
@@ -271,6 +302,7 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
       message: message.trim() || undefined,
       placement: variant,
       guide_slug: guideSlug ?? null,
+      offer,
       preferred_language: lang,
       page_url:
         typeof window !== "undefined" ? window.location.pathname : undefined,
@@ -288,7 +320,7 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
       } catch {
         // ignore
       }
-      trackEvent("developer_survey_submit", {
+      trackEvent(isChecklist ? "office_checklist_submit" : "developer_survey_submit", {
         variant,
         intent,
         guide_slug: guideSlug ?? null,
@@ -608,7 +640,7 @@ export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: P
               <X className="w-5 h-5" />
             </button>
             <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-accent bg-accent/20 px-2.5 py-1 rounded-full mb-1.5">
-              {isRtl ? "استطلاع مجاني · PDF" : "Free Survey · PDF"}
+              {isChecklist ? CHECKLIST_COPY[lang].badge : isRtl ? "استطلاع مجاني · PDF" : "Free Survey · PDF"}
             </span>
             <h3 className="text-base md:text-lg font-serif font-bold text-white leading-tight pr-6">
               {t.hookHeadline}

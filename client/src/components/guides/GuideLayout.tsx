@@ -5,7 +5,7 @@ import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { articleSchema, breadcrumbSchema } from "@/lib/schema";
-import { ArrowRight, ArrowLeft, Check, Clock, ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { ArrowRight, ArrowLeft, Check, Clock, ChevronDown, ChevronRight, FileText, ListChecks } from "lucide-react";
 import { GUIDES, type Guide } from "@/lib/guides";
 import { trackEvent } from "@/lib/analytics";
 import { openCalendly } from "@/lib/calendly";
@@ -30,6 +30,52 @@ type Props = {
   wordCount?: number;
   children: ReactNode;
 };
+
+// The guides lead magnet (28 Nov): the free office search checklist PDF.
+// Opens the same sign-up popup as the survey, set to the checklist offer.
+const CHECKLIST_POINTS = [
+  "What to decide before your first viewing",
+  "What to check in every building",
+  "The four lease terms worth negotiating",
+  "A table to compare three offices side by side",
+];
+
+export function ChecklistCard({ guideSlug, className = "" }: { guideSlug?: string; className?: string }) {
+  return (
+    <div className={`rounded-3xl bg-white p-6 md:p-8 ${className}`}>
+      <div className="flex flex-col gap-6">
+        <div className="min-w-0">
+          <span className="inline-flex items-center gap-2 rounded-full bg-accent/10 px-3 py-1 text-xs font-semibold text-accent">
+            <ListChecks className="h-3.5 w-3.5" aria-hidden /> Free checklist · PDF
+          </span>
+          <p className="mt-3 font-serif text-2xl md:text-[1.7rem] font-bold leading-tight text-primary">
+            The Cairo office search checklist
+          </p>
+          <p className="mt-2 text-muted-foreground leading-relaxed">
+            Every step PLACES advisors check, from working out how much space you need to move-in day. Three printable pages.
+          </p>
+          <ul className="mt-4 grid gap-2 sm:grid-cols-2">
+            {CHECKLIST_POINTS.map((p) => (
+              <li key={p} className="flex gap-2 text-sm text-primary">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-accent" aria-hidden /> {p}
+              </li>
+            ))}
+          </ul>
+        </div>
+        <button
+          type="button"
+          onClick={() => {
+            trackEvent("office_checklist_open", { guide_slug: guideSlug ?? null });
+            openDeveloperSurvey({ source: "checklist_card", guide_slug: guideSlug ?? null, offer: "office_checklist" });
+          }}
+          className="inline-flex shrink-0 items-center justify-center gap-2 self-start rounded-full bg-accent px-6 py-3 font-semibold text-white hover:bg-accent/90 transition-colors"
+        >
+          Get the free checklist <ArrowRight className="h-4 w-4" aria-hidden />
+        </button>
+      </div>
+    </div>
+  );
+}
 
 // The developer-survey lead magnet as a calm card in the page (28 Nov): the
 // timed popup covered what people were reading. Clicking opens the popup form.
@@ -241,7 +287,8 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
               >
                 {children}
               </article>
-              <SurveyCard guideSlug={guide.slug} className="lg:hidden mt-10 max-w-[720px]" />
+              <ChecklistCard guideSlug={guide.slug} className="mt-12 max-w-[720px]" />
+              <SurveyCard guideSlug={guide.slug} className="lg:hidden mt-6 max-w-[720px]" />
             </div>
           </div>
         </section>

@@ -18,6 +18,8 @@ Disallow: /listings?
 # of the base /projects). Blocking here saves crawl budget + declutters
 # GSC's "not indexed" report.
 Disallow: /projects?q=
+# /downloads/ holds the free PDFs sent by email after a sign-up: keep them out of search.
+Disallow: /downloads/
 
 # AI / LLM crawlers — explicitly welcomed so PLACES content can be surfaced and
 # cited in AI search (ChatGPT, Perplexity, Google AI Overviews, Claude, etc.).
@@ -44,5 +46,7 @@ Disallow: /listings?
 # of the base /projects). Blocking here saves crawl budget + declutters
 # GSC's "not indexed" report.
 Disallow: /projects?q=
+# /downloads/ holds the free PDFs sent by email after a sign-up: keep them out of search.
+Disallow: /downloads/
 
 Sitemap: https://places-egy.com/sitemap.xml

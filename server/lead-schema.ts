@@ -150,6 +150,10 @@ export const developerSurveyLeadSchema = z
     placement: z.enum(["popup", "inline"]),
     // Which guide URL surfaced the magnet.
     guide_slug: z.string().trim().max(120).nullable().optional(),
+    // Which free download was requested. Defaults to the developer survey
+    // (older clients don't send it). "office_checklist" = the Cairo office
+    // search checklist offered at the end of every guide (28 Nov).
+    offer: z.enum(["developer_survey", "office_checklist"]).optional(),
     page_url: z.string().max(500).nullable().optional(),
     utm_source: z.string().max(80).nullable().optional(),
     utm_medium: z.string().max(80).nullable().optional(),

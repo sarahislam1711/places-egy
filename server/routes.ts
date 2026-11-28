@@ -36,6 +36,7 @@ import {
   sendAdminLeadNotification,
   sendMarketReportReply,
   sendDeveloperSurveyReply,
+  sendOfficeChecklistReply,
   sendLeadWelcomeWithListings,
   escapeHtml,
 } from "./mailer";
@@ -622,8 +623,11 @@ export async function registerRoutes(
         budget_to,
         placement,
         guide_slug,
+        offer,
         ...rest
       } = parsed.data;
+      const isChecklist = offer === "office_checklist";
+      const magnet = isChecklist ? "office_search_checklist" : "cairo_developer_survey_2026";
       if (honeypot && honeypot.trim().length > 0) {
         return res.json({ ok: true });
       }
@@ -665,8 +669,9 @@ export async function registerRoutes(
 
       // lead_source encodes placement so LEAD_SOURCE_LABELS in mailer.ts
       // can render it distinctly ('Developer survey popup' vs '... inline').
-      const leadSource =
-        placement === "inline"
+      const leadSource = isChecklist
+        ? "office_checklist_guide"
+        : placement === "inline"
           ? "developer_survey_inline"
           : "developer_survey_popup";
 
@@ -679,7 +684,7 @@ export async function registerRoutes(
           message: composedMessage,
           locations: [],
           lead_source: leadSource,
-          magnet: "cairo_developer_survey_2026",
+          magnet,
           page_url: rest.page_url ?? null,
           utm_source: rest.utm_source ?? null,
           utm_medium: rest.utm_medium ?? null,
@@ -703,7 +708,7 @@ export async function registerRoutes(
         phone: rest.phone,
         message: composedMessage,
         lead_source: leadSource,
-        magnet: "cairo_developer_survey_2026",
+        magnet,
         listing_id: null,
         page_url: rest.page_url ?? null,
         locations: null,
@@ -713,7 +718,8 @@ export async function registerRoutes(
       });
 
       // Auto-reply to the visitor with the PDF download link.
-      void sendDeveloperSurveyReply({
+      const reply = isChecklist ? sendOfficeChecklistReply : sendDeveloperSurveyReply;
+      void reply({
         toEmail: rest.email,
         toName: rest.name,
         lang: rest.preferred_language ?? "en",

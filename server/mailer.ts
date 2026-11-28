@@ -410,12 +410,14 @@ const LEAD_SOURCE_LABELS: Record<string, string> = {
   favorites_email_me_now: "'Email my saved list' button",
   developer_survey_popup: "Developer survey popup (guide page)",
   developer_survey_inline: "Developer survey inline card (guide page)",
+  office_checklist_guide: "Office checklist card (guide page)",
   service_page_form: "Requirements form (service page)",
 };
 
 const MAGNET_LABELS: Record<string, string> = {
   cairo_office_market_report_2026: "Cairo Office Market Report (2026)",
   cairo_developer_survey_2026: "Cairo Developer Price Survey (2026)",
+  office_search_checklist: "Cairo Office Search Checklist",
 };
 
 const LOCATION_LABELS: Record<string, string> = {
@@ -865,6 +867,123 @@ export async function sendDeveloperSurveyReply(opts: {
     subject: isAr
       ? "استطلاع أسعار المطورين في القاهرة 2026"
       : "Your Cairo Developer Price Survey 2026",
+    html,
+    replyTo: "admin@places-egy.com",
+  });
+}
+
+// ── Office search checklist (guides lead magnet, 28 Nov) ────────────────────
+// Static PDF served by the site itself (client/public/downloads, kept out of
+// search via robots.txt). Same layout as the developer-survey reply.
+const OFFICE_CHECKLIST_URL = "https://places-egy.com/downloads/places-office-search-checklist.pdf";
+
+export async function sendOfficeChecklistReply(opts: {
+  toEmail: string;
+  toName: string;
+  lang?: Lang;
+}): Promise<void> {
+  const lang: Lang = opts.lang ?? "en";
+  const isAr = lang === "ar";
+  const first = firstNameOf(opts.toName);
+  const downloadPdfUrl = `${OFFICE_CHECKLIST_URL}?utm_source=places-egy.com&utm_medium=email&utm_campaign=email_office_checklist&utm_content=download_pdf`;
+
+  const heroTitle = isAr ? "قائمة البحث عن مكتب في القاهرة" : "The Cairo Office Search Checklist";
+  const heroSubtitle = isAr ? "مجاني · PDF · 3 صفحات للطباعة" : "Free · PDF · 3 printable pages";
+  const downloadCta = isAr ? "تحميل PDF" : "Download PDF";
+  const readyLabel = isAr ? "📄 قائمتك جاهزة" : "📄 Your checklist is ready";
+
+  const downloadHero = `
+    <div style="margin:0 0 28px 0; padding:28px 24px; background:linear-gradient(135deg,#171717 0%,#2A2A2A 100%); border-radius:14px; text-align:center;">
+      <p style="margin:0 0 10px 0; font-size:11px; font-weight:700; color:#E11D48; text-transform:uppercase; letter-spacing:3px;">
+        ${readyLabel}
+      </p>
+      <h2 style="margin:0 0 6px 0; font-size:22px; font-weight:700; color:#ffffff; line-height:1.3;">
+        ${heroTitle}
+      </h2>
+      <p style="margin:0 0 22px 0; font-size:13px; color:rgba(255,255,255,0.6);">
+        ${heroSubtitle}
+      </p>
+      <a href="${downloadPdfUrl}"
+         style="display:inline-block; background:#E11D48; color:#ffffff; padding:14px 32px; border-radius:999px; text-decoration:none; font-weight:700; font-size:15px; box-shadow:0 4px 12px rgba(225,29,72,0.4);">
+        ${downloadCta}
+      </a>
+    </div>`;
+
+  const bullets = isAr
+    ? [
+        ["📝", "قبل أن تبدأ", "عدد الموظفين، المساحة، المناطق، الميزانية الكاملة وموعد الانتقال."],
+        ["🏢", "المعاينة والمقارنة", "ما الذي تفحصه في كل مبنى، وجدول لمقارنة 3 مكاتب جنبًا إلى جنب."],
+        ["🤝", "التفاوض والتوقيع", "أربع نقاط للتفاوض غير الإيجار، وما تراجعه قبل التوقيع."],
+        ["🔑", "الاستلام والتجهيز", "فحص الاستلام، مدة التجهيز، والميزانية الاحتياطية."],
+      ]
+    : [
+        ["📝", "Before you search", "Headcount, size, districts, all-in budget and move-in date — agreed before the first viewing."],
+        ["🏢", "Viewings and shortlist", "What to check in every building, plus a table to compare three offices side by side."],
+        ["🤝", "Negotiate and sign", "The four levers beyond rent, and the checks to make before you sign."],
+        ["🔑", "Handover and fit-out", "The handover inspection, realistic fit-out timing and the contingency to budget."],
+      ];
+
+  const hi = isAr ? "مرحباً" : "Hi";
+  const intro = isAr
+    ? "شكراً لطلبك قائمة البحث عن مكتب. الملف على بعد ضغطة واحدة."
+    : "Thanks for requesting the office search checklist. The PDF is one click below. Print it and tick it off as you go.";
+  const talkTitle = isAr ? "تريد من يتفاوض نيابة عنك؟" : "Want someone on your side of the table?";
+  const talkBody = isAr
+    ? "PLACES تمثل الشركات المستأجرة وليس الملاك: نبحث في السوق كله ونتفاوض على الشروط معك. الخدمة مجانية للمستأجر لأن المالك يدفع أتعابنا."
+    : "PLACES represents tenants, not landlords: we search the whole market and negotiate the terms with you. It's free for tenants, because the landlord pays our fee.";
+  const talkCta = isAr ? "تحدث معنا" : "Talk to us";
+  const replyLine = isAr
+    ? "أي أسئلة؟ فقط رد على هذا البريد الإلكتروني — تصل مباشرة إلى فريقنا."
+    : "Any questions? Just reply to this email — it goes straight to our team.";
+
+  const body = `
+    <p style="margin:0 0 20px 0; font-size:16px; color:#171717;">${hi} ${escapeHtml(first)}, 👋</p>
+    <p style="margin:0 0 24px 0; font-size:15px; line-height:1.6; color:#171717;">
+      ${intro}
+    </p>
+
+    ${downloadHero}
+
+    <p style="margin:0 0 12px 0; font-size:12px; font-weight:700; color:#64748B; text-transform:uppercase; letter-spacing:2px;">
+      ${isAr ? "ما ستجده" : "What's inside"}
+    </p>
+
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom:24px;">
+      ${bullets.map(([i, ti, d]) => bulletRow(i, ti, d)).join("")}
+    </table>
+
+    <hr style="border:0; border-top:1px solid #EAE4DA; margin:32px 0 24px 0;">
+
+    <div style="margin:0 0 8px 0; padding:24px; background:#F8F5F1; border-radius:12px;">
+      <p style="margin:0 0 6px 0; font-size:11px; font-weight:700; color:#E11D48; text-transform:uppercase; letter-spacing:2px;">
+        ${talkTitle}
+      </p>
+      <p style="margin:0 0 14px 0; font-size:14px; line-height:1.5; color:#171717;">
+        ${talkBody}
+      </p>
+      <a href="${taggedCalendlyUrl({ campaign: "email_office_checklist", content: "talk_to_us" })}"
+         style="display:inline-block; background:#171717; color:#ffffff; padding:11px 22px; border-radius:999px; text-decoration:none; font-weight:600; font-size:14px;">
+        ${talkCta} →
+      </a>
+    </div>
+
+    <p style="margin:24px 0 8px 0; font-size:14px; line-height:1.6; color:#64748B;">
+      ${replyLine}
+    </p>
+    <p style="margin:16px 0 0 0; font-size:14px; color:#171717;">— PLACES</p>
+  `;
+
+  const html = brandedShell({
+    preheader: isAr
+      ? "قائمة البحث عن مكتب في القاهرة — من المتطلبات حتى يوم الانتقال."
+      : "Your Cairo office search checklist is inside — from requirements to move-in day.",
+    body,
+    lang,
+  });
+
+  return sendMail({
+    to: opts.toEmail,
+    subject: isAr ? "قائمة البحث عن مكتب في القاهرة" : "Your Cairo Office Search Checklist",
     html,
     replyTo: "admin@places-egy.com",
   });
