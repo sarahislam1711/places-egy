@@ -32,8 +32,8 @@ import {
 import { landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
 import { TENANT_REP_PATH, tenantRepHtml } from "../../client/src/lib/tenant-rep-cta";
 import { arabicPath, hasArabicTwin, localHref } from "../../client/src/lib/i18n";
-import { CAIRO_AR, dealHeadingAr, hubCopyAr, medianLabelAr, unitsAr } from "../../client/src/lib/landing-pages-ar";
-import { arabicListingTitle } from "../../client/src/lib/listing-text-ar";
+import { CAIRO_AR, FAQ_TOPIC_LABELS_AR, areaCopyAr, dealHeadingAr, hubCopyAr, medianLabelAr, projectLineAr, unitsAr } from "../../client/src/lib/landing-pages-ar";
+import { arabicListingTitle, areaAr } from "../../client/src/lib/listing-text-ar";
 
 // Service pages linked from the homepage's server render (crawlers had no
 // path from / to any service page).
@@ -272,6 +272,69 @@ export async function renderDealHubAr(dealSlug: string): Promise<string | null> 
         .filter((d) => d !== deal)
         .map((d) => `<li><a href="${ar(`/${d}`)}">${esc(dealHeadingAr(d, CAIRO_AR))}</a></li>`)
         .join("") +
+      `</ul>`,
+    "ar",
+  );
+}
+
+// Arabic twins of the area pages (/ar/rent/new-cairo …, 29 Nov). Same rules as
+// renderLanding (404 under the minimum stock), Arabic copy from areaCopyAr.
+export async function renderLandingAr(dealSlug: string, locSlug: string): Promise<string | null> {
+  if (!(dealSlug in DEALS)) return null;
+  const deal = dealSlug as DealSlug;
+  const loc = LANDING_LOCATIONS.find((l) => l.slug === locSlug);
+  if (!loc) return null;
+  const inventory = await getInventory();
+  const rows = landingRows(inventory, deal, loc.name);
+  if (rows.length < LANDING_MIN_UNITS) return null;
+
+  const copy = areaCopyAr(deal, loc.slug, landingStats(rows, loc.name));
+  const enPath = landingPath(deal, loc.slug);
+  const path = arabicPath(enPath);
+  const place = areaAr(loc.slug);
+  const ar = (p: string) => localHref(p, "ar");
+  const live = hasArabicTwin(enPath);
+  let html = injectMeta(
+    shell(),
+    { title: copy.title, description: copy.description, url: `${SITE}${path}`, ...(live ? {} : { robots: "noindex, follow" }) },
+    { lang: "ar" },
+  );
+  html = arabicSkipNav(html);
+  html = injectJsonLd(
+    html,
+    breadcrumbSchema([
+      { name: "الرئيسية", url: `${SITE}${ar("/")}` },
+      { name: dealHeadingAr(deal, CAIRO_AR), url: `${SITE}${ar(`/${deal}`)}` },
+      { name: copy.h1, url: `${SITE}${path}` },
+    ]),
+  );
+  html = injectJsonLd(html, itemListSchema({ name: copy.h1, url: path, items: rows.slice(0, 48).map((l) => ({ name: arabicListingTitle(l), url: l.path })) }));
+  html = injectJsonLd(html, faqSchema(copy.faqs));
+
+  const projects = landingProjects(rows, loc.name);
+  const siblings = DEALS_FOR_LOCATION(inventory, loc.name).filter((p) => p.path !== enPath);
+  const txWord = deal === "rent" ? "مكاتب للإيجار" : deal === "buy" ? "مكاتب للبيع" : "عقارات مدرة للدخل";
+  return injectBody(
+    html,
+    `<h1>${esc(copy.h1)}</h1>` +
+      copy.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+      (deal === "rent" ? tenantRepHtml("rent", esc, "ar", ar(TENANT_REP_PATH)) : "") +
+      (projects.length >= 2
+        ? `<h2>${esc(`أكثر المشروعات بها ${txWord} في ${place}`)}</h2><ul>` +
+          projects.map((p) => `<li>${esc(p.name)}: ${esc(projectLineAr(deal, p.count, p.median))}</li>`).join("") +
+          `</ul>`
+        : "") +
+      `<h2>${esc(copy.listHeading)}</h2><ul>` +
+      rows.slice(0, 48).map((l) => `<li><a href="${l.path}">${esc(arabicListingTitle(l))}</a></li>`).join("") +
+      `</ul>` +
+      `<h2>${esc(`أسئلة شائعة: ${copy.h1}`)}</h2>` +
+      copy.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
+      (siblings.length
+        ? `<h2>${esc(`مكاتب أخرى في ${place}`)}</h2><ul>${siblings.map((p) => `<li><a href="${ar(p.path)}">${esc(dealHeadingAr(p.deal, place))}</a></li>`).join("")}</ul>`
+        : "") +
+      `<p><a href="${ar(`/${deal}`)}">${esc(dealHeadingAr(deal, CAIRO_AR))}</a> · <a href="${ar(`/locations/${loc.slug}`)}">${esc(`دليل منطقة ${place}`)}</a></p>` +
+      `<h2>${esc(deal === "rent" ? "قبل أن توقّع عقد الإيجار" : "قبل أن تشتري")}</h2><ul>` +
+      landingFaqTopics(deal).map((t) => `<li><a href="${ar(t.path)}">${esc(FAQ_TOPIC_LABELS_AR[t.path.split("/").pop() ?? ""] ?? t.label)}</a></li>`).join("") +
       `</ul>`,
     "ar",
   );

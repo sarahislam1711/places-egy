@@ -29,6 +29,10 @@ import {
 import { landingFaqTopics } from "@/lib/landing-related";
 import NotFound from "@/pages/not-found";
 import { TenantRepCallout } from "@/components/TenantRepCallout";
+import { ListingCardAr } from "@/components/listings/ListingCardAr";
+import { arabicPath, englishPath, langOfPath, localHref } from "@/lib/i18n";
+import { areaAr } from "@/lib/listing-text-ar";
+import { CAIRO_AR, FAQ_TOPIC_LABELS_AR, areaCopyAr, dealHeadingAr, medianLabelAr, projectLineAr, unitsAr } from "@/lib/landing-pages-ar";
 
 const SITE = "https://places-egy.com";
 const BATCH = 24;
@@ -37,8 +41,13 @@ const CARD_FIELDS =
 
 // /rent/{location}, /buy/{location}, /income-property/{location}.
 // The server renders the same copy for crawlers (server/seo/render.ts).
+// Arabic twins (/ar/rent/{location} …, 29 Nov): same template and live data,
+// Arabic text from landing-pages-ar.ts.
 export default function LandingPage() {
-  const [path] = useLocation();
+  const [rawPath] = useLocation();
+  const isAr = langOfPath(rawPath) === "ar";
+  const path = englishPath(rawPath);
+  const L = (enPath: string) => localHref(enPath, isAr ? "ar" : "en");
   const { location: locSlug } = useParams<{ location: string }>();
   const dealSlug = path.split("/")[1] as DealSlug;
   const deal = DEALS[dealSlug];
@@ -67,6 +76,8 @@ export default function LandingPage() {
 
   const rows = useMemo(() => (deal && loc ? landingRows(all, dealSlug, loc.name) : []), [all, deal, dealSlug, loc]);
   const copy = useMemo(() => (deal && loc ? landingCopy(dealSlug, loc, landingStats(rows, loc.name)) : null), [deal, dealSlug, loc, rows]);
+  const copyAr = useMemo(() => (isAr && deal && loc ? areaCopyAr(dealSlug, loc.slug, landingStats(rows, loc.name)) : null), [isAr, deal, dealSlug, loc, rows]);
+  const areaName = loc ? (isAr ? areaAr(loc.slug) : loc.name) : "";
   const siblings = useMemo(
     () => (loc ? eligibleLandingPages(all).filter((p) => p.loc.slug === loc.slug && p.deal !== dealSlug) : []),
     [all, loc, dealSlug],
@@ -76,54 +87,89 @@ export default function LandingPage() {
   const heroMedian = useMemo(() => {
     if (!loc) return null;
     const st = landingStats(rows, loc.name);
-    return st.perSqm ? medianLabel(dealSlug, st.perSqm[1]) : null;
-  }, [rows, loc, dealSlug]);
+    return st.perSqm ? (isAr ? medianLabelAr(dealSlug, st.perSqm[1]) : medianLabel(dealSlug, st.perSqm[1])) : null;
+  }, [rows, loc, dealSlug, isAr]);
   const faqTopics = deal ? landingFaqTopics(dealSlug) : [];
 
   useDocumentMeta({
-    title: copy?.title ?? "Offices | PLACES",
-    description: copy?.description ?? "",
-    url: `${SITE}${pagePath}`,
+    title: (isAr ? copyAr?.title : copy?.title) ?? "Offices | PLACES",
+    description: (isAr ? copyAr?.description : copy?.description) ?? "",
+    url: `${SITE}${isAr ? arabicPath(pagePath) : pagePath}`,
     image: content ? `${SITE}${content.heroImage}` : undefined,
   });
 
   if (!deal || !loc) return <NotFound />;
   if (!isLoading && rows.length < LANDING_MIN_UNITS) return <NotFound />;
 
+  const h1 = isAr ? dealHeadingAr(dealSlug, areaName) : deal.heading(loc.name);
+  const txWordAr = dealSlug === "rent" ? "مكاتب للإيجار" : dealSlug === "buy" ? "مكاتب للبيع" : "عقارات مدرة للدخل";
+  const T = isAr
+    ? {
+        home: "الرئيسية",
+        send: "أرسل طلبك",
+        promiseFallback: "نحدّث الصفحة كلما أُضيفت وحدات أو سُحبت.",
+        points: ["قارن المشروعات والأسعار", "احجز معاينة لأي مكتب", dealSlug === "rent" ? "وسيط عقاري مجاني للشركات" : "استشارة قبل الشراء"],
+        more: (n: number) => `عرض المزيد (متبقي ${n})`,
+        projects: `أكثر المشروعات بها ${txWordAr} في ${areaName}`,
+        faqs: `أسئلة شائعة: ${h1}`,
+        explore: `اكتشف المزيد في ${areaName}`,
+        guide: `دليل منطقة ${areaName}`,
+        guideSub: "المشروعات والمطورون وتكلفة المكاتب هنا",
+        allAreas: `${dealHeadingAr(dealSlug, CAIRO_AR)}، كل المناطق`,
+        before: dealSlug === "rent" ? "قبل أن توقّع عقد الإيجار" : "قبل أن تشتري",
+        beforeSub: "إجابات مباشرة من الأسئلة الشائعة",
+        cantFind: "لم تجد المساحة المناسبة؟",
+        tellUs: "قل لنا المساحة والميزانية",
+        shortlist: "وسنرسل لك قائمة مختصرة.",
+      }
+    : null;
+
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       {/* Breadcrumb, ItemList and FAQPage JSON-LD come from the server render
           (server/seo/render.ts); adding them here would duplicate them. */}
       <Navbar />
 
       {/* Same split hero as the service pages and the /rent hub. */}
       <ServiceHero
-        crumbs={[{ name: "Home", href: "/" }, { name: deal.heading("Cairo"), href: `/${dealSlug}` }, { name: loc.name }]}
-        title={deal.heading(loc.name)}
-        intro={copy ? copy.intro[0] : `Every available ${deal.label === "as income properties" ? "income property" : `office ${deal.label}`} in ${loc.name}.`}
+        crumbs={
+          T
+            ? [{ name: T.home, href: L("/") }, { name: dealHeadingAr(dealSlug, CAIRO_AR), href: L(`/${dealSlug}`) }, { name: areaName }]
+            : [{ name: "Home", href: "/" }, { name: deal.heading("Cairo"), href: `/${dealSlug}` }, { name: loc.name }]
+        }
+        title={h1}
+        intro={T ? copyAr?.intro[0] ?? "" : copy ? copy.intro[0] : `Every available ${deal.label === "as income properties" ? "income property" : `office ${deal.label}`} in ${loc.name}.`}
         primary={{
-          label: "Send us your requirements",
-          href: "/contact",
-          form: { intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: deal.heading(loc.name) },
+          label: T ? T.send : "Send us your requirements",
+          href: L("/contact"),
+          form: { intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: deal.heading(loc.name) + (isAr ? " (AR)" : "") },
         }}
         image={areaPhoto(loc.slug).image}
-        imageAlt={areaPhoto(loc.slug).alt}
-        promise={{
-          title: rows.length ? `${rows.length} ${dealSlug === "income-property" ? "income properties" : `offices ${deal.label}`}` : deal.heading(loc.name),
-          text: heroMedian ? `${heroMedian.charAt(0).toUpperCase()}${heroMedian.slice(1)}.` : `Updated as units are listed and withdrawn.`,
-        }}
-        points={[
-          "Compare projects and prices",
-          "Book a viewing on any office",
-          dealSlug === "rent" ? "Free tenant representation" : "Advice before you buy",
-        ]}
+        imageAlt={isAr ? h1 : areaPhoto(loc.slug).alt}
+        promise={
+          T
+            ? { title: rows.length ? unitsAr(dealSlug, rows.length) : h1, text: heroMedian ? `${heroMedian}.` : T.promiseFallback }
+            : {
+                title: rows.length ? `${rows.length} ${dealSlug === "income-property" ? "income properties" : `offices ${deal.label}`}` : deal.heading(loc.name),
+                text: heroMedian ? `${heroMedian.charAt(0).toUpperCase()}${heroMedian.slice(1)}.` : `Updated as units are listed and withdrawn.`,
+              }
+        }
+        points={
+          T
+            ? T.points
+            : [
+                "Compare projects and prices",
+                "Book a viewing on any office",
+                dealSlug === "rent" ? "Free tenant representation" : "Advice before you buy",
+              ]
+        }
       />
 
       {/* Tenant representation (rent pages only) */}
       {dealSlug === "rent" && (
         <section className="pb-10">
           <div className="container mx-auto px-6 md:px-10 max-w-6xl">
-            <TenantRepCallout variant="rent" />
+            <TenantRepCallout variant="rent" lang={isAr ? "ar" : "en"} />
           </div>
         </section>
       )}
@@ -133,7 +179,7 @@ export default function LandingPage() {
         <div className="container mx-auto px-6 md:px-10 max-w-6xl">
           <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-8">
             <Home className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
-            <span>{copy?.listHeading ?? deal.heading(loc.name)}</span>
+            <span>{isAr ? copyAr?.listHeading ?? h1 : copy?.listHeading ?? deal.heading(loc.name)}</span>
           </h2>
           {isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -144,14 +190,14 @@ export default function LandingPage() {
           ) : (
             <>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                {rows.slice(0, shown).map((listing) => (
-                  <ListingCard key={listing.id} listing={listing} hideSubtype />
-                ))}
+                {rows.slice(0, shown).map((listing) =>
+                  isAr ? <ListingCardAr key={listing.id} listing={listing} /> : <ListingCard key={listing.id} listing={listing} hideSubtype />,
+                )}
               </div>
               {shown < rows.length && (
                 <div className="mt-10 flex justify-center">
                   <Button variant="outline" className="bg-white rounded-full px-8" onClick={() => setShown((n) => n + BATCH)}>
-                    Show more ({rows.length - shown} left)
+                    {T ? T.more(rows.length - shown) : `Show more (${rows.length - shown} left)`}
                   </Button>
                 </div>
               )}
@@ -167,7 +213,7 @@ export default function LandingPage() {
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
               <Building2 className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
               <span>
-                Projects with the most {dealSlug === "rent" ? "offices for rent" : dealSlug === "buy" ? "offices for sale" : "income properties"} in {loc.name}
+                {T ? T.projects : <>Projects with the most {dealSlug === "rent" ? "offices for rent" : dealSlug === "buy" ? "offices for sale" : "income properties"} in {loc.name}</>}
               </span>
             </h2>
             <ul className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -182,9 +228,9 @@ export default function LandingPage() {
                     decoding="async"
                     className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.28]"
                   />
-                  <span className="relative block text-lg font-serif font-bold text-primary">{p.name}</span>
+                  <span className="relative block text-lg font-serif font-bold text-primary" dir="auto">{p.name}</span>
                   <span className="relative block mt-1 text-sm text-muted-foreground">
-                    {p.count} available{p.median ? ` · ${medianLabel(dealSlug, p.median)}` : ""}
+                    {isAr ? projectLineAr(dealSlug, p.count, p.median) : `${p.count} available${p.median ? ` · ${medianLabel(dealSlug, p.median)}` : ""}`}
                   </span>
                 </li>
               ))}
@@ -194,14 +240,14 @@ export default function LandingPage() {
       )}
 
       {/* FAQs */}
-      {copy && (
+      {(isAr ? copyAr : copy) && (
         <section className="py-12">
           <div className="container mx-auto px-6 md:px-10 max-w-6xl [&>*]:max-w-4xl">
             <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary flex items-center gap-3 mb-6">
               <HelpCircle className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
-              <span>{copy.h1}: FAQs</span>
+              <span>{T ? T.faqs : `${copy!.h1}: FAQs`}</span>
             </h2>
-            <FaqAccordionList faqs={copy.faqs} />
+            <FaqAccordionList faqs={(isAr ? copyAr : copy)!.faqs} />
           </div>
         </section>
       )}
@@ -212,15 +258,15 @@ export default function LandingPage() {
       <section className="py-16 md:py-24">
         <div className="container mx-auto px-6 md:px-10 max-w-6xl">
           <h2 className="text-3xl md:text-[2.5rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-primary">
-            Keep exploring {loc.name}
+            {T ? T.explore : `Keep exploring ${loc.name}`}
           </h2>
           <div className="mt-10 grid gap-5 lg:grid-cols-2">
             {/* The area guide, as a picture, with the other deals here under it */}
             <div className="flex flex-col gap-4">
-              <Link href={`/locations/${loc.slug}`} className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[4/3] lg:aspect-auto lg:flex-1 lg:min-h-[17rem]">
+              <Link href={L(`/locations/${loc.slug}`)} className="group relative block overflow-hidden rounded-2xl bg-muted aspect-[4/3] lg:aspect-auto lg:flex-1 lg:min-h-[17rem]">
                 <img
                   src={areaPhoto(loc.slug).image}
-                  alt={areaPhoto(loc.slug).alt}
+                  alt={isAr ? (T?.guide ?? "") : areaPhoto(loc.slug).alt}
                   width={800}
                   height={600}
                   loading="lazy"
@@ -230,27 +276,27 @@ export default function LandingPage() {
                 <div className="absolute inset-x-0 bottom-0 h-2/3 bg-gradient-to-t from-black/75 to-transparent" aria-hidden />
                 <span className="absolute inset-x-5 bottom-5 md:inset-x-6 md:bottom-6">
                   <span className="flex items-center justify-between gap-3 text-xl md:text-2xl font-serif font-bold text-white">
-                    {loc.name} area guide
-                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
+                    {T ? T.guide : `${loc.name} area guide`}
+                    <ArrowRight className="h-5 w-5 shrink-0 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
                   </span>
-                  <span className="mt-1 block text-sm md:text-base text-white/80">Projects, developers and what offices cost here</span>
+                  <span className="mt-1 block text-sm md:text-base text-white/80">{T ? T.guideSub : "Projects, developers and what offices cost here"}</span>
                 </span>
               </Link>
               <ul className="flex flex-col gap-2">
                 {siblings.map((p) => (
                   <li key={p.path}>
-                    <Link href={p.path} className="group flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-base font-semibold text-primary hover:text-accent transition-colors">
+                    <Link href={L(p.path)} className="group flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-base font-semibold text-primary hover:text-accent transition-colors">
                       <span>
-                        {DEALS[p.deal].heading(loc.name)} <span className="font-normal text-muted-foreground">({p.count})</span>
+                        {isAr ? dealHeadingAr(p.deal, areaName) : DEALS[p.deal].heading(loc.name)} <span className="font-normal text-muted-foreground">({p.count})</span>
                       </span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+                      <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden />
                     </Link>
                   </li>
                 ))}
                 <li>
-                  <Link href={`/${dealSlug}`} className="group flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-base font-semibold text-primary hover:text-accent transition-colors">
-                    <span>{deal.heading("Cairo")}, all areas</span>
-                    <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+                  <Link href={L(`/${dealSlug}`)} className="group flex items-center justify-between gap-3 rounded-xl bg-white px-4 py-3 text-base font-semibold text-primary hover:text-accent transition-colors">
+                    <span>{T ? T.allAreas : `${deal.heading("Cairo")}, all areas`}</span>
+                    <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden />
                   </Link>
                 </li>
               </ul>
@@ -258,24 +304,24 @@ export default function LandingPage() {
 
             {/* The questions to settle first, as plain questions */}
             <div className="rounded-2xl bg-primary p-6 md:p-7 text-white">
-              <h3 className="text-xl font-serif font-bold text-white">Before you {dealSlug === "rent" ? "sign a lease" : "buy"}</h3>
-              <p className="mt-1 text-sm text-white/65">Straight answers from our FAQ</p>
+              <h3 className="text-xl font-serif font-bold text-white">{T ? T.before : `Before you ${dealSlug === "rent" ? "sign a lease" : "buy"}`}</h3>
+              <p className="mt-1 text-sm text-white/65">{T ? T.beforeSub : "Straight answers from our FAQ"}</p>
               <ul className="mt-4">
                 {faqTopics.map((t) => (
                   <li key={t.path}>
-                    <Link href={t.path} className="group flex items-center justify-between gap-3 py-3 text-base font-medium text-white hover:text-accent transition-colors">
-                      <span>{t.label}</span>
-                      <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5" aria-hidden />
+                    <Link href={L(t.path)} className="group flex items-center justify-between gap-3 py-3 text-base font-medium text-white hover:text-accent transition-colors">
+                      <span>{isAr ? FAQ_TOPIC_LABELS_AR[t.path.split("/").pop() ?? ""] ?? t.label : t.label}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-0.5 rtl:rotate-180 rtl:group-hover:-translate-x-0.5" aria-hidden />
                     </Link>
                   </li>
                 ))}
               </ul>
               <p className="mt-4 text-sm text-white/65">
-                Can't find the right space?{" "}
-                <RequirementsTrigger config={{ intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: deal.heading(loc.name) }} fallbackHref="/contact">
-                  <span className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-accent">Tell us your size and budget</span>
+                {T ? T.cantFind : "Can't find the right space?"}{" "}
+                <RequirementsTrigger config={{ intent: dealSlug === "rent" ? "rent" : dealSlug === "buy" ? "buy" : "invest", pageName: deal.heading(loc.name) + (isAr ? " (AR)" : "") }} fallbackHref={L("/contact")}>
+                  <span className="font-semibold text-white underline decoration-white/30 underline-offset-4 hover:decoration-accent">{T ? T.tellUs : "Tell us your size and budget"}</span>
                 </RequirementsTrigger>{" "}
-                and we'll send a shortlist.
+                {T ? T.shortlist : "and we'll send a shortlist."}
               </p>
             </div>
           </div>

@@ -5,6 +5,7 @@
 // (script/ssr-pages.ts) carries the full text.
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "wouter";
+import { pageLanguage } from "@/lib/detect-language";
 import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqAccordionList } from "@/components/FaqAccordionList";
@@ -80,7 +81,7 @@ export function ServiceHero({
           <nav className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground mb-8" aria-label="Breadcrumb">
             {crumbs.map((c, i) => (
               <span key={c.name} className="inline-flex items-center gap-1.5">
-                {i > 0 && <ChevronRight className="w-3.5 h-3.5" aria-hidden />}
+                {i > 0 && <ChevronRight className="w-3.5 h-3.5 rtl:rotate-180" aria-hidden />}
                 {c.href ? (
                   <Link href={c.href} className="hover:text-primary transition-colors">{c.name}</Link>
                 ) : (
@@ -107,7 +108,7 @@ export function ServiceHero({
               className="bg-white text-primary border-primary/20 hover:border-primary/50 font-semibold px-7 h-13 text-base transition-transform hover:-translate-y-0.5"
             >
               <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> WhatsApp us
+                <MessageCircle className="w-4 h-4" /> {pageLanguage() === "ar" ? "راسلنا على واتساب" : "WhatsApp us"}
               </a>
             </Button>
           </div>
@@ -133,7 +134,7 @@ export function ServiceHero({
               className="w-full h-full object-cover"
             />
           </div>
-          <div className="absolute -bottom-6 left-6 right-6 md:left-auto md:-left-8 md:right-auto md:max-w-[300px] rounded-2xl bg-primary text-white p-6 shadow-[0_24px_48px_-16px_rgba(17,17,17,0.45)]">
+          <div className="absolute -bottom-6 start-6 end-6 md:end-auto md:-start-8 md:max-w-[300px] rounded-2xl bg-primary text-white p-6 shadow-[0_24px_48px_-16px_rgba(17,17,17,0.45)]">
             <p className="text-xl font-serif font-bold leading-tight">{promise.title}</p>
             <p className="mt-2 text-sm text-white/75 leading-relaxed">{promise.text}</p>
           </div>

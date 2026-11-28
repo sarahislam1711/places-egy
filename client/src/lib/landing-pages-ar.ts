@@ -168,3 +168,43 @@ export function hubCopyAr(deal: DealSlug, all: LandingListing[]): HubCopyAr {
   const description = `${unitsAr(deal, rows.length)} في ${areas.length > 3 ? `${top.join("، ")} وغيرها` : listAr(top)}. قارن أسعار المتر والمساحات والتشطيب${rent ? "، مع وسيط عقاري مجاني للشركات المستأجرة" : ""}.`;
   return { ...base, description: description.slice(0, 160), areas };
 }
+
+// ---------- area pages: /ar/rent/{area}, /ar/buy/{area}, /ar/income-property/{area} ----------
+
+/** Where in the area the offices are, in the words Arabic searchers use. */
+const WITHIN_AR: Record<string, string> = {
+  "new-cairo": "التجمع الخامس وعلى امتداد شارع التسعين",
+};
+
+/** Arabic copy for one deal type in one area (same live figures as landingCopy). */
+export function areaCopyAr(deal: DealSlug, locSlug: string, s: LandingStats): LandingCopyAr {
+  const place = areaAr(locSlug);
+  const base = landingCopyAr(deal, place, s);
+  const rent = DEALS[deal].tx === "rent";
+  const within = WITHIN_AR[locSlug];
+  const kind = deal === "income-property" ? "المكاتب المؤجرة المدرة للدخل" : "المكاتب الإدارية";
+  const txWord = rent ? "للإيجار" : "للبيع";
+  const intro = [
+    `تصفح ${kind} ${txWord} في ${place}${within ? `، في ${within}` : ""}. نحدّث الصفحة كلما أُضيفت وحدات جديدة أو ${rent ? "تم تأجيرها" : "تم بيعها"} أو سُحبت من السوق.`,
+  ];
+  const description = `${unitsAr(deal, s.count)} في ${place}. قارن أسعار المتر والمساحات والتشطيب والمشروعات${rent ? "، مع وسيط عقاري مجاني للشركات المستأجرة" : ""}.`.slice(0, 160);
+  return { ...base, intro, description };
+}
+
+/** Arabic labels for the FAQ topics linked from the area pages. */
+export const FAQ_TOPIC_LABELS_AR: Record<string, string> = {
+  "early-thinking": "قبل أن تبدأ: ما الذي تفكر فيه",
+  "admin-vs-commercial": "مكتب إداري أم وحدة تجارية؟",
+  locations: "أي منطقة تناسب شركتك؟",
+  "contracts-legal": "ما الذي تراجعه في العقد",
+  "advisors-brokers": "هل تحتاج إلى وسيط عقاري؟",
+  "risks-mistakes": "أخطاء يجب تجنبها",
+  "rent-buy-resale": "إيجار أم شراء جديد أم إعادة بيع؟",
+  developers: "كيف تختار المطور والمشروع",
+  "pricing-value": "هل السعر مناسب؟",
+  "investment-income": "شراء مكتب للدخل الإيجاري",
+};
+
+/** "متاح 12 · متوسط 1,300 ج.م للمتر شهريًا" */
+export const projectLineAr = (deal: DealSlug, count: number, median: number | null) =>
+  `متاح ${fmt(count)}${median ? ` · ${medianLabelAr(deal, median)}` : ""}`;

@@ -1,5 +1,5 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { renderDealHub, renderDealHubAr, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
+import { renderDealHub, renderDealHubAr, renderLandingAr, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
 import { findBlogPost, getBlogData, renderBlogHub, renderBlogPost, type BlogLang } from "./blog";
 import { getListingById } from "./data";
 import { registerSitemapRoutes } from "./sitemap";
@@ -81,6 +81,18 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
   app.get(["/rent", "/buy", "/income-property"], send((req) => renderDealHub(req.path.slice(1))));
   // Arabic twins of the hubs (28 Nov).
   app.get(["/ar/rent", "/ar/buy", "/ar/income-property"], send((req) => renderDealHubAr(req.path.split("/")[2])));
+  // Arabic twins of the area pages (29 Nov): same 404 rule as English.
+  app.get(["/ar/rent/:loc", "/ar/buy/:loc", "/ar/income-property/:loc"], async (req, res, next) => {
+    try {
+      const html = await renderLandingAr(req.path.split("/")[2], String(req.params.loc));
+      res.setHeader("Cache-Control", "no-cache");
+      if (html === null) return res.status(404).type("html").send(renderNotFound("404"));
+      res.type("html").send(ensureAlternates(html, alternatesFor(req.path)));
+    } catch (err) {
+      console.warn(`[seo] render failed for ${req.path}:`, err);
+      next();
+    }
+  });
   // Search landing pages (/rent/new-cairo, /buy/new-cairo, …). A page exists only
   // while it has enough available units; otherwise it's a real 404.
   app.get(["/rent/:loc", "/buy/:loc", "/income-property/:loc"], async (req, res, next) => {
@@ -88,7 +100,7 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
       const html = await renderLanding(req.path.split("/")[1], String(req.params.loc));
       res.setHeader("Cache-Control", "no-cache");
       if (html === null) return res.status(404).type("html").send(renderNotFound("404"));
-      res.type("html").send(html);
+      res.type("html").send(ensureAlternates(html, alternatesFor(req.path)));
     } catch (err) {
       console.warn(`[seo] render failed for ${req.path}:`, err);
       next();

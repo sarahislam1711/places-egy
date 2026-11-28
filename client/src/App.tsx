@@ -345,6 +345,9 @@ function Router() {
       <Route path="/ar/rent" component={DealHubPage} />
       <Route path="/ar/buy" component={DealHubPage} />
       <Route path="/ar/income-property" component={DealHubPage} />
+      <Route path="/ar/rent/:location" component={LandingPage} />
+      <Route path="/ar/buy/:location" component={LandingPage} />
+      <Route path="/ar/income-property/:location" component={LandingPage} />
       <Route path="/rent/:location" component={LandingPage} />
       <Route path="/buy/:location" component={LandingPage} />
       <Route path="/income-property/:location" component={LandingPage} />

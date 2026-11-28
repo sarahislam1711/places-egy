@@ -40,9 +40,16 @@ function withAlternates(block: string): string {
   return links ? block.replace(/(<\/loc>\n)/, `$1${links}`) : block;
 }
 
-/** Arabic twins of the live pages, each with its en / ar / x-default links. */
-function arPagesXml(): string {
-  return AR_LIVE.map((en) => {
+/**
+ * Arabic twins of the live pages, each with its en / ar / x-default links.
+ * Area pages (/rent/new-cairo …) only while the English page exists (enough
+ * stock), so the sitemap never lists a 404.
+ */
+async function arPagesXml(): Promise<string> {
+  const inventory = await getInventory();
+  const liveLanding = new Set(eligibleLandingPages(inventory).map((p) => p.path));
+  const isArea = (p: string) => /^\/(rent|buy|income-property)\/[^/]+$/.test(p);
+  return AR_LIVE.filter((en) => !isArea(en) || liveLanding.has(en)).map((en) => {
     const block = url(`${SITE}${arabicPath(en)}`, null, "weekly", "0.8");
     return block.replace(/(<\/loc>\n)/, `$1${xhtmlLinks(en)}`);
   }).join("\n");
