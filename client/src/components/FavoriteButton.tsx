@@ -35,7 +35,7 @@ export function FavoriteButton({
   const iconSize = size === "lg" ? "w-5 h-5" : "w-5 h-5 md:w-4 md:h-4";
 
   const positioning = overlay
-    ? "absolute top-3 right-3 z-30"
+    ? "absolute top-3 end-3 z-30" // end: top-right in English, top-left in Arabic (badges sit on the start side)
     : "";
 
   const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
