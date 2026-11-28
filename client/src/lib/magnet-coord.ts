@@ -16,6 +16,7 @@ export type PagePopups = "concierge" | "report" | "both" | "none";
 const RULES: [RegExp, PagePopups][] = [
   [/^\/$/, "both"],
   [/^\/(contact|resources\/market-report|privacy-policy|terms-of-service|dashboard)$/, "none"],
+  [/^\/ar\/contact$/, "none"],
   [/^\/guides(\/|$)/, "none"],
   [/^\/(ar\/)?blog(\/|$)/, "report"],
   [/^\/faqs(\/|$)/, "report"],

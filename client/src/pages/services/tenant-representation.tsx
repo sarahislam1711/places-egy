@@ -22,7 +22,11 @@ import {
 } from "@/components/service-page";
 import { breadcrumbSchema, faqSchema, serviceSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { STATIC_PAGE_META } from "@/lib/page-meta";
+import { AR_PAGE_META, STATIC_PAGE_META } from "@/lib/page-meta";
+import { useLang } from "@/lib/ui-text";
+import { areaPageHref, arabicPath } from "@/lib/i18n";
+import { areaAr } from "@/lib/listing-text-ar";
+import { TR_AR } from "@/lib/tenant-rep-ar";
 import { LOCATION_CONTENT } from "@/lib/location-content";
 
 const PATH = "/services/tenant-representation";
@@ -160,43 +164,80 @@ const FAQS = [
   },
 ];
 
+// English page and its Arabic twin /ar/services/tenant-representation (29 Nov):
+// one template, Arabic text from lib/tenant-rep-ar.ts.
 export default function TenantRepresentation() {
-  useDocumentMeta(STATIC_PAGE_META[PATH]);
+  const { isAr, href: L } = useLang();
+  const A = isAr ? TR_AR : null;
+  useDocumentMeta(isAr ? AR_PAGE_META[arabicPath(PATH)] : STATIC_PAGE_META[PATH]);
+  const pagePath = isAr ? arabicPath(PATH) : PATH;
+  const who: Audience[] = A ? WHO.map((w, i) => ({ ...w, ...A.who[i] })) : WHO;
+  const feeFlow = A ? FEE_FLOW.map((f, i) => ({ ...f, ...A.fee[i] })) : FEE_FLOW;
+  const areas = AREAS.map((a) => {
+    const slug = a.href.split("/").pop() ?? "";
+    return A ? { ...a, href: areaPageHref(slug, "ar"), name: areaAr(slug), line: A.areaLine[slug] ?? a.line, imageAlt: areaAr(slug) } : a;
+  });
+  const faqs = A ? A.faqs : FAQS;
+  const form = { intent: "rent" as const, pageName: "Tenant representation" };
   return (
-    <div className="min-h-screen flex flex-col font-sans bg-background">
+    <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
       <SchemaMarkup
-        schema={breadcrumbSchema([
-          { name: "Home", url: "/" },
-          { name: "Services", url: "/services" },
-          { name: "Tenant Representation", url: PATH },
-        ])}
+        schema={breadcrumbSchema(
+          A
+            ? [
+                { name: A.crumbs.home, url: L("/") },
+                { name: A.crumbs.services, url: L("/services") },
+                { name: A.crumbs.page, url: pagePath },
+              ]
+            : [
+                { name: "Home", url: "/" },
+                { name: "Services", url: "/services" },
+                { name: "Tenant Representation", url: PATH },
+              ],
+        )}
       />
       <SchemaMarkup
-        schema={serviceSchema({
-          name: "Tenant Representation",
-          description:
-            "PLACES represents companies, not landlords: we find, compare and negotiate your office in Cairo and review the lease. Free for tenants; the landlord pays our fee.",
-          url: PATH,
-          serviceType: "Tenant representation",
-        })}
+        schema={serviceSchema(
+          A
+            ? { name: A.schemaName, description: A.schemaDescription, url: pagePath, serviceType: "تمثيل المستأجر" }
+            : {
+                name: "Tenant Representation",
+                description:
+                  "PLACES represents companies, not landlords: we find, compare and negotiate your office in Cairo and review the lease. Free for tenants; the landlord pays our fee.",
+                url: PATH,
+                serviceType: "Tenant representation",
+              },
+        )}
       />
-      <SchemaMarkup schema={faqSchema(FAQS)} />
+      <SchemaMarkup schema={faqSchema(faqs)} />
       <Navbar />
 
       <main className="flex-1">
         <ServiceHero
-          crumbs={[{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Tenant Representation" }]}
-          title="Tenant Representation for Companies in Cairo"
-          intro="PLACES works for you, not the landlord. We find, compare and negotiate your office across Cairo's business districts and review the lease before you sign."
-          primary={{ label: "Send us your requirements", href: "/contact", form: { intent: "rent", pageName: "Tenant representation" } }}
+          crumbs={
+            A
+              ? [{ name: A.crumbs.home, href: L("/") }, { name: A.crumbs.services, href: L("/services") }, { name: A.crumbs.page }]
+              : [{ name: "Home", href: "/" }, { name: "Services", href: "/services" }, { name: "Tenant Representation" }]
+          }
+          title={A ? A.h1 : "Tenant Representation for Companies in Cairo"}
+          intro={A ? A.intro : "PLACES works for you, not the landlord. We find, compare and negotiate your office across Cairo's business districts and review the lease before you sign."}
+          primary={{ label: A ? A.primary : "Send us your requirements", href: L("/contact"), form }}
           image="/images/leasing.jpg"
-          imageAlt="Reviewing an office lease before signing"
-          promise={{ title: "Free for tenants", text: "The landlord pays our fee once the lease is signed. Your company gets its own advisor at no cost." }}
-          points={["Free for tenants", "4–8 weeks to a signed lease", "All six Cairo office districts"]}
+          imageAlt={A ? A.heroAlt : "Reviewing an office lease before signing"}
+          promise={A ? A.promise : { title: "Free for tenants", text: "The landlord pays our fee once the lease is signed. Your company gets its own advisor at no cost." }}
+          points={A ? A.points : ["Free for tenants", "4–8 weeks to a signed lease", "All six Cairo office districts"]}
         />
 
         <Band tone="white">
-          <IntroSplit title="What is tenant representation?" cardTitle="With PLACES on your side" items={BENEFITS}>
+          <IntroSplit
+            title={A ? A.whatTitle : "What is tenant representation?"}
+            cardTitle={A ? A.whatCard : "With PLACES on your side"}
+            items={A ? A.benefits : BENEFITS}
+          >
+            {A ? (
+              A.whatText.map((t) => <p key={t}>{t}</p>)
+            ) : (
+              <>
                 <p>
                   Tenant representation means your real estate advisor works only for the company that is renting. A
                   tenant representative (also called a tenant rep broker or tenant advisor) defines what you need,
@@ -206,49 +247,53 @@ export default function TenantRepresentation() {
                   The landlord's agent is paid to get the best deal for the landlord. Your tenant rep is there to get
                   the best deal for you.
                 </p>
-              </IntroSplit>
+              </>
+            )}
+          </IntroSplit>
         </Band>
 
         <Band tone="cream" tight>
-          <SectionHead title="Who we represent"  compact />
-          <AudienceTabs items={WHO} label="Who we represent" />
+          <SectionHead title={A ? A.whoTitle : "Who we represent"} compact />
+          <AudienceTabs items={who} label={A ? A.whoTitle : "Who we represent"} />
         </Band>
 
         <Band tone="dark" tight>
           <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-center">
             <SectionHead
               dark
-              title="Our tenant representation services"
-              lead="One advisor from the first brief to the day you move in, and again when your lease comes up for renewal."
+              title={A ? A.servicesTitle : "Our tenant representation services"}
+              lead={A ? A.servicesLead : "One advisor from the first brief to the day you move in, and again when your lease comes up for renewal."}
             />
-            <Checklist items={SERVICES} dark columns={2} />
+            <Checklist items={A ? A.services : SERVICES} dark columns={2} />
           </div>
           <div className="mt-10 pt-10 border-t border-white/15">
             <div className="max-w-2xl">
-              <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">Why it's free for tenants</h2>
+              <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">{A ? A.freeTitle : "Why it's free for tenants"}</h2>
               <p className="mt-4 text-lg text-white/75 leading-relaxed">
-                When PLACES represents you, the landlord pays our fee once the lease is signed. You get your own
-                advisor negotiating on your side, at no cost to your company.
+                {A
+                  ? A.freeText
+                  : "When PLACES represents you, the landlord pays our fee once the lease is signed. You get your own advisor negotiating on your side, at no cost to your company."}
               </p>
-              <Link href="/faqs/advisors-brokers" className="group mt-5 inline-flex items-center text-accent font-semibold hover:underline">
-                Read the advisors &amp; brokers FAQs <ArrowRight className="ml-1.5 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              <Link href={L("/faqs/advisors-brokers")} className="group mt-5 inline-flex items-center text-accent font-semibold hover:underline">
+                {A ? A.freeLink : "Read the advisors & brokers FAQs"}{" "}
+                <ArrowRight className="ms-1.5 w-4 h-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
               </Link>
             </div>
             {/* How the fee flows: landlord → PLACES → your company */}
-            <ol className="mt-10 flex flex-col md:flex-row items-stretch gap-2 md:gap-0" aria-label="Who pays for tenant representation">
-              {FEE_FLOW.map((step, i) => (
+            <ol className="mt-10 flex flex-col md:flex-row items-stretch gap-2 md:gap-0" aria-label={A ? A.feeAria : "Who pays for tenant representation"}>
+              {feeFlow.map((step, i) => (
                 <li key={step.who} className="flex flex-col md:flex-row items-center md:flex-1">
                   <div
                     className={`w-full md:h-full rounded-2xl p-5 ${
-                      i === FEE_FLOW.length - 1 ? "bg-accent text-white" : "bg-white/[0.06] border border-white/10 text-white"
+                      i === feeFlow.length - 1 ? "bg-accent text-white" : "bg-white/[0.06] border border-white/10 text-white"
                     }`}
                   >
-                    <step.icon className={`w-5 h-5 mb-3 ${i === FEE_FLOW.length - 1 ? "text-white" : "text-accent"}`} aria-hidden />
+                    <step.icon className={`w-5 h-5 mb-3 ${i === feeFlow.length - 1 ? "text-white" : "text-accent"}`} aria-hidden />
                     <p className="font-serif font-bold text-lg leading-tight">{step.who}</p>
-                    <p className={`mt-1 text-sm leading-snug ${i === FEE_FLOW.length - 1 ? "text-white/90" : "text-white/65"}`}>{step.does}</p>
+                    <p className={`mt-1 text-sm leading-snug ${i === feeFlow.length - 1 ? "text-white/90" : "text-white/65"}`}>{step.does}</p>
                   </div>
-                  {i < FEE_FLOW.length - 1 && (
-                    <ArrowRight className="w-5 h-5 text-white/40 shrink-0 my-1 md:my-0 md:mx-2 rotate-90 md:rotate-0" aria-hidden />
+                  {i < feeFlow.length - 1 && (
+                    <ArrowRight className="w-5 h-5 text-white/40 shrink-0 my-1 md:my-0 md:mx-2 rotate-90 md:rotate-0 md:rtl:rotate-180" aria-hidden />
                   )}
                 </li>
               ))}
@@ -258,32 +303,43 @@ export default function TenantRepresentation() {
 
         <Band tone="white" tight>
           <SectionHead
-            title="How the process works"
-            lead="Most searches take 4 to 8 weeks from the first brief to a signed lease. A core and shell office then needs 8 to 14 weeks of fit-out, which we try to cover with a rent-free period."
-          
+            title={A ? A.processTitle : "How the process works"}
+            lead={
+              A
+                ? A.processLead
+                : "Most searches take 4 to 8 weeks from the first brief to a signed lease. A core and shell office then needs 8 to 14 weeks of fit-out, which we try to cover with a rent-free period."
+            }
             compact
           />
-          <StepList steps={STEPS} />
+          <StepList steps={A ? A.steps : STEPS} />
           <p className="mt-10 text-muted-foreground">
-            Want the details first? Read our{" "}
-            <Link href="/guides/how-to-rent-office-cairo" className="text-accent font-semibold hover:underline">
-              step-by-step guide to renting an office in Cairo
+            {A ? A.guideBefore : "Want the details first? Read our "}
+            <Link href={L("/guides/how-to-rent-office-cairo")} className="text-accent font-semibold hover:underline">
+              {A ? A.guideLink : "step-by-step guide to renting an office in Cairo"}
             </Link>
             .
           </p>
         </Band>
 
         <Band tone="cream">
-          <SectionHead title="Your own tenant rep vs the landlord's broker" lead="Both may show you offices. Only one is working for you." compact />
-          <ComparisonTable usLabel="Your tenant rep (PLACES)" themLabel="The landlord's broker" rows={COMPARISON} />
+          <SectionHead
+            title={A ? A.compareTitle : "Your own tenant rep vs the landlord's broker"}
+            lead={A ? A.compareLead : "Both may show you offices. Only one is working for you."}
+            compact
+          />
+          <ComparisonTable
+            usLabel={A ? A.usLabel : "Your tenant rep (PLACES)"}
+            themLabel={A ? A.themLabel : "The landlord's broker"}
+            rows={A ? A.comparison : COMPARISON}
+          />
         </Band>
 
         <Band tone="white">
           <SectionHead
-            title="Areas we cover"
-            lead="We search every major office district in Cairo, so you can compare areas before you compare buildings."
+            title={A ? A.areasTitle : "Areas we cover"}
+            lead={A ? A.areasLead : "We search every major office district in Cairo, so you can compare areas before you compare buildings."}
           />
-          <AreaTiles items={AREAS} slim />
+          <AreaTiles items={areas} slim />
           <div className="mt-14">
             <ClientLogoStrip />
           </div>
@@ -291,28 +347,35 @@ export default function TenantRepresentation() {
 
         <Band tone="cream">
           <FaqWithAdvisor
-            title="Tenant representation FAQs"
-            faqs={FAQS}
+            title={A ? A.faqTitle : "Tenant representation FAQs"}
+            faqs={faqs}
             footer={
-              <>
-                More on leases:{" "}
-                <Link href="/faqs/contracts-legal" className="text-accent font-medium hover:underline">Contracts &amp; legal FAQs</Link>
-                {" · "}
-                <Link href="/blog/office-lease-renewal-vs-relocation" className="text-accent font-medium hover:underline">Renew your lease or relocate?</Link>
-              </>
+              A ? (
+                <>
+                  {A.faqFooter}
+                  <Link href={L("/faqs/contracts-legal")} className="text-accent font-medium hover:underline">{A.faqFooterLink}</Link>
+                </>
+              ) : (
+                <>
+                  More on leases:{" "}
+                  <Link href="/faqs/contracts-legal" className="text-accent font-medium hover:underline">Contracts &amp; legal FAQs</Link>
+                  {" · "}
+                  <Link href="/blog/office-lease-renewal-vs-relocation" className="text-accent font-medium hover:underline">Renew your lease or relocate?</Link>
+                </>
+              )
             }
           />
         </Band>
 
         <Band tone="white">
-          <SectionHead title="Buying instead of renting?" />
+          <SectionHead title={A ? A.buyTitle : "Buying instead of renting?"} />
           <RelatedServices current="/services/tenant-representation" order={["/services/primary-property", "/services/property-resale", "/services/income-generating-property", "/services/investment-consultation"]} />
         </Band>
 
         <CtaBand
-          title="Ready to find your next office?"
-          text="Tell us your size, area, budget and move-in date. We'll come back with a shortlist."
-          primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "rent", pageName: "Tenant representation" } }}
+          title={A ? A.ctaTitle : "Ready to find your next office?"}
+          text={A ? A.ctaText : "Tell us your size, area, budget and move-in date. We'll come back with a shortlist."}
+          primary={{ label: A ? A.ctaButton : "Talk to an advisor", href: L("/contact"), form }}
         />
       </main>
 

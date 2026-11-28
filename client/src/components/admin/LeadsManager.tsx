@@ -392,6 +392,12 @@ export function LeadsManager() {
                           );
                         })()}
                         <div className="text-primary/80">{lead.lead_source}</div>
+                        {/* Sent from an Arabic page (/ar/…): reply in Arabic. */}
+                        {lead.page_url && /^\/ar(\/|$)/.test(lead.page_url) && (
+                          <span className="mt-1 inline-block text-[10px] font-semibold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                            Arabic page · reply in Arabic
+                          </span>
+                        )}
                         {lead.magnet && (
                           <div className="text-muted-foreground">
                             magnet: {lead.magnet}
@@ -447,7 +453,7 @@ export function LeadsManager() {
                               <p className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-1">
                                 Projects they are interested in
                               </p>
-                              <p className="text-sm text-primary whitespace-pre-wrap bg-white p-3 rounded-md border border-border/40">
+                              <p dir="auto" className="text-sm text-primary whitespace-pre-wrap bg-white p-3 rounded-md border border-border/40">
                                 {lead.message}
                               </p>
                             </div>

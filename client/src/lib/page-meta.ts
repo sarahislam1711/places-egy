@@ -60,3 +60,22 @@ export const STATIC_PAGE_META = {
     url: `${SITE}/terms-of-service`,
   },
 } satisfies Record<string, StaticPageMeta>;
+
+/**
+ * Arabic twins of static pages (29 Nov), keyed by the Arabic path. Used by the
+ * pages (useDocumentMeta) and script/prerender.ts (Arabic build-time HTML).
+ */
+export const AR_PAGE_META: Record<string, StaticPageMeta> = {
+  "/ar/services/tenant-representation": {
+    title: "وسيط عقاري للشركات في القاهرة | إيجار مكاتب إدارية | PLACES",
+    description:
+      "PLACES وسيط عقاري يمثل الشركات لا الملاك في إيجار المكاتب الإدارية بالقاهرة: نبحث ونقارن ونتفاوض ونراجع عقد الإيجار. الخدمة مجانية للمستأجرين.",
+    url: `${SITE}/ar/services/tenant-representation`,
+  },
+  "/ar/contact": {
+    title: "تواصل مع PLACES | استشارة في إيجار وشراء المكاتب الإدارية",
+    description:
+      "تواصل مع PLACES لإيجار أو شراء مكتب إداري أو للاستشارة الاستثمارية في مصر: اتصال مباشر أو واتساب أو بريد إلكتروني، ورد في اليوم نفسه.",
+    url: `${SITE}/ar/contact`,
+  },
+};

@@ -5,7 +5,9 @@
 // (script/ssr-pages.ts) carries the full text.
 import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { Link } from "wouter";
-import { pageLanguage } from "@/lib/detect-language";
+import { useLang } from "@/lib/ui-text";
+import { SERVICES_AR } from "@/lib/home-ar";
+import { localHref } from "@/lib/i18n";
 import { ArrowRight, Check, ChevronRight, MessageCircle, Phone, X, type LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { FaqAccordionList } from "@/components/FaqAccordionList";
@@ -74,6 +76,7 @@ export function ServiceHero({
   /** Three short facts under the actions. */
   points: string[];
 }) {
+  const { isAr } = useLang();
   return (
     <section className="pt-28 md:pt-36 pb-16 md:pb-24">
       <div className="container mx-auto px-6 md:px-10 max-w-6xl grid lg:grid-cols-[1.15fr_1fr] gap-12 lg:gap-16 items-center">
@@ -108,7 +111,7 @@ export function ServiceHero({
               className="bg-white text-primary border-primary/20 hover:border-primary/50 font-semibold px-7 h-13 text-base transition-transform hover:-translate-y-0.5"
             >
               <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-                <MessageCircle className="w-4 h-4" /> {pageLanguage() === "ar" ? "راسلنا على واتساب" : "WhatsApp us"}
+                <MessageCircle className="w-4 h-4" /> {isAr ? "راسلنا على واتساب" : "WhatsApp us"}
               </a>
             </Button>
           </div>
@@ -225,6 +228,7 @@ export function ComparisonTable({
   themLabel: string;
   rows: { label: string; us: string; them: string }[];
 }) {
+  const { isAr } = useLang();
   return (
     <>
       {/* The PLACES side is the one to pick (28 Nov): red header with a
@@ -234,7 +238,7 @@ export function ComparisonTable({
         {rows.map((r) => (
           <div key={r.label} className="overflow-hidden rounded-2xl bg-white">
             <h3 className="px-5 pt-4 pb-3 font-bold text-primary">{r.label}</h3>
-            <p className="flex items-start gap-2.5 border-l-4 border-accent bg-accent/[0.07] px-4 py-3 text-sm text-primary">
+            <p className="flex items-start gap-2.5 border-s-4 border-accent bg-accent/[0.07] px-4 py-3 text-sm text-primary">
               <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-white">
                 <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
               </span>
@@ -251,20 +255,20 @@ export function ComparisonTable({
         <table className="w-full text-[15px]">
           <thead>
             <tr>
-              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
-              <th className="px-5 py-4 text-left bg-accent text-white" scope="col">
+              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">{isAr ? "وجه المقارنة" : "Compared on"}</span></th>
+              <th className="px-5 py-4 text-start bg-accent text-white" scope="col">
                 <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
                   <span className="font-serif text-lg font-bold">{usLabel}</span>
-                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold">Best for you</span>
+                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold">{isAr ? "الأفضل لك" : "Best for you"}</span>
                 </span>
               </th>
-              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-primary/55" scope="col">{themLabel}</th>
+              <th className="px-5 py-4 text-start font-serif text-lg font-bold text-primary/55" scope="col">{themLabel}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r, i) => (
               <tr key={r.label} className="border-t border-primary/10">
-                <th className="px-5 py-3.5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <th className="px-5 py-3.5 text-start font-semibold text-primary align-top" scope="row">{r.label}</th>
                 <td className={`px-5 py-3.5 align-top bg-accent/[0.07] border-x-2 border-accent/40 ${i === rows.length - 1 ? "border-b-2" : ""}`}>
                   <span className="flex items-start gap-2.5 font-medium text-primary">
                     <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-white">
@@ -302,7 +306,7 @@ export function LinkGrid({ items }: { items: { href: string; title: string; desc
             <span className="block text-lg font-serif font-bold text-primary group-hover:text-accent transition-colors">{a.title}</span>
             <span className="block mt-1.5 text-sm text-muted-foreground leading-relaxed">{a.desc}</span>
           </span>
-          <ArrowRight className="w-4 h-4 mt-1.5 text-accent shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
+          <ArrowRight className="w-4 h-4 mt-1.5 text-accent shrink-0 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
         </Link>
       ))}
     </div>
@@ -319,19 +323,20 @@ export function FaqWithAdvisor({
   faqs: { question: string; answer: string }[];
   footer?: ReactNode;
 }) {
+  const { isAr } = useLang();
   return (
     <div className="grid lg:grid-cols-[1fr_1.6fr] gap-12 lg:gap-16 items-start">
       <div className="lg:sticky lg:top-28">
         <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold text-primary leading-[1.1] tracking-[-0.02em] text-balance">{title}</h2>
         <div className="mt-8 rounded-2xl bg-primary text-white p-7">
-          <p className="text-lg font-serif font-bold">Have a question that isn't here?</p>
-          <p className="mt-2 text-sm text-white/75 leading-relaxed">Talk to an advisor. We'll answer it, no commitment.</p>
+          <p className="text-lg font-serif font-bold">{isAr ? "لديك سؤال غير موجود هنا؟" : "Have a question that isn't here?"}</p>
+          <p className="mt-2 text-sm text-white/75 leading-relaxed">{isAr ? "تحدث مع أحد مستشارينا وسنجيبك، دون أي التزام." : "Talk to an advisor. We'll answer it, no commitment."}</p>
           <div className="mt-5 flex flex-col gap-2">
             <a href={`tel:${PHONE_TEL}`} className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-accent transition-colors">
-              <Phone className="w-4 h-4" /> {PHONE_DISPLAY}
+              <Phone className="w-4 h-4" /> <span dir="ltr">{PHONE_DISPLAY}</span>
             </a>
             <a href={WHATSAPP} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:text-accent transition-colors">
-              <MessageCircle className="w-4 h-4" /> WhatsApp
+              <MessageCircle className="w-4 h-4" /> {isAr ? "واتساب" : "WhatsApp"}
             </a>
           </div>
         </div>
@@ -358,6 +363,7 @@ function PrimaryAction({ primary, children }: { primary: { href: string; form?: 
 }
 
 export function CtaBand({ title, text, primary }: { title: string; text: string; primary: { label: string; href: string; form?: RequirementsFormConfig } }) {
+  const { isAr } = useLang();
   return (
     <section className="bg-primary text-white">
       <div className="container mx-auto px-6 md:px-10 max-w-6xl py-16 md:py-20 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
@@ -378,7 +384,7 @@ export function CtaBand({ title, text, primary }: { title: string; text: string;
             className="bg-transparent text-white border-white/30 hover:border-white/70 font-semibold px-7 h-13 text-base"
           >
             <a href={WHATSAPP} target="_blank" rel="noopener noreferrer">
-              <MessageCircle className="w-4 h-4" /> WhatsApp
+              <MessageCircle className="w-4 h-4" /> {isAr ? "واتساب" : "WhatsApp"}
             </a>
           </Button>
         </div>
@@ -403,6 +409,7 @@ export interface Audience {
  * inactive ones are only hidden), so crawlers read all of them.
  */
 export function AudienceTabs({ items, label }: { items: Audience[]; label: string }) {
+  const { isAr } = useLang();
   const [active, setActive] = useState(0);
   const base = useId();
   const trackRef = useRef<HTMLDivElement>(null);
@@ -430,7 +437,8 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
     const first = track.children[0] as HTMLElement | undefined;
     if (!first) return;
     const step = first.offsetWidth + parseFloat(getComputedStyle(track).columnGap || "0");
-    const n = Math.round(track.scrollLeft / step);
+    // Math.abs: in right-to-left pages scrollLeft counts down from 0.
+    const n = Math.round(Math.abs(track.scrollLeft) / step);
     if (n !== active && n >= 0 && n < items.length) setActive(n);
   };
 
@@ -452,12 +460,12 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`group flex items-center justify-between gap-4 text-left rounded-xl px-5 py-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`group flex items-center justify-between gap-4 text-start rounded-xl px-5 py-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                 on ? "bg-primary text-white" : "bg-transparent text-primary hover:bg-white"
               }`}
             >
               <span className="text-lg font-serif font-bold">{it.title}</span>
-              <ArrowRight className={`w-5 h-5 shrink-0 transition-transform ${on ? "text-accent translate-x-1" : "text-primary/30 group-hover:translate-x-1"}`} aria-hidden />
+              <ArrowRight className={`w-5 h-5 shrink-0 transition-transform rtl:rotate-180 ${on ? "text-accent translate-x-1 rtl:-translate-x-1" : "text-primary/30 group-hover:translate-x-1 rtl:group-hover:-translate-x-1"}`} aria-hidden />
             </button>
           );
         })}
@@ -475,7 +483,7 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               role="tabpanel"
               aria-labelledby={`${base}-tab-${i}`}
               aria-roledescription="slide"
-              aria-label={`${i + 1} of ${items.length}: ${it.title}`}
+              aria-label={isAr ? `${i + 1} من ${items.length}: ${it.title}` : `${i + 1} of ${items.length}: ${it.title}`}
               className={`flex w-[84%] sm:w-[60%] shrink-0 snap-start lg:w-auto lg:h-full ${i === active ? "" : "lg:hidden"}`}
             >
               <div className="flex w-full flex-col overflow-hidden rounded-2xl bg-white lg:grid lg:grid-cols-[0.95fr_1.05fr] lg:min-h-[17rem]">
@@ -505,7 +513,7 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
                 key={it.title}
                 type="button"
                 onClick={() => slideTo(i)}
-                aria-label={`Show ${it.title}`}
+                aria-label={isAr ? `عرض: ${it.title}` : `Show ${it.title}`}
                 aria-current={i === active}
                 className={`h-2 rounded-full transition-all ${i === active ? "w-6 bg-primary" : "w-2 bg-primary/25"}`}
               />
@@ -516,19 +524,19 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               type="button"
               onClick={() => slideTo(active - 1)}
               disabled={active === 0}
-              aria-label="Previous"
+              aria-label={isAr ? "السابق" : "Previous"}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-white text-primary transition-opacity disabled:opacity-35"
             >
-              <ArrowRight className="w-4 h-4 rotate-180" aria-hidden />
+              <ArrowRight className="w-4 h-4 rotate-180 rtl:rotate-0" aria-hidden />
             </button>
             <button
               type="button"
               onClick={() => slideTo(active + 1)}
               disabled={active === items.length - 1}
-              aria-label="Next"
+              aria-label={isAr ? "التالي" : "Next"}
               className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white transition-opacity disabled:opacity-35"
             >
-              <ArrowRight className="w-4 h-4" aria-hidden />
+              <ArrowRight className="w-4 h-4 rtl:rotate-180" aria-hidden />
             </button>
           </div>
         </div>
@@ -548,6 +556,7 @@ export interface ServiceCardItem {
 
 /** Photo-led service cards; the first card is the featured one (wider on desktop). */
 export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
+  const { isAr } = useLang();
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
       {items.map((s, i) => (
@@ -573,7 +582,7 @@ export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
           </div>
           <div className="flex flex-1 flex-col p-5">
             <p className="text-[15px] text-primary/80 leading-relaxed">{s.desc}</p>
-            <ul className="mt-3 flex flex-wrap gap-2" aria-label={`${s.name} is best for`}>
+            <ul className="mt-3 flex flex-wrap gap-2" aria-label={isAr ? `${s.name} مناسبة لـ` : `${s.name} is best for`}>
               {s.tags.map((t) => (
                 <li key={t} className="rounded-full bg-background px-3 py-1 text-xs font-semibold text-primary">
                   {t}
@@ -581,7 +590,7 @@ export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
               ))}
             </ul>
             <span className="mt-auto pt-4 inline-flex items-center text-accent font-semibold">
-              Learn more <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
+              {isAr ? "اعرف المزيد" : "Learn more"} <ArrowRight className="ms-2 w-4 h-4 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
             </span>
           </div>
         </Link>
@@ -608,10 +617,11 @@ const CLIENT_LOGOS: { name: string; src: string }[] = [
 ];
 
 /** "Companies we've placed": a grid of client logos with a link to the full list. */
-export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: string }) {
+export function ClientLogoStrip({ title }: { title?: string }) {
+  const { isAr, href } = useLang();
   return (
     <div className="rounded-2xl bg-background p-7 md:p-9">
-      <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-7">{title}</h2>
+      <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-7">{title ?? (isAr ? "شركات ساعدناها في إيجاد مكاتبها" : "Companies we've placed")}</h2>
       <ul className="grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
         {CLIENT_LOGOS.map((c) => (
           <li key={c.name} className="flex h-16 md:h-24 items-center justify-center px-1.5 md:px-3">
@@ -628,11 +638,11 @@ export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: 
         ))}
       </ul>
       <Link
-        href="/why-places"
-        aria-label="See all clients"
+        href={href("/why-places")}
+        aria-label={isAr ? "كل عملائنا" : "See all clients"}
         className="group mt-5 inline-flex items-center text-sm text-accent font-semibold hover:underline"
       >
-        See all <ArrowRight className="ml-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1" aria-hidden />
+        {isAr ? "عرض الكل" : "See all"} <ArrowRight className="ms-1 w-3.5 h-3.5 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
       </Link>
     </div>
   );
@@ -669,7 +679,7 @@ export function AreaTiles({ items, columns = 3, slim = false }: { items: AreaTil
               />
               <span className="relative flex items-start justify-between gap-2">
                 <span className="text-lg md:text-xl font-serif font-bold leading-tight text-primary">{a.name}</span>
-                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-1" aria-hidden />
+                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
               </span>
               <span className="relative text-sm text-primary/75 leading-snug">{a.line}</span>
             </Link>
@@ -696,7 +706,7 @@ export function AreaTiles({ items, columns = 3, slim = false }: { items: AreaTil
               <div className="absolute inset-0 bg-gradient-to-t from-primary/85 via-primary/10 to-transparent" aria-hidden />
               <span className="absolute left-3 right-3 bottom-3 md:left-5 md:bottom-4 flex items-end justify-between gap-2">
                 <span className="text-base md:text-xl font-serif font-bold text-white leading-tight">{a.name}</span>
-                <ArrowRight className="hidden md:block w-5 h-5 text-white shrink-0 transition-transform group-hover:translate-x-1" aria-hidden />
+                <ArrowRight className="hidden md:block w-5 h-5 text-white shrink-0 transition-transform group-hover:translate-x-1 rtl:rotate-180 rtl:group-hover:-translate-x-1" aria-hidden />
               </span>
             </div>
             {/* Same height on every tile: room for 3 lines on phones, 2 on desktop. */}
@@ -722,9 +732,29 @@ const SERVICE_TILES: AreaTile[] = [
 ];
 
 /** The other four services as photo tiles (pass the current page's path to leave it out). */
+// Arabic one-liners for the tiles, same order as SERVICE_TILES.
+const SERVICE_LINES_AR: Record<string, { line: string; imageAlt: string }> = {
+  "/services/tenant-representation": { line: "نمثلك أنت، لا المالك", imageAlt: "مراجعة عقد إيجار مكتب قبل التوقيع" },
+  "/services/primary-property": { line: "اشترِ مباشرة من المطور", imageAlt: "مشروع إداري جديد في مصر" },
+  "/services/property-resale": { line: "اشترِ أو بِع مكتبًا جاهزًا", imageAlt: "مبانٍ إدارية في سوق إعادة البيع" },
+  "/services/investment-consultation": { line: "استشارة مبنية على البيانات قبل أن تستثمر", imageAlt: "مراجعة أرقام الاستثمار في أصل إداري" },
+  "/services/income-generating-property": { line: "وحدات عليها طلب حقيقي من المستأجرين", imageAlt: "Allegria Business Park، موقع مكاتب مدرة للدخل" },
+};
+
 export function RelatedServices({ current, order }: { current: string; order?: string[] }) {
-  const tiles = SERVICE_TILES.filter((t) => t.href !== current);
-  if (order) tiles.sort((a, b) => order.indexOf(a.href) - order.indexOf(b.href));
+  const { isAr } = useLang();
+  const tiles = SERVICE_TILES.filter((t) => t.href !== current).map((t) =>
+    isAr
+      ? {
+          ...t,
+          href: localHref(t.href, "ar"),
+          name: SERVICES_AR.find((s) => s.href === t.href)?.title ?? t.name,
+          ...SERVICE_LINES_AR[t.href],
+          key: t.href,
+        }
+      : { ...t, key: t.href },
+  );
+  if (order) tiles.sort((a, b) => order.indexOf(a.key) - order.indexOf(b.key));
   return <AreaTiles items={tiles} columns={4} />;
 }
 

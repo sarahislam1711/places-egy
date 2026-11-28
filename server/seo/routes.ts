@@ -88,7 +88,7 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
     try {
       const html = await renderLandingAr(req.path.split("/")[2], String(req.params.loc));
       res.setHeader("Cache-Control", "no-cache");
-      if (html === null) return res.status(404).type("html").send(renderNotFound("404"));
+      if (html === null) return res.status(404).type("html").send(renderNotFound("404", "ar"));
       res.type("html").send(ensureAlternates(html, alternatesFor(req.path)));
     } catch (err) {
       console.warn(`[seo] render failed for ${req.path}:`, err);

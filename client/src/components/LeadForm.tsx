@@ -13,6 +13,35 @@ import {
 } from "@/lib/leads";
 import { detectPreferredLanguage } from "@/lib/detect-language";
 import { trackEvent } from "@/lib/analytics";
+import { useLang } from "@/lib/ui-text";
+import { areaAr } from "@/lib/listing-text-ar";
+
+// Field labels and messages; Arabic on /ar pages (29 Nov). Callers pass their
+// own submit / success / message wording.
+const LF = {
+  en: {
+    errNameEmail: "Name and email are required.",
+    errPhone: "Phone number is required.",
+    errLocation: "Pick at least one location you're interested in.",
+    name: "Full name",
+    email: "Email",
+    phone: "Phone",
+    locations: "Locations you're interested in",
+    optional: "(optional)",
+    sending: "Sending…",
+  },
+  ar: {
+    errNameEmail: "الاسم والبريد الإلكتروني مطلوبان.",
+    errPhone: "رقم الهاتف مطلوب.",
+    errLocation: "اختر منطقة واحدة على الأقل تهمك.",
+    name: "الاسم بالكامل",
+    email: "البريد الإلكتروني",
+    phone: "رقم الهاتف",
+    locations: "المناطق التي تهمك",
+    optional: "(اختياري)",
+    sending: "جارٍ الإرسال…",
+  },
+};
 
 // Reusable lead form. Used across every capture point — market-report page,
 // blog slide-up popup, homepage CTA, etc. Wrapper components pass the right
@@ -61,6 +90,8 @@ export function LeadForm({
   messagePlaceholder = "e.g. a project you're eyeing, size, budget, timing…",
   onSubmitSuccess,
 }: Props) {
+  const { lang, isAr } = useLang();
+  const f = LF[lang];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
@@ -90,15 +121,15 @@ export function LeadForm({
     e.preventDefault();
     setError(null);
     if (!name.trim() || !email.trim()) {
-      setError("Name and email are required.");
+      setError(f.errNameEmail);
       return;
     }
     if (phone.trim().length < 4) {
-      setError("Phone number is required.");
+      setError(f.errPhone);
       return;
     }
     if (locations.size === 0) {
-      setError("Pick at least one location you're interested in.");
+      setError(f.errLocation);
       return;
     }
     setSubmitting(true);
@@ -167,7 +198,7 @@ export function LeadForm({
       <div className="grid sm:grid-cols-2 gap-3">
         <div className="space-y-1.5">
           <Label htmlFor="lf-name" className="text-sm text-primary">
-            Full name <span className="text-accent">*</span>
+            {f.name} <span className="text-accent">*</span>
           </Label>
           <Input
             id="lf-name"
@@ -180,7 +211,7 @@ export function LeadForm({
         </div>
         <div className="space-y-1.5">
           <Label htmlFor="lf-email" className="text-sm text-primary">
-            Email <span className="text-accent">*</span>
+            {f.email} <span className="text-accent">*</span>
           </Label>
           <Input
             id="lf-email"
@@ -196,7 +227,7 @@ export function LeadForm({
 
       <div className="space-y-1.5">
         <Label htmlFor="lf-phone" className="text-sm text-primary">
-          Phone <span className="text-accent">*</span>
+          {f.phone} <span className="text-accent">*</span>
         </Label>
         <Input
           id="lf-phone"
@@ -206,13 +237,14 @@ export function LeadForm({
           className="bg-white"
           autoComplete="tel"
           placeholder="+20 100 000 0000"
+          dir="ltr"
           required
         />
       </div>
 
       <div className="space-y-2">
         <Label className="text-sm text-primary">
-          Locations you're interested in <span className="text-accent">*</span>
+          {f.locations} <span className="text-accent">*</span>
         </Label>
         <div className="flex flex-wrap gap-2">
           {LOCATION_CHOICES.map(({ slug, label }) => {
@@ -229,7 +261,7 @@ export function LeadForm({
                 }`}
                 aria-pressed={active}
               >
-                {label}
+                {isAr ? areaAr(slug) : label}
               </button>
             );
           })}
@@ -239,7 +271,7 @@ export function LeadForm({
       <div className="space-y-1.5">
         <Label htmlFor="lf-message" className="text-sm text-primary">
           {messageLabel}{" "}
-          <span className="text-muted-foreground">(optional)</span>
+          <span className="text-muted-foreground">{f.optional}</span>
         </Label>
         <Textarea
           id="lf-message"
@@ -261,8 +293,8 @@ export function LeadForm({
       >
         {submitting ? (
           <>
-            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            Sending…
+            <Loader2 className="w-4 h-4 me-2 animate-spin" />
+            {f.sending}
           </>
         ) : (
           submitLabel

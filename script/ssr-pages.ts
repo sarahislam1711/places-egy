@@ -36,6 +36,9 @@ export const STATIC_PAGE_COMPONENTS: Record<string, string> = {
   "/locations": "locations",
   "/glossary": "resources/glossary",
   "/contact": "contact",
+  // Arabic twins (29 Nov): same components; the route makes them render in Arabic.
+  "/ar/services/tenant-representation": "services/tenant-representation",
+  "/ar/contact": "contact",
   "/privacy-policy": "privacy-policy",
   "/terms-of-service": "terms-of-service",
 };

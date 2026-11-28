@@ -16,7 +16,7 @@ import { supabase, type Listing } from "@/lib/supabase";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { faqSchema } from "@/lib/schema";
 import { useDocumentMeta } from "@/lib/use-document-meta";
-import { hasArabicTwin, langOfPath, localHref } from "@/lib/i18n";
+import { areaPageHref, hasArabicTwin, langOfPath, localHref } from "@/lib/i18n";
 import { HOME_AR } from "@/lib/home-ar";
 
 const HOME_FAQS = [
@@ -63,8 +63,7 @@ export default function Home() {
   const findHref = isAr && !hasArabicTwin("/listings") ? L("/rent") : L("/listings");
   // Area cards: Arabic area guide when live, else the Arabic rent page for that
   // area, else the English guide.
-  const areaHref = (slug: string) =>
-    !isAr || hasArabicTwin(`/locations/${slug}`) ? L(`/locations/${slug}`) : hasArabicTwin(`/rent/${slug}`) ? L(`/rent/${slug}`) : `/locations/${slug}`;
+  const areaHref = (slug: string) => areaPageHref(slug, lang);
 
   useDocumentMeta(
     T

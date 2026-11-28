@@ -594,7 +594,24 @@ export async function renderListing(l: SeoListing): Promise<string> {
 }
 
 // 404 / 410 page: noindex, no canonical, with ways back into the site.
-export function renderNotFound(kind: "404" | "410" = "404"): string {
+export function renderNotFound(kind: "404" | "410" = "404", lang: "en" | "ar" = "en"): string {
+  if (lang === "ar" && kind === "404") {
+    // Unknown /ar/ addresses (29 Nov): the same page in Arabic, right-to-left.
+    const ar = (p: string) => localHref(p, "ar");
+    const lead = "ربما نُقلت الصفحة أو كُتب الرابط بشكل خاطئ. ابحث عن مكتب أو تصفح المكاتب حسب المنطقة.";
+    const html = arabicSkipNav(injectMeta(shell(), { title: "الصفحة غير موجودة | PLACES", description: lead, url: null, robots: "noindex, follow" }, { lang: "ar" }));
+    return injectBody(
+      html,
+      `<h1>لم نجد هذه الصفحة</h1><p>${lead}</p>` +
+        `<form action="/listings" method="get" role="search"><label for="q">ابحث عن مكتب</label> ` +
+        `<input id="q" name="q" type="search" placeholder="المنطقة أو المشروع أو المطور"> <button type="submit">بحث</button></form>` +
+        `<p><a href="${ar("/rent")}">${esc(dealHeadingAr("rent", CAIRO_AR))}</a> · <a href="${ar("/buy")}">${esc(dealHeadingAr("buy", CAIRO_AR))}</a></p>` +
+        `<h2>المكاتب حسب المنطقة</h2><ul>` +
+        LOCATIONS.map((l) => `<li><a href="${ar(`/locations/${l.slug}`)}">${esc(`مكاتب في ${areaAr(l.slug)}`)}</a></li>`).join("") +
+        `</ul>`,
+      "ar",
+    );
+  }
   const gone = kind === "410";
   const title = gone ? "This listing is no longer available | PLACES" : "Page not found | PLACES";
   const heading = gone ? "This listing is no longer available" : "We couldn't find that page";

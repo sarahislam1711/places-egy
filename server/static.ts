@@ -134,7 +134,7 @@ export function serveStatic(app: Express) {
       // Missing static files (anything with an extension) get a plain 404.
       if (path.extname(urlPath)) return res.status(404).type("text").send("Not found");
       const known = req.method === "GET" || req.method === "HEAD" ? await isKnownRoute(urlPath) : false;
-      if (known === false) return res.status(404).type("html").send(renderNotFound("404"));
+      if (known === false) return res.status(404).type("html").send(renderNotFound("404", urlPath === "/ar" || urlPath.startsWith("/ar/") ? "ar" : "en"));
       res.sendFile(path.resolve(distPath, "index.html"));
     });
   } else {

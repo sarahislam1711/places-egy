@@ -82,6 +82,18 @@ export function alternatesFor(path: string, origin: string = SITE_ORIGIN): Alter
 }
 
 /**
+ * Link for an area card: the area guide in `lang` when it exists; for Arabic
+ * readers the Arabic rent page of that area until the Arabic guide is live;
+ * otherwise the English guide.
+ */
+export function areaPageHref(slug: string, lang: Lang): string {
+  const guide = `/locations/${slug}`;
+  if (lang !== "ar" || hasArabicTwin(guide)) return localHref(guide, lang);
+  if (hasArabicTwin(`/rent/${slug}`)) return arabicPath(`/rent/${slug}`);
+  return guide;
+}
+
+/**
  * Where a link should point for a reader in `lang`: the Arabic twin when it
  * exists, otherwise the English page (never a missing /ar/ URL).
  */

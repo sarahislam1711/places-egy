@@ -1,9 +1,9 @@
 import { readFile, writeFile, mkdir, readdir } from "fs/promises";
 import path from "path";
 import ts from "typescript";
-import { attr, esc, injectBody, injectMeta } from "../server/seo/html";
-import { STATIC_PAGE_META } from "../client/src/lib/page-meta";
-import { alternatesFor } from "../client/src/lib/i18n";
+import { arabicSkipNav, attr, esc, injectBody, injectMeta } from "../server/seo/html";
+import { AR_PAGE_META, STATIC_PAGE_META } from "../client/src/lib/page-meta";
+import { alternatesFor, hasArabicTwin } from "../client/src/lib/i18n";
 import { renderDeveloperBodies } from "./ssr-developers";
 import { renderStaticPageBodies } from "./ssr-pages";
 import { TENANT_REP_FAQ_SECTIONS, tenantRepHtml } from "../client/src/lib/tenant-rep-cta";
@@ -735,6 +735,21 @@ export async function prerender() {
       await writeFile(dirIndexOut, html, "utf8");
     }
 
+    indexWritten++;
+  }
+
+  // Arabic twins of static pages (29 Nov): Arabic meta, lang="ar" dir="rtl"
+  // and the Arabic page body from the first byte. Paired with the English page
+  // (hreflang) once listed in AR_LIVE; until then reachable but noindex.
+  for (const [route, m] of Object.entries(AR_PAGE_META)) {
+    const meta: RouteMeta = { route, ...m };
+    const live = hasArabicTwin(route);
+    let html = injectMeta(shell, { ...meta, ...(live ? {} : { robots: "noindex, follow" }) }, { lang: "ar", alternates: alternatesFor(route, SITE) });
+    html = arabicSkipNav(html);
+    html = injectBody(html, pageBodies[route] ?? simpleBody(meta), "ar");
+    const outPath = path.join(DIST, `${route}.html`);
+    await mkdir(path.dirname(outPath), { recursive: true });
+    await writeFile(outPath, html, "utf8");
     indexWritten++;
   }
 
