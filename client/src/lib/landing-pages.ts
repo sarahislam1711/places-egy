@@ -288,7 +288,7 @@ export function landingCopy(dealSlug: DealSlug, loc: LandingLocation, s: Landing
   const intro = [
     // No counts or size ranges here (27 Nov): they change daily; the live
     // figures sit in the hero panel / promise card and the FAQs.
-    `Browse ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}${where}. Updated as units are listed, ${rent ? "rented" : "sold"} or withdrawn.`,
+    `Browse ${kind} ${deal.label === "as income properties" ? "for sale" : deal.label} in ${loc.name}${where}.`,
   ];
 
   const faqs: LandingCopy["faqs"] = [];

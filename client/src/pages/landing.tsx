@@ -107,7 +107,7 @@ export default function LandingPage() {
     ? {
         home: "الرئيسية",
         send: "أرسل طلبك",
-        promiseFallback: "نحدّث الصفحة كلما أُضيفت وحدات أو سُحبت.",
+        promiseFallback: "الأسعار في صفحة كل وحدة.",
         points: ["قارن المشروعات والأسعار", "احجز معاينة لأي مكتب", dealSlug === "rent" ? "وسيط عقاري مجاني للشركات" : "استشارة قبل الشراء"],
         more: (n: number) => `عرض المزيد (متبقي ${n})`,
         projects: `أكثر المشروعات بها ${txWordAr} في ${areaName}`,
@@ -151,7 +151,7 @@ export default function LandingPage() {
             ? { title: rows.length ? unitsAr(dealSlug, rows.length) : h1, text: heroMedian ? `${heroMedian}.` : T.promiseFallback }
             : {
                 title: rows.length ? `${rows.length} ${dealSlug === "income-property" ? "income properties" : `offices ${deal.label}`}` : deal.heading(loc.name),
-                text: heroMedian ? `${heroMedian.charAt(0).toUpperCase()}${heroMedian.slice(1)}.` : `Updated as units are listed and withdrawn.`,
+                text: heroMedian ? `${heroMedian.charAt(0).toUpperCase()}${heroMedian.slice(1)}.` : `Prices on each listing.`,
               }
         }
         points={

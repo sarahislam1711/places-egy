@@ -91,7 +91,6 @@ export default function DealHubPage() {
         compare: "قارن المناطق",
         send: "أرسل طلبك",
         market: "السوق الآن",
-        marketSub: "مباشرة من وحداتنا، وتتحدث مع كل تغيير",
         byArea: `${heading} حسب المنطقة`,
         pricesOnListing: "السعر في صفحة كل وحدة",
         more: (n: number) => `عرض المزيد (متبقي ${n})`,
@@ -143,7 +142,6 @@ export default function DealHubPage() {
 
           <div className="rounded-3xl bg-primary text-white p-7 md:p-10">
             <h2 className="text-xl md:text-2xl font-serif font-bold text-white">{T ? T.market : "The market right now"}</h2>
-            <p className="mt-1 text-sm text-white/60">{T ? T.marketSub : "Live from our listings, updated as units change"}</p>
             <dl className="mt-7 grid grid-cols-2 gap-x-6 gap-y-8">
               {heroStats.map((st) => (
                 <div key={st.label} className="flex flex-col-reverse justify-end gap-1">

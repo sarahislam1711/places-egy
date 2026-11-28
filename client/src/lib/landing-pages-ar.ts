@@ -86,7 +86,7 @@ export function landingCopyAr(deal: DealSlug, place: string, s: LandingStats): L
   const kind = deal === "income-property" ? "المكاتب المؤجرة المدرة للدخل" : "المكاتب الإدارية";
   const txWord = deal === "income-property" ? "للبيع" : rent ? "للإيجار" : "للبيع";
 
-  const intro = [`تصفح ${kind} ${txWord} في ${place}. نحدّث الصفحة كلما أُضيفت وحدات جديدة أو ${rent ? "تم تأجيرها" : "تم بيعها"} أو سُحبت من السوق.`];
+  const intro = [`تصفح ${kind} ${txWord} في ${place}.`];
 
   const faqs: LandingCopyAr["faqs"] = [];
   if (s.perSqm) {
@@ -173,7 +173,7 @@ export function hubCopyAr(deal: DealSlug, all: LandingListing[]): HubCopyAr {
 
 /** Where in the area the offices are, in the words Arabic searchers use. */
 const WITHIN_AR: Record<string, string> = {
-  "new-cairo": "التجمع الخامس وعلى امتداد شارع التسعين",
+  "new-cairo": "على امتداد شارع التسعين الشمالي والجنوبي",
 };
 
 /** Arabic copy for one deal type in one area (same live figures as landingCopy). */
@@ -185,7 +185,7 @@ export function areaCopyAr(deal: DealSlug, locSlug: string, s: LandingStats): La
   const kind = deal === "income-property" ? "المكاتب المؤجرة المدرة للدخل" : "المكاتب الإدارية";
   const txWord = rent ? "للإيجار" : "للبيع";
   const intro = [
-    `تصفح ${kind} ${txWord} في ${place}${within ? `، في ${within}` : ""}. نحدّث الصفحة كلما أُضيفت وحدات جديدة أو ${rent ? "تم تأجيرها" : "تم بيعها"} أو سُحبت من السوق.`,
+    `تصفح ${kind} ${txWord} في ${place}${within ? `، ${within}` : ""}.`,
   ];
   const description = `${unitsAr(deal, s.count)} في ${place}. قارن أسعار المتر والمساحات والتشطيب والمشروعات${rent ? "، مع وسيط عقاري مجاني للشركات المستأجرة" : ""}.`.slice(0, 160);
   return { ...base, intro, description };
