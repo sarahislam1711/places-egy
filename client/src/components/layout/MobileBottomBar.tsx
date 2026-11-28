@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useLocation } from "wouter";
 import { LayoutGrid, MessageCircle, Phone } from "lucide-react";
 import { trackEvent } from "@/lib/analytics";
+import { useLang } from "@/lib/ui-text";
+import { englishPath } from "@/lib/i18n";
 
 const WHATSAPP_HREF = "https://wa.me/201063618217";
 const PHONE_TEL = "tel:+201063618217";
@@ -23,7 +25,10 @@ const PHONE_TEL = "tel:+201063618217";
 // bookings paused for now. When re-enabled, restore the third column
 // and switch the grid back to grid-cols-3.
 export function MobileBottomBar() {
-  const [location] = useLocation();
+  const [rawLocation] = useLocation();
+  // Same rules on /ar pages: compare against the English path.
+  const location = englishPath(rawLocation);
+  const { t, href } = useLang();
   const [ctaOnScreen, setCtaOnScreen] = useState(false);
   const barShown = location !== "/listings" && !ctaOnScreen;
 
@@ -77,16 +82,16 @@ export function MobileBottomBar() {
             className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-accent text-primary font-semibold text-sm hover:bg-accent/90 transition-colors"
           >
             <Phone className="w-4 h-4" />
-            Call
+            {t.bar.call}
           </a>
         ) : (
           <Link
-            href="/listings"
+            href={href("/listings")}
             onClick={() => trackEvent("browse_listings_click", { source: "mobile_bottom_bar" })}
             className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-accent text-primary font-semibold text-sm hover:bg-accent/90 transition-colors"
           >
             <LayoutGrid className="w-4 h-4" />
-            Browse
+            {t.bar.browse}
           </Link>
         )}
         <a
@@ -97,7 +102,7 @@ export function MobileBottomBar() {
           className="flex items-center justify-center gap-2 py-2.5 rounded-lg bg-[#25D366] text-white font-semibold text-sm hover:bg-[#1fb855] transition-colors"
         >
           <MessageCircle className="w-4 h-4" />
-          WhatsApp
+          {t.bar.whatsapp}
         </a>
       </div>
     </div>
