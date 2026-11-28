@@ -68,7 +68,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "Why are more Egyptians and foreign investors buying commercial real estate instead of residential?",
-            a: "Commercial real estate gives higher rental yields than residential — 8% to 14% per year compared to 3% to 6%. Lease contracts are longer, tenants are more stable, and tenants usually pay for their own fit-out, utilities, and maintenance. Residential supply has also grown faster than demand in many new cities, while demand for commercial space keeps rising in business areas.",
+            a: "Commercial real estate gives higher rental yields than residential — 8% to 14% per year compared to 4% to 6%. Lease contracts are longer, tenants are more stable, and tenants usually pay for their own fit-out, utilities, and maintenance. Residential supply has also grown faster than demand in many new cities, while demand for commercial space keeps rising in business areas.",
           },
           {
             q: "Is commercial real estate a better protection against inflation than residential property or other investments?",
@@ -140,7 +140,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "What is a realistic return on investment for commercial property in Egypt?",
-            a: "Realistic ROI ranges from 12% to 20% per year when combining rental yield (8% to 14%) and value growth (4% to 8%) on well-selected commercial units. Drive-thru, medical, and prime mall units perform at the higher end. Standard admin offices in mature areas perform at the lower end. Off-plan units in growing areas can exceed 20% over full development cycles.",
+            a: "Realistic ROI ranges from 12% to 22% per year when combining rental yield (8% to 14%) and value growth (4% to 8%) on well-selected commercial units. Drive-thru, medical, and prime mall units perform at the higher end. Standard admin offices in mature areas perform at the lower end. Off-plan units in growing areas can do better over a full development cycle.",
           },
           {
             q: "How long does it take to recover my investment through rent alone?",
@@ -486,7 +486,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
         items: [
           {
             q: "Which type of commercial property gives the highest rental yield in Egypt?",
-            a: "Drive-thru units, well-located strip mall retail, and prime medical units typically deliver the highest yields, ranging from 10% to 15% annually. Standard admin offices in mature areas yield 7% to 10%. Mega mall retail yields 8% to 12% depending on placement. Off-plan units in growing areas can exceed these figures over full ownership cycles when capital appreciation is added.",
+            a: "Drive-thru units, well-located strip mall retail, and prime medical units typically deliver the highest yields, ranging from 10% to 14% annually. Standard admin offices in mature areas yield 7% to 10%. Mega mall retail yields 8% to 12% depending on placement. Off-plan units in growing areas can exceed these figures over full ownership cycles when capital appreciation is added.",
           },
           {
             q: "How do I decide between an admin office, retail unit, medical unit, or drive-thru?",
@@ -555,7 +555,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "Is buying a commercial unit better than renting in the long term?",
-            a: "Buying is usually better for long-term occupiers. You build equity instead of paying rising rents, lock in your costs against inflation, and own an asset that appreciates with the market. Egyptian commercial property prices have grown 13% to 20% annually in recent years. Renting is better for short-term needs, businesses still defining their model, or operations that need frequent relocation as they scale.",
+            a: "Buying is usually better for long-term occupiers. You build equity instead of paying rising rents, lock in your costs against inflation, and own an asset that appreciates with the market. Egyptian commercial property prices have grown 13% to 30% annually in recent years. Renting is better for short-term needs, businesses still defining their model, or operations that need frequent relocation as they scale.",
           },
           {
             q: "What are the financial advantages of buying versus renting commercial real estate in Egypt?",
@@ -581,7 +581,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "Should I buy a primary commercial unit or a resale unit?",
-            a: "Primary suits investors with longer time horizons who want lower entry prices, the full appreciation cycle, and developer payment plans. Resale suits investors who want immediate income, want to skip handover delays, or want to verify the actual delivered product before buying. Resale prices typically run 30% to 60% below primary prices in the same project — for example, ZED East primary units start at 16.8 million EGP while resale units start at 5.8 million EGP.",
+            a: "Primary suits investors with longer time horizons who want lower entry prices, the full appreciation cycle, and developer payment plans. Resale suits investors who want immediate income, want to skip handover delays, or want to verify the actual delivered product before buying. Launch prices are usually the lowest in a project; resale units are typically priced close to the developer's current price for a similar unit, often 5% to 10% below it.",
           },
           {
             q: "What are the advantages of buying primary commercial units off-plan?",
@@ -633,7 +633,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
         items: [
           {
             q: "Should I buy a commercial unit specifically to rent it out?",
-            a: "Yes, if your goal is monthly income with long-term appreciation. Commercial units rented to stable tenants generate 8% to 15% annual yields in Egypt, with lease terms of 3 to 9 years and yearly rent increases of 7% to 10%. Categories like medical units, drive-thrus, and pharmacy strip malls perform best for buy-to-rent strategies because of long leases and tenant loyalty.",
+            a: "Yes, if your goal is monthly income with long-term appreciation. Commercial units rented to stable tenants generate 8% to 14% annual yields in Egypt, with lease terms of 3 to 9 years and yearly rent increases of 7% to 10%. Categories like medical units, drive-thrus, and pharmacy strip malls perform best for buy-to-rent strategies because of long leases and tenant loyalty.",
           },
           {
             q: "What types of commercial properties generate the best rental income?",
@@ -645,7 +645,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "What is the average rental yield for commercial property in Egypt?",
-            a: "Commercial rental yields range from 8% to 15% per year, compared to 4% to 6% for residential. Grade A admin offices yield 7% to 10%, prime mall retail yields 8% to 12%, drive-thrus and prime medical units yield 10% to 15%, and well-located strip malls yield 10% to 14%. Net yields after maintenance, vacancy, and management run 1.5 to 2 percentage points below gross yields.",
+            a: "Commercial rental yields range from 8% to 14% per year, compared to 4% to 6% for residential. Grade A admin offices yield 7% to 10%, prime mall retail yields 8% to 12%, drive-thrus and prime medical units yield 10% to 14%, and well-located strip malls yield 10% to 14%. Net yields after maintenance, vacancy, and management run 1.5 to 2 percentage points below gross yields.",
           },
         ],
       },
@@ -1038,7 +1038,7 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "Why do commercial properties cost more per square meter than residential?",
-            a: "Commercial properties cost more because they generate higher rental income, support business activity rather than housing, and require higher specifications — better HVAC, parking ratios, fire systems, and infrastructure. Commercial rental yields of 8% to 15% justify higher entry prices than residential yields of 4% to 6%. Commercial properties also benefit from longer lease terms and stable corporate tenants, supporting premium pricing.",
+            a: "Commercial properties cost more because they generate higher rental income, support business activity rather than housing, and require higher specifications — better HVAC, parking ratios, fire systems, and infrastructure. Commercial rental yields of 8% to 14% justify higher entry prices than residential yields of 4% to 6%. Commercial properties also benefit from longer lease terms and stable corporate tenants, supporting premium pricing.",
           },
           {
             q: "How do commercial prices in Egypt compare across different cities and areas?",
@@ -1114,11 +1114,11 @@ export const FAQ_SECTIONS: FAQSection[] = [
         items: [
           {
             q: "How do I calculate the rental yield on a commercial property?",
-            a: "Gross rental yield = (annual rent ÷ purchase price) × 100. Net yield subtracts vacancy, maintenance, taxes, and management fees — usually 1.5 to 2 percentage points below gross. A unit costing 5 million EGP earning 500,000 EGP annual rent has a 10% gross yield. Commercial yields in Egypt range from 8% to 15%, with drive-thrus and prime medical units at the higher end and standard admin offices at the lower end.",
+            a: "Gross rental yield = (annual rent ÷ purchase price) × 100. Net yield subtracts vacancy, maintenance, taxes, and management fees — usually 1.5 to 2 percentage points below gross. A unit costing 5 million EGP earning 500,000 EGP annual rent has a 10% gross yield. Commercial yields in Egypt range from 8% to 14%, with drive-thrus and prime medical units at the higher end and standard admin offices at the lower end.",
           },
           {
             q: "What is a good ROI for commercial real estate in Egypt?",
-            a: "Total ROI combines rental yield (8% to 14%) and capital appreciation (4% to 8% in stable conditions, 10% to 20% in growing areas). Total annual returns of 12% to 25% are realistic for well-selected commercial units. Drive-thrus, medical units, and prime mall positions perform at the higher end. Off-plan units in growing areas like Mostakbal City and the New Administrative Capital can exceed 25% over full development cycles.",
+            a: "Total ROI combines rental yield (8% to 14%) and capital appreciation (4% to 8% in stable conditions, 10% to 20% in growing areas). Total annual returns of 12% to 22% are realistic for well-selected commercial units in stable conditions. Drive-thrus, medical units, and prime mall positions perform at the higher end. Off-plan units in growing areas like Mostakbal City and the New Administrative Capital can do better over a full development cycle.",
           },
           {
             q: "How do I calculate the payback period for a commercial property?",
@@ -1368,11 +1368,11 @@ export const FAQ_SECTIONS: FAQSection[] = [
           },
           {
             q: "How is commercial real estate in Egypt different from residential as an investment?",
-            a: "Commercial properties yield 8% to 15% annually compared to 4% to 6% for residential, with longer lease terms (5 to 9 years vs 1 year), more stable tenants, and tenant-paid maintenance and fit-out. Commercial requires higher initial fit-out budgets but generates more consistent income with less hands-on management. Returns compound faster because annual rent escalations of 7% to 10% are standard in commercial leases but rare in residential.",
+            a: "Commercial properties yield 8% to 14% annually compared to 4% to 6% for residential, with longer lease terms (5 to 9 years vs 1 year), more stable tenants, and tenant-paid maintenance and fit-out. Commercial requires higher initial fit-out budgets but generates more consistent income with less hands-on management. Returns compound faster because annual rent escalations of 7% to 10% are standard in commercial leases but rare in residential.",
           },
           {
             q: "What is the average ROI for commercial real estate investment in Egypt?",
-            a: "Total annual ROI ranges from 12% to 25% when combining rental yield and capital appreciation. Rental yields run 8% to 14%, with capital appreciation adding 4% to 10% annually in stable markets and 15% to 30% in growing zones. A New Cairo commercial unit purchased in 2021 typically shows 50% total appreciation by 2026 plus rental income — generating combined annual returns near 18%.",
+            a: "Total annual ROI ranges from 12% to 22% when combining rental yield and capital appreciation. Rental yields run 8% to 14%, with capital appreciation adding 4% to 8% annually in stable markets and 10% to 20% in growing zones. A New Cairo commercial unit purchased in 2021 typically shows 50% total appreciation by 2026 plus rental income — generating combined annual returns near 18%.",
           },
           {
             q: "Why are commercial properties considered better than other investment options in Egypt?",

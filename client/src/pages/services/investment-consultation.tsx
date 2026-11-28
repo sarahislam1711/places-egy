@@ -93,7 +93,7 @@ const FAQS = [
   {
     question: "What is a realistic return on investment for commercial property in Egypt?",
     answer:
-      "Realistic ROI ranges from 12% to 20% per year when combining rental yield (8% to 14%) and value growth (4% to 8%) on well-selected commercial units. Drive-thru, medical, and prime mall units perform at the higher end. Standard admin offices in mature areas perform at the lower end. Off-plan units in growing areas can exceed 20% over full development cycles.",
+      "Realistic ROI ranges from 12% to 22% per year when combining rental yield (8% to 14%) and value growth (4% to 8%) on well-selected commercial units. Drive-thru, medical, and prime mall units perform at the higher end. Standard admin offices in mature areas perform at the lower end. Off-plan units in growing areas can do better over a full development cycle.",
   },
   {
     question: "Should my goal be rental income, value growth, or using the space for my own business?",

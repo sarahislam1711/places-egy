@@ -84,12 +84,12 @@ const FAQS = [
   {
     question: "Should I buy a commercial unit specifically to rent it out?",
     answer:
-      "Yes, if your goal is monthly income with long-term appreciation. Commercial units rented to stable tenants generate 8% to 15% annual yields in Egypt, with lease terms of 3 to 9 years and yearly rent increases of 7% to 10%. Categories like medical units, drive-thrus, and pharmacy strip malls perform best for buy-to-rent strategies because of long leases and tenant loyalty.",
+      "Yes, if your goal is monthly income with long-term appreciation. Commercial units rented to stable tenants generate 8% to 14% annual yields in Egypt, with lease terms of 3 to 9 years and yearly rent increases of 7% to 10%. Categories like medical units, drive-thrus, and pharmacy strip malls perform best for buy-to-rent strategies because of long leases and tenant loyalty.",
   },
   {
     question: "What is the average rental yield for commercial property in Egypt?",
     answer:
-      "Commercial rental yields range from 8% to 15% per year, compared to 4% to 6% for residential. Grade A admin offices yield 7% to 10%, prime mall retail yields 8% to 12%, drive-thrus and prime medical units yield 10% to 15%, and well-located strip malls yield 10% to 14%. Net yields after maintenance, vacancy, and management run 1.5 to 2 percentage points below gross yields.",
+      "Commercial rental yields range from 8% to 14% per year, compared to 4% to 6% for residential. Grade A admin offices yield 7% to 10%, prime mall retail yields 8% to 12%, drive-thrus and prime medical units yield 10% to 14%, and well-located strip malls yield 10% to 14%. Net yields after maintenance, vacancy, and management run 1.5 to 2 percentage points below gross yields.",
   },
   {
     question: "Are admin offices a good income-generating investment?",
