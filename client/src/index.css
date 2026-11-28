@@ -106,6 +106,15 @@
     main {
       padding-bottom: max(5rem, calc(4rem + env(safe-area-inset-bottom)));
     }
+    /* When the footer follows, the room for the bar goes inside the (dark)
+       footer instead: otherwise a page ending in a dark band shows a cream
+       stripe between that band and the footer (28 Nov). */
+    main:has(+ footer) {
+      padding-bottom: 0;
+    }
+    main + footer {
+      padding-bottom: max(6rem, calc(5rem + env(safe-area-inset-bottom))) !important;
+    }
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;

@@ -7,6 +7,7 @@ import {
   AudienceTabs,
   Band,
   Checklist,
+  IntroSplit,
   ComparisonTable,
   CtaBand,
   FaqWithAdvisor,
@@ -148,10 +149,7 @@ export default function IncomeGeneratingProperty() {
         />
 
         <Band tone="white">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <SectionHead title="What is income generating property?" />
-              <div className="-mt-4 space-y-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
+          <IntroSplit title="What is income generating property?" cardTitle="What makes a unit a good income investment" items={GOOD_INCOME_UNIT}>
                 <p>
                   Income generating property is a commercial unit bought to earn rental income from tenants. Our
                   service helps you identify and acquire units that generate consistent rental income across Egypt's
@@ -162,17 +160,11 @@ export default function IncomeGeneratingProperty() {
                   quality all determine whether a unit performs or sits vacant, so we evaluate every asset on its
                   income potential, not just its location or price.
                 </p>
-              </div>
-            </div>
-            <div className="lg:pt-3 rounded-2xl bg-background p-7 md:p-9">
-              <p className="text-sm font-semibold text-primary mb-5">What makes a unit a good income investment:</p>
-              <Checklist items={GOOD_INCOME_UNIT} />
-            </div>
-          </div>
+              </IntroSplit>
         </Band>
 
-        <Band tone="cream">
-          <SectionHead title="Who this service is for" />
+        <Band tone="cream" tight>
+          <SectionHead title="Who this service is for"  compact />
           <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting an office for your own company?{" "}
@@ -192,10 +184,12 @@ export default function IncomeGeneratingProperty() {
           <ReasonGrid items={WHY} dark />
         </Band>
 
-        <Band tone="white">
+        <Band tone="white" tight>
           <SectionHead
             title="How we evaluate an income property"
             lead="Four checks, in order, before you buy and while you set up the lease."
+          
+            compact
           />
           <StepList steps={STEPS} />
         </Band>
@@ -204,6 +198,7 @@ export default function IncomeGeneratingProperty() {
           <SectionHead
             title="A unit bought for income vs a unit left to chance"
             lead="The difference shows after handover: a unit chosen and leased for income starts earning sooner, while a unit bought without a plan can wait months for a tenant."
+            compact
           />
           <ComparisonTable usLabel="Bought for income, with PLACES" themLabel="Bought without an income plan" rows={COMPARISON} />
         </Band>

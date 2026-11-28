@@ -9,6 +9,7 @@ import {
   AudienceTabs,
   Band,
   Checklist,
+  IntroSplit,
   CtaBand,
   FaqWithAdvisor,
   ReasonGrid,
@@ -126,28 +127,28 @@ function SideBySide({ left, right, rows }: { left: string; right: string; rows: 
     <>
       <div className="md:hidden space-y-3">
         {rows.map((r) => (
-          <div key={r.label} className="rounded-2xl bg-white p-5 shadow-[0_8px_24px_-16px_rgba(17,17,17,0.25)]">
+          <div key={r.label} className="rounded-2xl bg-white p-5">
             <h3 className="font-bold text-primary mb-3">{r.label}</h3>
             <p className="text-sm mb-2"><span className="font-semibold text-primary">{left}:</span> <span className="text-muted-foreground">{r.a}</span></p>
             <p className="text-sm"><span className="font-semibold text-primary">{right}:</span> <span className="text-muted-foreground">{r.b}</span></p>
           </div>
         ))}
       </div>
-      <div className="hidden md:block overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.3)]">
-        <table className="w-full text-base">
+      <div className="hidden md:block overflow-hidden rounded-2xl bg-white">
+        <table className="w-full text-[15px]">
           <thead>
             <tr>
-              <th className="p-5 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
-              <th className="p-5 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
-              <th className="p-5 text-left font-serif text-lg font-bold text-primary" scope="col">{right}</th>
+              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
+              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{left}</th>
+              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-primary" scope="col">{right}</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((r) => (
               <tr key={r.label} className="border-t border-primary/10">
-                <th className="p-5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
-                <td className="p-5 align-top bg-primary/[0.03] text-primary">{r.a}</td>
-                <td className="p-5 align-top text-muted-foreground">{r.b}</td>
+                <th className="px-5 py-3.5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <td className="px-5 py-3.5 align-top bg-primary/[0.03] text-primary">{r.a}</td>
+                <td className="px-5 py-3.5 align-top text-muted-foreground">{r.b}</td>
               </tr>
             ))}
           </tbody>
@@ -210,10 +211,7 @@ export default function PrimaryProperty() {
         />
 
         <Band tone="white">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <SectionHead title="What is primary property?" />
-              <div className="-mt-4 space-y-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
+          <IntroSplit title="What is primary property?" cardTitle="What PLACES does for you" items={WHAT_WE_DO}>
                 <p>
                   Primary property means buying a unit directly from the developer, usually off-plan or at a new
                   launch, instead of from an existing owner. Primary units are usually sold on developer installment
@@ -224,17 +222,11 @@ export default function PrimaryProperty() {
                   units before they hit the secondary market. But not all launches are equal, so we assess the unit,
                   the developer and the payment plan, not just the brochure.
                 </p>
-              </div>
-            </div>
-            <div className="lg:pt-3 rounded-2xl bg-background p-7 md:p-9">
-              <p className="text-sm font-semibold text-primary mb-5">What PLACES does for you:</p>
-              <Checklist items={WHAT_WE_DO} />
-            </div>
-          </div>
+              </IntroSplit>
         </Band>
 
-        <Band tone="cream">
-          <SectionHead title="Who this service is for" />
+        <Band tone="cream" tight>
+          <SectionHead title="Who this service is for"  compact />
           <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting instead of buying?{" "}
@@ -254,10 +246,12 @@ export default function PrimaryProperty() {
           <ReasonGrid items={WHY} dark />
         </Band>
 
-        <Band tone="white">
+        <Band tone="white" tight>
           <SectionHead
             title="How buying from a developer works"
             lead="Buying a commercial unit runs from defining your goal and budget to handover. We manage every step from reservation to handover."
+          
+            compact
           />
           <StepList steps={STEPS} />
           <p className="mt-10 text-muted-foreground">
@@ -269,10 +263,11 @@ export default function PrimaryProperty() {
           </p>
         </Band>
 
-        <Band tone="cream">
+        <Band tone="cream" tight>
           <SectionHead
             title="Primary vs resale property"
             lead="Primary suits buyers with longer time horizons who want developer payment plans. Resale suits buyers who want the unit now and want to skip handover delays."
+            compact
           />
           <SideBySide left="Primary (from the developer)" right="Resale (from an owner)" rows={COMPARISON} />
           <p className="mt-10 text-muted-foreground">

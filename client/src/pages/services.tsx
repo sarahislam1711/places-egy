@@ -137,10 +137,11 @@ export default function Services() {
           points={["Leasing, buying and resale", "Investment and income advice", "Free tenant representation"]}
         />
 
-        <Band tone="white">
+        <Band tone="white" tight>
           <SectionHead
             title="Our services"
             lead="Five service areas, one team. Start with the one that matches what you're trying to do."
+            compact
           />
           <ServiceCards
             items={SERVICES.map((sv) => ({
@@ -154,11 +155,12 @@ export default function Services() {
           />
         </Band>
 
-        <Band tone="dark">
+        <Band tone="dark" tight>
           <SectionHead
             dark
             title="Which service do I need?"
             lead="Match your situation to the right starting point. If you're unsure, an advisor will point you to it."
+            compact
           />
           <ul className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
             {GUIDANCE.map((g) => (
@@ -176,7 +178,7 @@ export default function Services() {
               </li>
             ))}
           </ul>
-          <p className="mt-10 text-white/75">
+          <p className="mt-8 text-white/75">
             Still deciding whether to rent or buy?{" "}
             <Link href="/guides/buy-vs-rent-office-cairo" className="text-accent font-semibold hover:underline">
               Read our guide to buying vs renting an office in Cairo

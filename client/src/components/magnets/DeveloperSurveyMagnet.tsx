@@ -109,7 +109,16 @@ const COPY = {
 type Props = {
   variant: "popup" | "inline";
   guideSlug?: string; // set by guide pages so admin sees which guide surfaced the magnet
+  /** Popup only. false = never appears on a timer; it opens only when a survey
+   *  card on the page fires "places-open-developer-survey" (guides, 28 Nov:
+   *  the timed popup covered the guide text). */
+  autoShow?: boolean;
 };
+
+/** Ask the survey popup on this page to open with its form (used by survey cards). */
+export function openDeveloperSurvey(detail: { source: string; guide_slug?: string | null }) {
+  window.dispatchEvent(new CustomEvent("places-open-developer-survey", { detail }));
+}
 
 function isSuppressed(): boolean {
   try {
@@ -121,7 +130,7 @@ function isSuppressed(): boolean {
   }
 }
 
-export function DeveloperSurveyMagnet({ variant, guideSlug }: Props) {
+export function DeveloperSurveyMagnet({ variant, guideSlug, autoShow = true }: Props) {
   const isPopup = variant === "popup";
 
   const [mounted, setMounted] = useState(!isPopup); // inline is mounted immediately; popup waits
@@ -157,7 +166,7 @@ export function DeveloperSurveyMagnet({ variant, guideSlug }: Props) {
       return;
     }
     setLang(pageLanguage());
-    if (isSuppressed()) return;
+    if (!autoShow || isSuppressed()) return;
     // Guides get no concierge (see magnet-coord), so nothing to wait for.
     const t = setTimeout(() => {
       setMounted(true);
@@ -167,6 +176,19 @@ export function DeveloperSurveyMagnet({ variant, guideSlug }: Props) {
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Popup: open with the form when a survey card on the page asks for it.
+  useEffect(() => {
+    if (!isPopup) return;
+    const open = () => {
+      setLang(pageLanguage());
+      setMounted(true);
+      setExpanded(true);
+      requestAnimationFrame(() => setVisible(true));
+    };
+    window.addEventListener("places-open-developer-survey", open);
+    return () => window.removeEventListener("places-open-developer-survey", open);
+  }, [isPopup]);
 
   // Inline follows the page language too — but for form validation
   // strings only; no delayed mount logic to run.

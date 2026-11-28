@@ -5,20 +5,21 @@ import { Footer } from "@/components/layout/Footer";
 import { SchemaMarkup } from "@/components/SchemaMarkup";
 import { useDocumentMeta } from "@/lib/use-document-meta";
 import { articleSchema, breadcrumbSchema } from "@/lib/schema";
-import { ArrowRight, ArrowLeft, Clock, ChevronRight, MessageCircle } from "lucide-react";
-import { nextGuide, type Guide } from "@/lib/guides";
+import { ArrowRight, ArrowLeft, Check, Clock, ChevronDown, ChevronRight, FileText } from "lucide-react";
+import { GUIDES, type Guide } from "@/lib/guides";
 import { trackEvent } from "@/lib/analytics";
 import { openCalendly } from "@/lib/calendly";
 import { TenantRepCallout } from "@/components/TenantRepCallout";
-import { DeveloperSurveyMagnet } from "@/components/magnets/DeveloperSurveyMagnet";
+import { DeveloperSurveyMagnet, openDeveloperSurvey } from "@/components/magnets/DeveloperSurveyMagnet";
 
-// Shared layout for every /guides/* page. Handles:
-//   - <title>, meta description, canonical, og:*
-//   - Article + BreadcrumbList JSON-LD schema
-//   - Hero (H1 + read time + published date)
-//   - Auto-generated table of contents (from H2s the page renders)
-//   - "Read next" CTA at the bottom (rotates through the guides list)
-//   - Concierge CTA at the bottom
+// Shared layout for every /guides/* page (redesigned 28 Nov). Handles:
+//   - <title>, meta description, canonical, og:* and Article + Breadcrumb JSON-LD
+//   - Split header: breadcrumb, category + read time, H1, intro and a
+//     "What you'll learn" box on the left; the guide's photo on the right
+//   - Thin reading-progress bar along the top edge of the screen
+//   - Contents built from the H2s the page renders: a sticky panel on desktop
+//     that highlights the section in view, a collapsible menu on phones
+//   - Ending: the tenant-rep call-out, "Keep reading" photo cards, a call link
 //
 // Per-guide files just export their content between the layout tags. See
 // office-rental-prices-cairo-2026.tsx for the canonical example.
@@ -29,17 +30,15 @@ type Props = {
   children: ReactNode;
 };
 
-// Auto-generate table of contents by walking the rendered content once mounted,
-// finding every <h2> that has an id, and building anchor links. Runs after the
-// content mounts so we don't need to hand-maintain a TOC list per guide.
 type TocItem = { id: string; text: string };
+
+// Contents from every <h2 id> in the rendered article (no hand-kept lists).
 function useAutoToc(contentRef: React.RefObject<HTMLDivElement | null>): TocItem[] {
   const [items, setItems] = useState<TocItem[]>([]);
   useEffect(() => {
     if (!contentRef.current) return;
-    const headings = contentRef.current.querySelectorAll<HTMLHeadingElement>("h2[id]");
     const list: TocItem[] = [];
-    headings.forEach((h) => {
+    contentRef.current.querySelectorAll<HTMLHeadingElement>("h2[id]").forEach((h) => {
       list.push({ id: h.id, text: h.textContent?.trim() ?? "" });
     });
     setItems(list);
@@ -47,11 +46,99 @@ function useAutoToc(contentRef: React.RefObject<HTMLDivElement | null>): TocItem
   return items;
 }
 
+// The section currently being read: the last H2 above a line ~30% down the screen.
+function useActiveSection(ids: string[]): string | null {
+  const [active, setActive] = useState<string | null>(null);
+  useEffect(() => {
+    if (!ids.length) return;
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const line = window.innerHeight * 0.3;
+      let current: string | null = null;
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= line) current = id;
+      }
+      setActive(current ?? ids[0]);
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [ids.join("|")]);
+  return active;
+}
+
+// 0–1 progress through the article.
+function useReadingProgress(ref: React.RefObject<HTMLElement | null>): number {
+  const [p, setP] = useState(0);
+  useEffect(() => {
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const el = ref.current;
+      if (!el) return;
+      const r = el.getBoundingClientRect();
+      const total = r.height - window.innerHeight * 0.6;
+      setP(Math.min(1, Math.max(0, (window.innerHeight * 0.4 - r.top) / Math.max(total, 1))));
+    };
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [ref]);
+  return p;
+}
+
+
+// The developer-survey lead magnet as a calm card in the page (28 Nov): the
+// timed popup covered what people were reading. Clicking opens the popup form.
+export function SurveyCard({ guideSlug, className = "" }: { guideSlug?: string; className?: string }) {
+  return (
+    <div className={`rounded-2xl bg-white p-5 ${className}`}>
+      <span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-accent/10 text-accent">
+        <FileText className="h-5 w-5" aria-hidden />
+      </span>
+      <p className="mt-3 font-serif text-lg font-bold leading-snug text-primary">What are Cairo developers actually charging?</p>
+      <p className="mt-1.5 text-sm text-muted-foreground leading-relaxed">Our free 2026 price survey: real numbers from New Cairo, Sheikh Zayed and 6th October.</p>
+      <button
+        type="button"
+        onClick={() => {
+          trackEvent("developer_survey_open", { variant: "card", guide_slug: guideSlug ?? null });
+          openDeveloperSurvey({ source: "card", guide_slug: guideSlug ?? null });
+        }}
+        className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-accent px-4 py-2 text-sm font-semibold text-white hover:bg-accent/90 transition-colors"
+      >
+        Get the free survey <ArrowRight className="h-4 w-4" aria-hidden />
+      </button>
+    </div>
+  );
+}
+
+const fmtDate = (iso: string) => new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" });
+
 export function GuideLayout({ guide, wordCount, children }: Props) {
   const contentRef = useRef<HTMLDivElement | null>(null);
   const toc = useAutoToc(contentRef);
-  const next = nextGuide(guide.slug);
+  const active = useActiveSection(toc.map((t) => t.id));
+  const progress = useReadingProgress(contentRef);
   const url = `https://places-egy.com/guides/${guide.slug}`;
+  // Two other guides to keep reading: the next ones in the list, wrapping round.
+  const i = GUIDES.findIndex((g) => g.slug === guide.slug);
+  const more = [1, 2].map((n) => GUIDES[(i + n) % GUIDES.length]).filter((g) => g.slug !== guide.slug);
 
   useDocumentMeta({
     title: `${guide.title} | PLACES`,
@@ -61,16 +148,33 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
   });
 
   useEffect(() => {
-    trackEvent("guide_view", {
-      guide_slug: guide.slug,
-      guide_title: guide.title,
-      category: guide.category,
-    });
+    trackEvent("guide_view", { guide_slug: guide.slug, guide_title: guide.title, category: guide.category });
   }, [guide.slug, guide.title, guide.category]);
 
-  const published = new Date(guide.publishedAt);
-  const updated = new Date(guide.updatedAt);
   const showUpdated = guide.updatedAt !== guide.publishedAt;
+
+  const tocList = (onPick?: () => void) => (
+    <ul className="space-y-1">
+      {toc.map((item) => {
+        const on = item.id === active;
+        return (
+          <li key={item.id}>
+            <a
+              href={`#${item.id}`}
+              onClick={onPick}
+              aria-current={on ? "location" : undefined}
+              className={`block rounded-lg px-3 py-2 text-sm leading-snug transition-colors ${
+                on ? "bg-primary text-white font-semibold" : "text-primary/75 hover:bg-[#F5F0EA] hover:text-primary"
+              }`}
+            >
+              {item.text}
+            </a>
+          </li>
+        );
+      })}
+    </ul>
+  );
+  const [tocOpen, setTocOpen] = useState(false);
 
   return (
     <div className="min-h-screen flex flex-col bg-background font-sans">
@@ -97,181 +201,182 @@ export function GuideLayout({ guide, wordCount, children }: Props) {
 
       <Navbar />
 
-      <main className="flex-1 pt-24 md:pt-28 pb-20">
-        {/* Breadcrumb — visual + also parsable by AI crawlers as inline text */}
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-          <nav
-            aria-label="Breadcrumb"
-            className="text-xs text-muted-foreground mb-6 flex items-center gap-1.5"
-          >
-            <Link href="/" className="hover:text-accent">Home</Link>
-            <ChevronRight className="w-3 h-3" />
-            <Link href="/guides" className="hover:text-accent">Guides</Link>
-            <ChevronRight className="w-3 h-3" />
-            <span className="text-primary/60 line-clamp-1">{guide.title}</span>
-          </nav>
+      {/* Reading progress: a thin line along the very top of the screen */}
+      <div className="fixed inset-x-0 top-0 z-[60] h-[3px] bg-transparent" aria-hidden>
+        <div className="h-full origin-left bg-accent transition-transform duration-150" style={{ transform: `scaleX(${progress})` }} />
+      </div>
 
-          <div className="mb-3 inline-flex items-center gap-2">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-accent">
-              {guide.category}
-            </span>
-            <span className="text-muted-foreground/50">·</span>
-            <span className="text-xs text-muted-foreground inline-flex items-center gap-1">
-              <Clock className="w-3 h-3" />
-              {guide.readMinutes} min read
-            </span>
-          </div>
+      <main className="flex-1">
+        {/* Header */}
+        <section className="pt-28 md:pt-36 pb-10 md:pb-14">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl grid lg:grid-cols-[1.15fr_1fr] gap-10 lg:gap-14 items-center">
+            <div>
+              <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-sm text-muted-foreground mb-7">
+                <Link href="/" className="hover:text-primary transition-colors">Home</Link>
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+                <Link href="/guides" className="hover:text-primary transition-colors">Guides</Link>
+                <ChevronRight className="w-3.5 h-3.5" aria-hidden />
+                <span className="text-primary font-medium line-clamp-1">{guide.category}</span>
+              </nav>
+              <div className="flex flex-wrap items-center gap-3 text-sm">
+                <span className="rounded-full bg-accent/10 px-3 py-1 font-semibold text-accent">{guide.category}</span>
+                <span className="inline-flex items-center gap-1.5 text-muted-foreground">
+                  <Clock className="h-3.5 w-3.5" aria-hidden /> {guide.readMinutes} min read
+                </span>
+              </div>
+              <h1 className="mt-5 font-serif text-3xl md:text-[2.9rem] font-bold text-primary leading-[1.08] tracking-[-0.025em] text-balance">
+                {guide.title}
+              </h1>
+              <p className="mt-5 text-lg text-muted-foreground leading-relaxed max-w-xl">{guide.description}</p>
+              <p className="mt-4 text-sm text-muted-foreground">
+                By PLACES advisors · {showUpdated ? "Updated" : "Published"}{" "}
+                <time dateTime={showUpdated ? guide.updatedAt : guide.publishedAt}>{fmtDate(showUpdated ? guide.updatedAt : guide.publishedAt)}</time>
+              </p>
+            </div>
 
-          <h1 className="font-serif text-3xl md:text-5xl font-bold text-primary tracking-tight leading-[1.1] mb-3">
-            {guide.title}
-          </h1>
-
-          <p className="text-lg text-muted-foreground max-w-2xl leading-relaxed mb-3">
-            {guide.description}
-          </p>
-
-          <p className="text-xs text-muted-foreground">
-            Published{" "}
-            <time dateTime={guide.publishedAt}>
-              {published.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-            </time>
-            {showUpdated && (
-              <>
-                {" "}· Updated{" "}
-                <time dateTime={guide.updatedAt}>
-                  {updated.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })}
-                </time>
-              </>
-            )}
-            {" "}by PLACES
-          </p>
-        </div>
-
-        <hr className="mt-6 mb-8 border-border/30 max-w-4xl mx-auto" />
-
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl">
-          <div className="lg:grid lg:grid-cols-[1fr_240px] lg:gap-10">
-            {/* Content */}
-            <article
-              ref={contentRef}
-              className="guide-content prose prose-neutral max-w-none prose-headings:font-serif prose-headings:text-primary prose-h2:text-2xl md:prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-p:text-base prose-p:leading-relaxed prose-p:text-primary/85 prose-a:text-accent prose-a:no-underline hover:prose-a:underline prose-strong:text-primary prose-li:text-primary/85 prose-table:text-sm prose-th:bg-primary/5 prose-th:text-primary prose-td:align-top"
-            >
-              {children}
-            </article>
-
-            {/* Sticky TOC on desktop only */}
-            {toc.length > 0 && (
-              <aside className="hidden lg:block">
-                <div className="sticky top-24">
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground mb-3">
-                    In this guide
-                  </p>
-                  <ul className="space-y-2 text-sm border-l border-border/40 pl-4">
-                    {toc.map((item) => (
-                      <li key={item.id}>
-                        <a
-                          href={`#${item.id}`}
-                          className="text-primary/70 hover:text-accent transition-colors line-clamp-2"
-                        >
-                          {item.text}
-                        </a>
+            <div className="relative">
+              {guide.imageUrl && (
+                <div className="aspect-[4/3] overflow-hidden rounded-3xl bg-muted">
+                  <img
+                    src={guide.imageUrl}
+                    alt={guide.imageAlt ?? ""}
+                    width={900}
+                    height={675}
+                    fetchPriority="high"
+                    decoding="async"
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              )}
+              {guide.learn && guide.learn.length > 0 && (
+                <div className="relative -mt-16 mx-4 md:mx-8 rounded-2xl bg-primary p-5 md:p-6 text-white shadow-[0_24px_48px_-20px_rgba(17,17,17,0.5)]">
+                  <p className="font-serif text-lg font-bold text-white">What you'll learn</p>
+                  <ul className="mt-3 space-y-2">
+                    {guide.learn.map((l) => (
+                      <li key={l} className="flex items-start gap-2.5 text-sm text-white/85">
+                        <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent/25 text-accent">
+                          <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
+                        </span>
+                        {l}
                       </li>
                     ))}
                   </ul>
                 </div>
+              )}
+            </div>
+          </div>
+        </section>
+
+        {/* Body: contents on the left (desktop), the article on the right */}
+        <section className="pb-12">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl lg:grid lg:grid-cols-[250px_minmax(0,1fr)] lg:gap-14">
+            {toc.length > 0 && (
+              <aside className="hidden lg:block">
+                <div className="sticky top-28 space-y-4">
+                  <div className="rounded-2xl bg-white p-4">
+                    <p className="px-3 pb-2 font-serif text-base font-bold text-primary">In this guide</p>
+                    {tocList()}
+                  </div>
+                  <SurveyCard guideSlug={guide.slug} />
+                </div>
               </aside>
             )}
-          </div>
-        </div>
 
-        {/* Tenant representation — every guide ends with the free advisor offer */}
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl mt-12">
-          <TenantRepCallout variant="advice" />
-        </div>
+            <div className="min-w-0">
+              {/* Phones / tablets: contents as a collapsible menu */}
+              {toc.length > 0 && (
+                <div className="lg:hidden mb-8 rounded-2xl bg-white">
+                  <button
+                    type="button"
+                    onClick={() => setTocOpen((o) => !o)}
+                    aria-expanded={tocOpen}
+                    className="flex w-full items-center justify-between gap-3 px-5 py-4 text-left font-serif font-bold text-primary"
+                  >
+                    In this guide <span className="font-sans text-sm font-normal text-muted-foreground">{toc.length} sections</span>
+                    <ChevronDown className={`ml-auto h-5 w-5 shrink-0 transition-transform ${tocOpen ? "rotate-180" : ""}`} aria-hidden />
+                  </button>
+                  {tocOpen && <div className="px-2 pb-3">{tocList(() => setTocOpen(false))}</div>}
+                </div>
+              )}
 
-        {/* End-of-article section — ONE container that combines the Talk-
-            to-PLACES CTA with the Read-next pointer. Merged into a single
-            dark card with a soft divider so we don't stack two competing
-            boxes. Right side of the divider is the CTA, left side is the
-            next-guide pointer, which visually chains readers into the next
-            piece of content without a second physical box. */}
-        {/* Read next — light editorial pointer, no dark box. */}
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl mt-16">
-          <Link
-            href={`/guides/${next.slug}`}
-            onClick={() =>
-              trackEvent("guide_next_click", {
-                from_slug: guide.slug,
-                to_slug: next.slug,
-              })
-            }
-            className="group block border-t border-b border-primary/10 py-6 hover:border-accent/40 transition-colors"
-          >
-            <div className="flex items-center justify-between gap-4">
-              <div className="min-w-0">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-accent mb-1">
-                  Read next
-                </p>
-                <p className="font-serif text-lg md:text-xl font-bold text-primary leading-snug group-hover:text-accent transition-colors">
-                  {next.title}
-                </p>
-              </div>
-              <ArrowRight className="w-5 h-5 text-primary/40 group-hover:text-accent group-hover:translate-x-1 transition-all shrink-0" />
+              <article
+                ref={contentRef}
+                className="guide-content max-w-[720px] prose prose-neutral md:prose-lg prose-headings:font-serif prose-headings:text-primary prose-headings:scroll-mt-28 prose-h2:text-2xl md:prose-h2:text-[2rem] prose-h2:leading-tight prose-h2:mt-14 prose-h2:mb-4 prose-h3:text-xl prose-h3:mt-8 prose-h3:mb-3 prose-p:leading-relaxed prose-p:text-primary/85 prose-a:text-accent prose-a:font-medium prose-a:no-underline hover:prose-a:underline prose-strong:text-primary prose-li:text-primary/85 prose-table:text-sm prose-th:bg-primary/5 prose-th:text-primary prose-td:align-top prose-img:rounded-2xl"
+              >
+                {children}
+              </article>
+              <SurveyCard guideSlug={guide.slug} className="lg:hidden mt-10 max-w-[720px]" />
             </div>
-          </Link>
-        </div>
+          </div>
+        </section>
 
-        {/* Single, calmer CTA — one line + one button. */}
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl mt-12">
-          <div className="text-center py-10">
-            <h3 className="font-serif text-2xl md:text-3xl font-bold text-primary leading-tight mb-6">
-              Ready to find your office?
-            </h3>
-            <Link
-              href="/contact"
-              onClick={() =>
-                trackEvent("guide_cta_click", {
-                  guide_slug: guide.slug,
-                  cta: "contact",
-                })
-              }
-              className="inline-flex items-center gap-2 bg-accent hover:bg-accent/90 text-white text-sm font-semibold px-6 py-3 rounded-full transition-all shadow-md shadow-accent/30 hover:-translate-y-0.5"
-            >
-              <MessageCircle className="w-4 h-4" />
-              Talk to an advisor
-              <ArrowRight className="w-4 h-4" />
-            </Link>
-            {/* Secondary self-serve path — dotted underline link so it
-                reads as an "or" alternative, not a competing button. */}
-            <div className="mt-4">
+        {/* Free advisor offer */}
+        <section className="pb-14">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl">
+            <TenantRepCallout variant="advice" />
+          </div>
+        </section>
+
+        {/* Keep reading */}
+        <section className="pb-16 md:pb-24">
+          <div className="container mx-auto px-6 md:px-10 max-w-6xl">
+            <div className="flex items-end justify-between gap-4 mb-6">
+              <h2 className="text-2xl md:text-3xl font-serif font-bold text-primary">Keep reading</h2>
+              <Link href="/guides" className="hidden sm:inline-flex items-center gap-1.5 text-sm font-semibold text-accent hover:underline">
+                All guides <ArrowRight className="h-4 w-4" aria-hidden />
+              </Link>
+            </div>
+            <ul className="grid gap-5 md:grid-cols-2">
+              {more.map((g) => (
+                <li key={g.slug}>
+                  <Link
+                    href={`/guides/${g.slug}`}
+                    onClick={() => trackEvent("guide_next_click", { from_slug: guide.slug, to_slug: g.slug })}
+                    className="group flex h-full overflow-hidden rounded-2xl bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  >
+                    {g.imageUrl && (
+                      <div className="w-[38%] shrink-0 overflow-hidden bg-muted">
+                        <img
+                          src={g.imageUrl}
+                          alt=""
+                          loading="lazy"
+                          decoding="async"
+                          className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.05]"
+                        />
+                      </div>
+                    )}
+                    <div className="flex flex-1 flex-col p-5">
+                      <span className="text-xs font-semibold text-accent">{g.category}</span>
+                      <span className="mt-1.5 font-serif text-lg font-bold leading-snug text-primary group-hover:text-accent transition-colors">{g.title}</span>
+                      <span className="mt-auto pt-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <Clock className="h-3.5 w-3.5" aria-hidden /> {g.readMinutes} min read
+                        <ArrowRight className="ml-auto h-4 w-4 text-accent transition-transform group-hover:translate-x-1" aria-hidden />
+                      </span>
+                    </div>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <div className="mt-8 flex flex-wrap items-center justify-between gap-4 text-sm">
+              <Link href="/guides" className="inline-flex items-center gap-1.5 text-muted-foreground hover:text-accent transition-colors">
+                <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> All PLACES guides
+              </Link>
               <button
                 type="button"
                 onClick={() => openCalendly("guide_footer", `guide_${guide.slug}`)}
-                className="text-xs text-muted-foreground hover:text-accent transition-colors underline decoration-dotted underline-offset-4"
+                className="text-muted-foreground hover:text-accent transition-colors underline decoration-dotted underline-offset-4"
               >
-                Or book a 30-min call directly
+                Prefer to talk? Book a 30-minute call
               </button>
             </div>
           </div>
-        </div>
-
-        {/* Back to all guides */}
-        <div className="container mx-auto px-4 md:px-8 max-w-4xl mt-8">
-          <Link
-            href="/guides"
-            className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-accent transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            All PLACES guides
-          </Link>
-        </div>
+        </section>
       </main>
 
       <Footer />
 
-      {/* Developer survey popup — bottom-left, 15s delay, session-dismiss.
-          Guide-specific magnet, appears only on /guides/* pages. */}
-      <DeveloperSurveyMagnet variant="popup" guideSlug={guide.slug} />
+      {/* Developer survey form: opens only from the survey card (no timed popup). */}
+      <DeveloperSurveyMagnet variant="popup" guideSlug={guide.slug} autoShow={false} />
     </div>
   );
 }

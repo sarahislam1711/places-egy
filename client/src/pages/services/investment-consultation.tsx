@@ -7,6 +7,7 @@ import {
   AudienceTabs,
   Band,
   Checklist,
+  IntroSplit,
   ComparisonTable,
   CtaBand,
   FaqWithAdvisor,
@@ -147,10 +148,7 @@ export default function InvestmentConsultation() {
         />
 
         <Band tone="white">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <SectionHead title="What is real estate investment consultation?" />
-              <div className="-mt-4 space-y-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
+          <IntroSplit title="What is real estate investment consultation?" cardTitle="What we analyze before you invest" items={WHAT_WE_LOOK_AT}>
                 <p>
                   Investment consultation is objective analysis of market opportunities, property types, locations and
                   developers, based on your own goals, budget and risk tolerance. It comes before you buy, so the
@@ -161,17 +159,11 @@ export default function InvestmentConsultation() {
                   wrong location can take years to recover from, which is why we start with your objectives, risk
                   appetite and target return before recommending anything.
                 </p>
-              </div>
-            </div>
-            <div className="lg:pt-3 rounded-2xl bg-background p-7 md:p-9">
-              <p className="text-sm font-semibold text-primary mb-5">What we analyze before you invest:</p>
-              <Checklist items={WHAT_WE_LOOK_AT} />
-            </div>
-          </div>
+              </IntroSplit>
         </Band>
 
-        <Band tone="cream">
-          <SectionHead title="Who this service is for" />
+        <Band tone="cream" tight>
+          <SectionHead title="Who this service is for"  compact />
           <AudienceTabs items={WHO} label="Who this service is for" />
           <p className="mt-10 text-muted-foreground">
             Renting an office rather than investing?{" "}
@@ -191,10 +183,12 @@ export default function InvestmentConsultation() {
           <ReasonGrid items={WHY} dark />
         </Band>
 
-        <Band tone="white">
+        <Band tone="white" tight>
           <SectionHead
             title="How the consultation works"
             lead="Four stages, starting with your objectives and continuing after the transaction."
+          
+            compact
           />
           <StepList steps={STEPS} />
         </Band>
@@ -203,6 +197,7 @@ export default function InvestmentConsultation() {
           <SectionHead
             title="Independent advisor vs developer sales agent"
             lead="A developer's sales agent sells only that developer's projects. An independent advisor compares options across developers and projects."
+            compact
           />
           <ComparisonTable usLabel="Independent advisor (PLACES)" themLabel="Developer's sales agent" rows={COMPARISON} />
           <p className="mt-10 text-muted-foreground">

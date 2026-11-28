@@ -22,22 +22,25 @@ const TONE: Record<Tone, string> = {
 };
 
 /** A page band with consistent vertical rhythm. */
-export function Band({ tone = "cream", children, className = "" }: { tone?: Tone; children: ReactNode; className?: string }) {
+export function Band({ tone = "cream", children, className = "", tight = false }: { tone?: Tone; children: ReactNode; className?: string; tight?: boolean }) {
+  // tight: less space above and below (sections that should fit one screen).
   return (
-    <section className={`${TONE[tone]} py-16 md:py-24 ${className}`}>
+    <section className={`${TONE[tone]} ${tight ? "py-12 md:py-16" : "py-16 md:py-24"} ${className}`}>
       <div className="container mx-auto px-6 md:px-10 max-w-6xl">{children}</div>
     </section>
   );
 }
 
 /** Section heading + optional lead, left-aligned. */
-export function SectionHead({ title, lead, dark = false }: { title: string; lead?: ReactNode; dark?: boolean }) {
+export function SectionHead({ title, lead, dark = false, compact = false }: { title: string; lead?: ReactNode; dark?: boolean; compact?: boolean }) {
+  // compact: wider (heading stays on one line) with less space below — used
+  // before the comparison table so the whole section fits on one screen.
   return (
-    <div className="max-w-3xl mb-10 md:mb-14">
+    <div className={compact ? "max-w-5xl mb-8" : "max-w-3xl mb-10 md:mb-14"}>
       <h2 className={`text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance ${dark ? "text-white" : "text-primary"}`}>
         {title}
       </h2>
-      {lead && <p className={`mt-5 text-lg leading-relaxed ${dark ? "text-white/75" : "text-muted-foreground"}`}>{lead}</p>}
+      {lead && <p className={`${compact ? "mt-3" : "mt-5"} text-lg leading-relaxed ${dark ? "text-white/75" : "text-muted-foreground"}`}>{lead}</p>}
     </div>
   );
 }
@@ -154,6 +157,28 @@ export function DefinitionList({ items, dark = false }: { items: { title: string
   );
 }
 
+/**
+ * "What is …?" intro (28 Nov): heading across the top, then the explanation
+ * and a card with the key points side by side, starting and ending on the
+ * same lines (the card stretches to the text's height, content centred).
+ */
+export function IntroSplit({ title, cardTitle, items, children }: { title: string; cardTitle: string; items: string[]; children: ReactNode }) {
+  return (
+    <>
+      <h2 className="max-w-4xl text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-primary">{title}</h2>
+      <div className="mt-8 md:mt-10 grid lg:grid-cols-2 gap-8 lg:gap-14 items-stretch">
+        <div className="space-y-5 text-lg text-muted-foreground leading-relaxed lg:self-center">{children}</div>
+        <div className="flex flex-col justify-center rounded-2xl bg-background p-7 md:p-9">
+          <h3 className="font-serif text-xl md:text-2xl font-bold leading-snug text-primary">{cardTitle}</h3>
+          <div className="mt-5">
+            <Checklist items={items} />
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}
+
 /** Checklist with accent ticks. */
 export function Checklist({ items, dark = false, columns = 1 }: { items: string[]; dark?: boolean; columns?: 1 | 2 }) {
   return (
@@ -172,15 +197,17 @@ export function Checklist({ items, dark = false, columns = 1 }: { items: string[
 
 /** Numbered steps: the order matters, so the numbers carry information. */
 export function StepList({ steps }: { steps: { title: string; desc: string }[] }) {
+  // Four steps: one row of 4 on desktop, 2 x 2 on tablets (never 3 + 1 alone).
+  const cols = steps.length % 4 === 0 ? "sm:grid-cols-2 lg:grid-cols-4" : "md:grid-cols-2 lg:grid-cols-3";
   return (
-    <ol className="grid md:grid-cols-2 lg:grid-cols-3 gap-x-10">
+    <ol className={`grid ${cols} gap-x-8`}>
       {steps.map((s, i) => (
-        <li key={s.title} className="relative py-7 border-t border-primary/10">
-          <span className="block text-5xl font-serif font-bold text-accent/90 leading-none tabular-nums" aria-hidden>
+        <li key={s.title} className="relative py-6 border-t border-primary/10">
+          <span className="block text-4xl font-serif font-bold text-accent/90 leading-none tabular-nums" aria-hidden>
             {i + 1}
           </span>
-          <h3 className="mt-4 text-lg font-serif font-bold text-primary">{s.title}</h3>
-          <p className="mt-2 text-muted-foreground leading-relaxed">{s.desc}</p>
+          <h3 className="mt-3 text-lg font-serif font-bold text-primary">{s.title}</h3>
+          <p className="mt-1.5 text-[15px] text-muted-foreground leading-relaxed">{s.desc}</p>
         </li>
       ))}
     </ol>
@@ -199,42 +226,56 @@ export function ComparisonTable({
 }) {
   return (
     <>
+      {/* The PLACES side is the one to pick (28 Nov): red header with a
+          "Best for you" tag, a warm red tint and outline down the column,
+          filled ticks; the other side stays muted. */}
       <div className="md:hidden space-y-3">
         {rows.map((r) => (
-          <div key={r.label} className="rounded-2xl bg-white p-5 shadow-[0_8px_24px_-16px_rgba(17,17,17,0.25)]">
-            <h3 className="font-bold text-primary mb-3">{r.label}</h3>
-            <p className="flex items-start gap-2 text-sm mb-2">
-              <Check className="w-4 h-4 text-accent mt-0.5 shrink-0" aria-hidden />
+          <div key={r.label} className="overflow-hidden rounded-2xl bg-white">
+            <h3 className="px-5 pt-4 pb-3 font-bold text-primary">{r.label}</h3>
+            <p className="flex items-start gap-2.5 border-l-4 border-accent bg-accent/[0.07] px-4 py-3 text-sm text-primary">
+              <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
+              </span>
               <span><span className="font-semibold">{usLabel}:</span> {r.us}</span>
             </p>
-            <p className="flex items-start gap-2 text-sm text-muted-foreground">
-              <X className="w-4 h-4 mt-0.5 shrink-0" aria-hidden />
+            <p className="flex items-start gap-2.5 px-4 py-3 text-sm text-muted-foreground">
+              <X className="mt-0.5 h-4 w-4 shrink-0 text-primary/30" aria-hidden />
               <span><span className="font-semibold">{themLabel}:</span> {r.them}</span>
             </p>
           </div>
         ))}
       </div>
-      <div className="hidden md:block overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.3)]">
-        <table className="w-full text-base">
+      <div className="hidden md:block overflow-hidden rounded-2xl bg-white">
+        <table className="w-full text-[15px]">
           <thead>
             <tr>
-              <th className="p-5 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
-              <th className="p-5 text-left font-serif text-lg font-bold text-white bg-primary" scope="col">{usLabel}</th>
-              <th className="p-5 text-left font-serif text-lg font-bold text-primary/70" scope="col">{themLabel}</th>
+              <th className="px-5 py-4 w-[24%]" scope="col"><span className="sr-only">Compared on</span></th>
+              <th className="px-5 py-4 text-left bg-accent text-white" scope="col">
+                <span className="flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span className="font-serif text-lg font-bold">{usLabel}</span>
+                  <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-semibold">Best for you</span>
+                </span>
+              </th>
+              <th className="px-5 py-4 text-left font-serif text-lg font-bold text-primary/55" scope="col">{themLabel}</th>
             </tr>
           </thead>
           <tbody>
-            {rows.map((r) => (
+            {rows.map((r, i) => (
               <tr key={r.label} className="border-t border-primary/10">
-                <th className="p-5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
-                <td className="p-5 align-top bg-primary/[0.03]">
-                  <span className="flex items-start gap-2 text-primary">
-                    <Check className="w-4 h-4 text-accent mt-1 shrink-0" aria-hidden />{r.us}
+                <th className="px-5 py-3.5 text-left font-semibold text-primary align-top" scope="row">{r.label}</th>
+                <td className={`px-5 py-3.5 align-top bg-accent/[0.07] border-x-2 border-accent/40 ${i === rows.length - 1 ? "border-b-2" : ""}`}>
+                  <span className="flex items-start gap-2.5 font-medium text-primary">
+                    <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-accent text-white">
+                      <Check className="h-3 w-3" strokeWidth={3} aria-hidden />
+                    </span>
+                    {r.us}
                   </span>
                 </td>
-                <td className="p-5 align-top text-muted-foreground">
-                  <span className="flex items-start gap-2">
-                    <X className="w-4 h-4 mt-1 shrink-0 text-primary/30" aria-hidden />{r.them}
+                <td className="px-5 py-3.5 align-top text-muted-foreground">
+                  <span className="flex items-start gap-2.5">
+                    <X className="mt-0.5 h-4 w-4 shrink-0 text-primary/30" aria-hidden />
+                    {r.them}
                   </span>
                 </td>
               </tr>
@@ -318,7 +359,7 @@ function PrimaryAction({ primary, children }: { primary: { href: string; form?: 
 export function CtaBand({ title, text, primary }: { title: string; text: string; primary: { label: string; href: string; form?: RequirementsFormConfig } }) {
   return (
     <section className="bg-primary text-white">
-      <div className="container mx-auto px-6 md:px-10 max-w-6xl py-16 md:py-20 flex flex-col md:flex-row md:items-end justify-between gap-8">
+      <div className="container mx-auto px-6 md:px-10 max-w-6xl py-16 md:py-20 flex flex-col lg:flex-row lg:items-end justify-between gap-8">
         <div className="max-w-2xl">
           <h2 className="text-3xl md:text-[2.75rem] font-serif font-bold leading-[1.1] tracking-[-0.02em] text-balance text-white">{title}</h2>
           <p className="mt-4 text-lg text-white/75">{text}</p>
@@ -393,8 +434,10 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
   };
 
   return (
-    <div className="grid lg:grid-cols-[0.85fr_1.15fr] gap-6 lg:gap-12 items-start">
-      <div role="tablist" aria-label={label} aria-orientation="vertical" className="hidden lg:flex lg:flex-col gap-2">
+    // Desktop (28 Nov): the list and a horizontal card (photo left, text right)
+    // side by side at the same height, so the whole section fits one screen.
+    <div className="grid lg:grid-cols-[0.8fr_1.2fr] gap-6 lg:gap-10 lg:items-stretch">
+      <div role="tablist" aria-label={label} aria-orientation="vertical" className="hidden lg:flex lg:flex-col lg:justify-center gap-2">
         {items.map((it, i) => {
           const on = i === active;
           return (
@@ -408,11 +451,11 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               tabIndex={on ? 0 : -1}
               onClick={() => setActive(i)}
               onKeyDown={(e) => onKey(e, i)}
-              className={`group flex items-center justify-between gap-4 text-left rounded-xl px-5 py-5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`group flex items-center justify-between gap-4 text-left rounded-xl px-5 py-4 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent ${
                 on ? "bg-primary text-white" : "bg-transparent text-primary hover:bg-white"
               }`}
             >
-              <span className="text-xl font-serif font-bold">{it.title}</span>
+              <span className="text-lg font-serif font-bold">{it.title}</span>
               <ArrowRight className={`w-5 h-5 shrink-0 transition-transform ${on ? "text-accent translate-x-1" : "text-primary/30 group-hover:translate-x-1"}`} aria-hidden />
             </button>
           );
@@ -422,7 +465,7 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
         <div
           ref={trackRef}
           onScroll={onTrackScroll}
-          className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:-mx-10 md:px-10 scroll-px-6 md:scroll-px-10 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block lg:overflow-visible lg:mx-0 lg:px-0 lg:pb-0"
+          className="flex gap-4 overflow-x-auto snap-x snap-mandatory -mx-6 px-6 md:-mx-10 md:px-10 scroll-px-6 md:scroll-px-10 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden lg:block lg:h-full lg:overflow-visible lg:mx-0 lg:px-0 lg:pb-0"
         >
           {items.map((it, i) => (
             <div
@@ -432,15 +475,15 @@ export function AudienceTabs({ items, label }: { items: Audience[]; label: strin
               aria-labelledby={`${base}-tab-${i}`}
               aria-roledescription="slide"
               aria-label={`${i + 1} of ${items.length}: ${it.title}`}
-              className={`flex w-[84%] sm:w-[60%] shrink-0 snap-start lg:w-auto ${i === active ? "" : "lg:hidden"}`}
+              className={`flex w-[84%] sm:w-[60%] shrink-0 snap-start lg:w-auto lg:h-full ${i === active ? "" : "lg:hidden"}`}
             >
-              <div className="flex w-full flex-col overflow-hidden rounded-2xl bg-white shadow-[0_16px_40px_-24px_rgba(17,17,17,0.35)]">
-                <div className="aspect-[16/10] lg:aspect-[16/9] bg-muted overflow-hidden">
-                  <img src={it.image} alt={it.imageAlt} width={960} height={540} loading="lazy" decoding="async" className="w-full h-full object-cover" />
+              <div className="flex w-full flex-col overflow-hidden rounded-2xl bg-white lg:grid lg:grid-cols-[0.95fr_1.05fr] lg:min-h-[17rem]">
+                <div className="relative aspect-[16/10] lg:aspect-auto bg-muted overflow-hidden">
+                  <img src={it.image} alt={it.imageAlt} width={960} height={540} loading="lazy" decoding="async" className="w-full h-full object-cover lg:absolute lg:inset-0" />
                 </div>
-                <div className="flex-1 p-5 md:p-8">
+                <div className="flex-1 p-5 md:p-7 lg:flex lg:flex-col lg:justify-center">
                   <h3 className="text-xl lg:text-2xl font-serif font-bold text-primary leading-snug">{it.title}</h3>
-                  <p className="mt-2 lg:mt-3 text-base lg:text-lg text-primary/80 leading-relaxed">{it.need}</p>
+                  <p className="mt-2 text-base text-primary/80 leading-relaxed">{it.need}</p>
                   <p className="mt-3 lg:mt-4 flex items-start gap-3 text-sm lg:text-base text-primary font-medium leading-relaxed">
                     <span className="mt-0.5 inline-flex w-5 h-5 lg:w-6 lg:h-6 shrink-0 items-center justify-center rounded-full bg-accent text-white">
                       <Check className="w-3 h-3 lg:w-3.5 lg:h-3.5" strokeWidth={3} aria-hidden />
@@ -514,7 +557,7 @@ export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
             i === 0 ? "sm:col-span-2 lg:col-span-2" : ""
           }`}
         >
-          <div className={`relative overflow-hidden bg-muted ${i === 0 ? "aspect-[16/7]" : "aspect-[16/10]"}`}>
+          <div className={`relative overflow-hidden bg-muted ${i === 0 ? "aspect-[16/6.5]" : "aspect-[16/9]"}`}>
             <img
               src={s.image}
               alt={s.imageAlt}
@@ -527,16 +570,16 @@ export function ServiceCards({ items }: { items: ServiceCardItem[] }) {
             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 via-primary/15 to-transparent" aria-hidden />
             <h3 className="absolute left-5 right-5 bottom-4 text-2xl md:text-[1.7rem] font-serif font-bold text-white leading-tight">{s.name}</h3>
           </div>
-          <div className="flex flex-1 flex-col p-5 md:p-6">
-            <p className="text-primary/80 leading-relaxed">{s.desc}</p>
-            <ul className="mt-4 flex flex-wrap gap-2" aria-label={`${s.name} is best for`}>
+          <div className="flex flex-1 flex-col p-5">
+            <p className="text-[15px] text-primary/80 leading-relaxed">{s.desc}</p>
+            <ul className="mt-3 flex flex-wrap gap-2" aria-label={`${s.name} is best for`}>
               {s.tags.map((t) => (
                 <li key={t} className="rounded-full bg-background px-3 py-1 text-xs font-semibold text-primary">
                   {t}
                 </li>
               ))}
             </ul>
-            <span className="mt-auto pt-5 inline-flex items-center text-accent font-semibold">
+            <span className="mt-auto pt-4 inline-flex items-center text-accent font-semibold">
               Learn more <ArrowRight className="ml-2 w-4 h-4 transition-transform group-hover:translate-x-1" aria-hidden />
             </span>
           </div>
@@ -570,7 +613,7 @@ export function ClientLogoStrip({ title = "Companies we've placed" }: { title?: 
       <h2 className="text-xl md:text-2xl font-serif font-bold text-primary mb-7">{title}</h2>
       <ul className="grid grid-cols-3 lg:grid-cols-6 gap-2 md:gap-3">
         {CLIENT_LOGOS.map((c) => (
-          <li key={c.name} className="flex h-16 md:h-24 items-center justify-center rounded-xl bg-white px-1.5 md:px-3">
+          <li key={c.name} className="flex h-16 md:h-24 items-center justify-center px-1.5 md:px-3">
             <img
               src={c.src}
               alt={c.name}
@@ -602,8 +645,38 @@ export interface AreaTile {
   imageAlt: string;
 }
 
-/** Areas as photo tiles: the name on the photo, one line underneath. */
-export function AreaTiles({ items, columns = 3 }: { items: AreaTile[]; columns?: 3 | 4 }) {
+/** Areas as photo tiles: the name on the photo, one line underneath.
+ *  slim: short cards with the photo faded behind the text (same look as the
+ *  /rent area cards), so a whole set fits on one screen. */
+export function AreaTiles({ items, columns = 3, slim = false }: { items: AreaTile[]; columns?: 3 | 4; slim?: boolean }) {
+  if (slim) {
+    return (
+      <ul className={`grid auto-rows-fr grid-cols-1 sm:grid-cols-2 ${columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-3 md:gap-4`}>
+        {items.map((a) => (
+          <li key={a.href} className="flex">
+            <Link
+              href={a.href}
+              className="group relative flex w-full flex-col justify-between gap-3 overflow-hidden rounded-2xl bg-[#F5F0EA] p-4 md:p-5 min-h-[7rem] md:min-h-[8.5rem] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+            >
+              <img
+                src={a.image}
+                alt=""
+                aria-hidden
+                loading="lazy"
+                decoding="async"
+                className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-[0.28] transition-[opacity,transform] duration-500 ease-out group-hover:scale-[1.04] group-hover:opacity-[0.38]"
+              />
+              <span className="relative flex items-start justify-between gap-2">
+                <span className="text-lg md:text-xl font-serif font-bold leading-tight text-primary">{a.name}</span>
+                <ArrowRight className="mt-1 h-4 w-4 shrink-0 text-accent transition-transform group-hover:translate-x-1" aria-hidden />
+              </span>
+              <span className="relative text-sm text-primary/75 leading-snug">{a.line}</span>
+            </Link>
+          </li>
+        ))}
+      </ul>
+    );
+  }
   return (
     <ul className={`grid grid-cols-2 ${columns === 4 ? "lg:grid-cols-4" : "lg:grid-cols-3"} gap-3 md:gap-5`}>
       {items.map((a) => (

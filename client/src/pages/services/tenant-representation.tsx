@@ -7,6 +7,7 @@ import { areaPhoto } from "@/lib/area-visuals";
 import {
   Band,
   Checklist,
+  IntroSplit,
   ComparisonTable,
   CtaBand,
   FaqWithAdvisor,
@@ -195,10 +196,7 @@ export default function TenantRepresentation() {
         />
 
         <Band tone="white">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20 items-start">
-            <div>
-              <SectionHead title="What is tenant representation?" />
-              <div className="-mt-4 space-y-5 text-lg text-muted-foreground leading-relaxed max-w-xl">
+          <IntroSplit title="What is tenant representation?" cardTitle="With PLACES on your side" items={BENEFITS}>
                 <p>
                   Tenant representation means your real estate advisor works only for the company that is renting. A
                   tenant representative (also called a tenant rep broker or tenant advisor) defines what you need,
@@ -208,22 +206,16 @@ export default function TenantRepresentation() {
                   The landlord's agent is paid to get the best deal for the landlord. Your tenant rep is there to get
                   the best deal for you.
                 </p>
-              </div>
-            </div>
-            <div className="lg:pt-3 rounded-2xl bg-background p-7 md:p-9">
-              <p className="text-sm font-semibold text-primary mb-5">With PLACES on your side:</p>
-              <Checklist items={BENEFITS} />
-            </div>
-          </div>
+              </IntroSplit>
         </Band>
 
-        <Band tone="cream">
-          <SectionHead title="Who we represent" />
+        <Band tone="cream" tight>
+          <SectionHead title="Who we represent"  compact />
           <AudienceTabs items={WHO} label="Who we represent" />
         </Band>
 
-        <Band tone="dark">
-          <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-start">
+        <Band tone="dark" tight>
+          <div className="grid lg:grid-cols-[1fr_1.3fr] gap-12 lg:gap-16 items-center">
             <SectionHead
               dark
               title="Our tenant representation services"
@@ -231,7 +223,7 @@ export default function TenantRepresentation() {
             />
             <Checklist items={SERVICES} dark columns={2} />
           </div>
-          <div className="mt-14 pt-12 border-t border-white/15">
+          <div className="mt-10 pt-10 border-t border-white/15">
             <div className="max-w-2xl">
               <h2 className="text-2xl md:text-3xl font-serif font-bold leading-tight text-white">Why it's free for tenants</h2>
               <p className="mt-4 text-lg text-white/75 leading-relaxed">
@@ -264,10 +256,12 @@ export default function TenantRepresentation() {
           </div>
         </Band>
 
-        <Band tone="white">
+        <Band tone="white" tight>
           <SectionHead
             title="How the process works"
             lead="Most searches take 4 to 8 weeks from the first brief to a signed lease. A core and shell office then needs 8 to 14 weeks of fit-out, which we try to cover with a rent-free period."
+          
+            compact
           />
           <StepList steps={STEPS} />
           <p className="mt-10 text-muted-foreground">
@@ -280,7 +274,7 @@ export default function TenantRepresentation() {
         </Band>
 
         <Band tone="cream">
-          <SectionHead title="Your own tenant rep vs the landlord's broker" lead="Both may show you offices. Only one is working for you." />
+          <SectionHead title="Your own tenant rep vs the landlord's broker" lead="Both may show you offices. Only one is working for you." compact />
           <ComparisonTable usLabel="Your tenant rep (PLACES)" themLabel="The landlord's broker" rows={COMPARISON} />
         </Band>
 
@@ -289,7 +283,7 @@ export default function TenantRepresentation() {
             title="Areas we cover"
             lead="We search every major office district in Cairo, so you can compare areas before you compare buildings."
           />
-          <AreaTiles items={AREAS} />
+          <AreaTiles items={AREAS} slim />
           <div className="mt-14">
             <ClientLogoStrip />
           </div>

@@ -21,7 +21,10 @@ export type Guide = {
   readMinutes: number; // shown on the card + at the top of each guide
   publishedAt: string; // ISO date — used for JSON-LD datePublished
   updatedAt: string; // ISO date — used for JSON-LD dateModified + sitemap lastmod
-  imageUrl?: string; // og:image + hub card thumbnail
+  imageUrl?: string; // og:image + hub card thumbnail + guide hero photo
+  imageAlt?: string;
+  /** Three short "you'll learn" points shown in the guide's header. */
+  learn?: string[];
 };
 
 // Ordered by priority for the hub display (highest-search-volume first).
@@ -39,7 +42,9 @@ export const GUIDES: Guide[] = [
     readMinutes: 9,
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
-    imageUrl: "/images/cairo-festival-city.webp",
+    imageUrl: "/images/Mivida-Business-Park.jpg",
+    imageAlt: "Office buildings at Mivida Business Park, New Cairo",
+    learn: ["Rent per m\u00b2 in all six business districts", "How Cairo office pricing actually works", "What to do before you start viewing"],
   },
   {
     slug: "how-to-rent-office-cairo",
@@ -52,7 +57,9 @@ export const GUIDES: Guide[] = [
     readMinutes: 12,
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
-    imageUrl: "/images/general-office.jpg",
+    imageUrl: "/images/leasing.jpg",
+    imageAlt: "An office lease agreement ready to sign",
+    learn: ["The 7 steps from brief to signed lease", "The 4 lease terms worth negotiating", "The mistakes that cost tenants most"],
   },
   {
     slug: "buy-vs-rent-office-cairo",
@@ -66,6 +73,8 @@ export const GUIDES: Guide[] = [
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
     imageUrl: "/images/hero-main.jpg",
+    imageAlt: "A glass office tower",
+    learn: ["The 5-year break-even, with 2026 numbers", "When buying wins, and when renting does", "The hybrid option many companies miss"],
   },
   {
     slug: "office-size-guide",
@@ -78,7 +87,9 @@ export const GUIDES: Guide[] = [
     readMinutes: 8,
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
-    imageUrl: "/images/general-office.jpg",
+    imageUrl: "/images/admin%202.jpg",
+    imageAlt: "A small private office with two workstations",
+    learn: ["The formula for m\u00b2 per person", "Room for meetings, amenities and circulation", "A worked example for a 30-person office"],
   },
   {
     slug: "office-fit-out-costs-cairo",
@@ -91,7 +102,9 @@ export const GUIDES: Guide[] = [
     readMinutes: 11,
     publishedAt: "2026-08-20",
     updatedAt: "2026-08-20",
-    imageUrl: "/images/Mivida-Business-Park.jpg",
+    imageUrl: "/images/general-office.jpg",
+    imageAlt: "A fitted-out open-plan office with glass partitions",
+    learn: ["Costs for three finish levels", "The itemised budget by category", "How long a fit-out really takes"],
   },
 ];
 
