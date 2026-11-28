@@ -25,6 +25,13 @@ export const AR_LIVE: readonly string[] = [
   "/rent",
   "/buy",
   "/income-property",
+  // 29 Nov: area pages (reviewed: /ar/rent/new-cairo). Listed in the sitemap
+  // only while the English page has enough stock.
+  "/rent/new-cairo",
+  "/buy/new-cairo",
+  "/income-property/new-cairo",
+  "/rent/sheikh-zayed",
+  "/rent/maadi",
 ];
 
 /** "/ar/rent" → "/rent", "/ar" → "/", English paths unchanged. */
