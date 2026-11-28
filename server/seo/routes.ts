@@ -1,5 +1,5 @@
 import type { Express, Request, Response, NextFunction } from "express";
-import { renderDealHub, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
+import { renderDealHub, renderDealHubAr, renderDeveloper, renderHome, renderLanding, renderListing, renderListingsIndex, renderLocation, renderNotFound, setDistPath, shell } from "./render";
 import { findBlogPost, getBlogData, renderBlogHub, renderBlogPost, type BlogLang } from "./blog";
 import { getListingById } from "./data";
 import { registerSitemapRoutes } from "./sitemap";
@@ -79,6 +79,8 @@ export function registerSeoRoutes(app: Express, distPath: string): void {
   app.get("/developers/:slug", send((req) => renderDeveloper(String(req.params.slug))));
   // Deal hubs: every available office for rent / for sale / income property in Cairo.
   app.get(["/rent", "/buy", "/income-property"], send((req) => renderDealHub(req.path.slice(1))));
+  // Arabic twins of the hubs (28 Nov).
+  app.get(["/ar/rent", "/ar/buy", "/ar/income-property"], send((req) => renderDealHubAr(req.path.split("/")[2])));
   // Search landing pages (/rent/new-cairo, /buy/new-cairo, …). A page exists only
   // while it has enough available units; otherwise it's a real 404.
   app.get(["/rent/:loc", "/buy/:loc", "/income-property/:loc"], async (req, res, next) => {

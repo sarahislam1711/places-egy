@@ -58,9 +58,12 @@
   --color-sidebar-ring: #E8404A;
 
   /* Typography */
-  --font-sans: 'Plus Jakarta Sans', sans-serif;
-  --font-serif: 'Figtree', sans-serif;
-  --font-heading: 'Figtree', sans-serif;
+  /* Cairo after each Latin font: Arabic letters (Arabic site, 28 Nov) render in
+     Cairo, Latin letters keep their font. Loaded per glyph, so English pages
+     don't download it. */
+  --font-sans: 'Plus Jakarta Sans', 'Cairo', sans-serif;
+  --font-serif: 'Figtree', 'Cairo', sans-serif;
+  --font-heading: 'Figtree', 'Cairo', sans-serif;
   /* Arabic display font — used inside the Arabic blog for headings + rendered
      WP content. Cairo has good weight coverage and pairs cleanly with our
      Latin stack. */

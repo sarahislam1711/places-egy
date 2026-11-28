@@ -30,7 +30,10 @@ import {
   type DealSlug,
 } from "../../client/src/lib/landing-pages";
 import { landingFaqTopics, type RelatedLink } from "../../client/src/lib/landing-related";
-import { tenantRepHtml } from "../../client/src/lib/tenant-rep-cta";
+import { TENANT_REP_PATH, tenantRepHtml } from "../../client/src/lib/tenant-rep-cta";
+import { arabicPath, hasArabicTwin, localHref } from "../../client/src/lib/i18n";
+import { CAIRO_AR, dealHeadingAr, hubCopyAr, medianLabelAr, unitsAr } from "../../client/src/lib/landing-pages-ar";
+import { arabicListingTitle } from "../../client/src/lib/listing-text-ar";
 
 // Service pages linked from the homepage's server render (crawlers had no
 // path from / to any service page).
@@ -43,7 +46,7 @@ const SERVICE_LINKS = [
 ];
 
 const LOCATIONS = Object.values(LOCATION_CONTENT);
-import { esc, injectBody, injectJsonLd, injectMeta, prerenderInner, type PageMeta } from "./html";
+import { arabicSkipNav, esc, injectBody, injectJsonLd, injectMeta, prerenderInner, type PageMeta } from "./html";
 import { getInventory, type SeoListing } from "./data";
 
 export const SITE = "https://places-egy.com";
@@ -222,6 +225,55 @@ export async function renderDealHub(dealSlug: string): Promise<string | null> {
       copy.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
       landingNav(inventory, "Other popular searches") +
       locationNav(),
+  );
+}
+
+// Arabic twins of the deal hubs (/ar/rent …, 28 Nov): same live data, Arabic
+// copy (hubCopyAr), lang="ar" dir="rtl" from the first byte, Arabic JSON-LD and
+// the hidden crawler link list in Arabic. Links go to Arabic pages once live.
+export async function renderDealHubAr(dealSlug: string): Promise<string | null> {
+  if (!(dealSlug in DEALS)) return null;
+  const deal = dealSlug as DealSlug;
+  const inventory = await getInventory();
+  const rows = hubRows(inventory, deal);
+  if (!rows.length) return null;
+  const copy = hubCopyAr(deal, inventory);
+  const path = arabicPath(`/${deal}`);
+  const ar = (enPath: string) => localHref(enPath, "ar");
+  // Not switched on yet (not in AR_LIVE): reachable for review, but kept out of Google.
+  const live = hasArabicTwin(`/${deal}`);
+  let html = injectMeta(
+    shell(),
+    { title: copy.title, description: copy.description, url: `${SITE}${path}`, ...(live ? {} : { robots: "noindex, follow" }) },
+    { lang: "ar" },
+  );
+  html = arabicSkipNav(html);
+  html = injectJsonLd(html, breadcrumbSchema([{ name: "الرئيسية", url: `${SITE}${ar("/")}` }, { name: copy.h1, url: `${SITE}${path}` }]));
+  html = injectJsonLd(html, itemListSchema({ name: copy.h1, url: path, items: rows.slice(0, 48).map((l) => ({ name: arabicListingTitle(l), url: l.path })) }));
+  html = injectJsonLd(html, faqSchema(copy.faqs));
+  return injectBody(
+    html,
+    `<h1>${esc(copy.h1)}</h1>` +
+      copy.intro.map((p) => `<p>${esc(p)}</p>`).join("") +
+      (deal === "rent" ? tenantRepHtml("rent", esc, "ar", ar(TENANT_REP_PATH)) : "") +
+      `<h2>${esc(`${copy.h1} حسب المنطقة`)}</h2><ul>` +
+      copy.areas
+        .map((a) => `<li><a href="${ar(a.path)}">${esc(dealHeadingAr(deal, a.name))}</a>: ${esc(unitsAr(deal, a.count))}${a.median ? `، ${esc(medianLabelAr(deal, a.median))}` : ""}</li>`)
+        .join("") +
+      `</ul>` +
+      `<h2>${esc(copy.listHeading)}</h2><ul>` +
+      rows.slice(0, 48).map((l) => `<li><a href="${l.path}">${esc(arabicListingTitle(l))}</a></li>`).join("") +
+      `</ul>` +
+      `<p><a href="${ar("/listings")}">تصفح كل المكاتب المتاحة</a></p>` +
+      `<h2>${esc(`أسئلة شائعة: ${copy.h1}`)}</h2>` +
+      copy.faqs.map((f) => `<h3>${esc(f.question)}</h3><p>${esc(f.answer)}</p>`).join("") +
+      `<h2>مكاتب أخرى في القاهرة</h2><ul>` +
+      (Object.keys(DEALS) as DealSlug[])
+        .filter((d) => d !== deal)
+        .map((d) => `<li><a href="${ar(`/${d}`)}">${esc(dealHeadingAr(d, CAIRO_AR))}</a></li>`)
+        .join("") +
+      `</ul>`,
+    "ar",
   );
 }
 

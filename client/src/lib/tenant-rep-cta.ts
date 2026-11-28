@@ -63,8 +63,52 @@ export const TENANT_REP_COPY: Record<
   },
 };
 
+// Arabic (28 Nov). "وسيط عقاري للشركات" is the Arabic search term for the
+// service; the brand stays PLACES.
+export const TENANT_REP_COPY_AR: Record<TenantRepVariant, (typeof TENANT_REP_COPY)[TenantRepVariant]> = {
+  rent: {
+    title: "لا تبحث وحدك",
+    text: "PLACES تمثّلك أنت، لا المالك. نختار لك المكاتب المناسبة، ونتفاوض على الإيجار وفترة السماح والزيادة السنوية، ونراجع العقد قبل التوقيع. خدمة الوسيط العقاري للشركات مجانية للمستأجر لأن المالك هو من يدفع أتعابنا.",
+    link: "كيف تعمل خدمة الوسيط العقاري للشركات",
+    lead: "PLACES تمثّلك أنت، لا المالك.",
+    points: [
+      "نختار لك المكاتب المناسبة لفريقك",
+      "نتفاوض على الإيجار وأشهر السماح والزيادة السنوية",
+      "نراجع العقد قبل أن توقّع",
+    ],
+    formPage: "Offices for rent (AR)",
+  },
+  listing: {
+    title: "تريدنا أن نتفاوض على هذا المكتب نيابةً عنك؟",
+    text: "مع PLACES كوسيط عقاري لشركتك، نقارن هذا المكتب بالبدائل المشابهة ونتفاوض على الشروط ونراجع العقد. الخدمة مجانية للمستأجر لأن المالك هو من يدفع أتعابنا.",
+    link: "وسيط عقاري مجاني للشركات",
+    lead: "مع PLACES كوسيط عقاري لشركتك، يكون معك مستشار في صفك.",
+    points: [
+      "نقارن هذا المكتب بالبدائل القريبة",
+      "نتفاوض على الإيجار وشروط العقد",
+      "نراجع العقد قبل أن توقّع",
+    ],
+    formPage: "Rent listing (AR)",
+  },
+  advice: {
+    title: "خلّي معاك مستشار في صفك",
+    text: "مع خدمة الوسيط العقاري للشركات من PLACES يكون معك مستشار في صفك: نبحث في السوق كله، ونتفاوض على شروط الإيجار، ونراجع العقد. الخدمة مجانية للمستأجر لأن المالك هو من يدفع أتعابنا.",
+    link: "اعرف أكثر عن الوسيط العقاري للشركات",
+    lead: "مع PLACES يكون معك مستشار في صفك على طاولة التفاوض.",
+    points: [
+      "نبحث في السوق كله من أجلك",
+      "نتفاوض على شروط الإيجار",
+      "نراجع العقد قبل أن توقّع",
+    ],
+    formPage: "Guide / FAQ (AR)",
+  },
+};
+
+export const tenantRepCopy = (variant: TenantRepVariant, lang: "en" | "ar" = "en") =>
+  (lang === "ar" ? TENANT_REP_COPY_AR : TENANT_REP_COPY)[variant];
+
 /** Plain HTML version for server-rendered and build-time pages. */
-export function tenantRepHtml(variant: TenantRepVariant, esc: (s: string) => string): string {
-  const c = TENANT_REP_COPY[variant];
-  return `<aside><h2>${esc(c.title)}</h2><p>${esc(c.text)} <a href="${TENANT_REP_PATH}">${esc(c.link)}</a></p></aside>`;
+export function tenantRepHtml(variant: TenantRepVariant, esc: (s: string) => string, lang: "en" | "ar" = "en", href = TENANT_REP_PATH): string {
+  const c = tenantRepCopy(variant, lang);
+  return `<aside><h2>${esc(c.title)}</h2><p>${esc(c.text)} <a href="${href}">${esc(c.link)}</a></p></aside>`;
 }

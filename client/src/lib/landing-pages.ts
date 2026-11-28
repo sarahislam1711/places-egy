@@ -106,12 +106,12 @@ const quantile = (sorted: number[], q: number) => {
   const lo = Math.floor(i);
   return sorted[lo] + (sorted[Math.min(lo + 1, sorted.length - 1)] - sorted[lo]) * (i - lo);
 };
-const roundNice = (n: number) => {
+export const roundNice = (n: number) => {
   const step = n >= 1_000_000 ? 100_000 : n >= 100_000 ? 10_000 : n >= 10_000 ? 1_000 : n >= 1_000 ? 50 : 10;
   return Math.round(n / step) * step;
 };
-const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
-const fmtMoney = (n: number) =>
+export const fmt = (n: number) => Math.round(n).toLocaleString("en-US");
+export const fmtMoney = (n: number) =>
   n >= 1_000_000 ? `${(n / 1_000_000).toFixed(n >= 10_000_000 ? 0 : 1)}M` : fmt(roundNice(n));
 
 const CONDITION_LABELS: Record<string, string> = {

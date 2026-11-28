@@ -13,6 +13,8 @@ export interface PageMeta {
   robots?: string;
 }
 
+import { localHref } from "../../client/src/lib/i18n";
+
 export function attr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }
@@ -82,6 +84,31 @@ export function ensureAlternates(html: string, alternates: Array<{ hreflang: str
     .map((a) => `<link rel="alternate" hreflang="${attr(a.hreflang)}" href="${attr(a.url)}" />`)
     .join("\n");
   return swap(html, /<\/head>/i, `${tags}\n</head>`);
+}
+
+/**
+ * Arabic pages: swap the shell's hidden "Site navigation" link list (English)
+ * for an Arabic one, so crawlers that don't run JavaScript see an all-Arabic
+ * page. Links go to the English pages until their Arabic twins exist.
+ */
+export function arabicSkipNav(html: string): string {
+  const links: Array<[string, string]> = [
+    [localHref("/", "ar"), "الرئيسية"],
+    [localHref("/listings", "ar"), "المكاتب المتاحة"],
+    [localHref("/rent", "ar"), "مكاتب إدارية للإيجار"],
+    [localHref("/buy", "ar"), "مكاتب إدارية للبيع"],
+    [localHref("/locations", "ar"), "المناطق"],
+    [localHref("/services", "ar"), "الخدمات"],
+    ["/ar/blog", "المدونة"],
+    [localHref("/contact", "ar"), "تواصل معنا"],
+  ];
+  const nav =
+    `<nav aria-label="روابط الموقع" style="position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;">` +
+    `<h2>PLACES — مكاتب إدارية في القاهرة</h2><ul>` +
+    links.map(([href, label]) => `<li><a href="${href}">${esc(label)}</a></li>`).join("") +
+    `</ul></nav>`;
+  // The shell's list has no nested <nav>, so the first </nav> closes it.
+  return html.replace(/<nav\s+aria-label="Site navigation"[\s\S]*?<\/nav>/, () => nav);
 }
 
 export function injectJsonLd(html: string, jsonLd: unknown): string {

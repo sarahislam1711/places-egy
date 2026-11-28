@@ -6,13 +6,17 @@ import { useEffect, useState } from "react";
 
 export type TocItem = { id: string; text: string };
 
+// Letters and digits in any script (Arabic headings keep their letters). Built
+// from a string so the type checker's ES target doesn't reject the "u" flag.
+const NON_WORD = new RegExp("[^\\p{L}\\p{N}\\s-]", "gu");
+
 /** Turn a heading into an id. Keeps Arabic letters so Arabic posts get readable ids. */
 export function slugifyHeading(text: string): string {
   return (
     text
       .trim()
       .toLowerCase()
-      .replace(/[^\p{L}\p{N}\s-]/gu, "")
+      .replace(NON_WORD, "")
       .replace(/\s+/g, "-")
       .replace(/-+/g, "-")
       .slice(0, 60) || "section"
