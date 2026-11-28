@@ -208,11 +208,13 @@ export default function BlogIndexPage({ lang = "en" }: { lang?: BlogLang }) {
             {/* Newest post large, next three as a list */}
             {showLatest && (
               <section className="pb-14 md:pb-20">
-                <div className="container mx-auto px-6 md:px-10 max-w-6xl grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-start">
-                  <FeaturedPost post={latest[0]} lang={lang} basePath={basePath} />
-                  <div className="flex flex-col">
-                    <h2 className={`text-2xl font-bold text-primary mb-4 ${serif}`}>{t.latest}</h2>
-                    <ul className="flex flex-col gap-3">
+                <div className="container mx-auto px-6 md:px-10 max-w-6xl">
+                  <h2 className={`text-2xl md:text-3xl font-bold text-primary mb-6 ${serif}`}>{t.latest}</h2>
+                  {/* Big card and list start and end on the same line: the list
+                      stretches to the card's height and spreads its rows. */}
+                  <div className="grid gap-6 lg:grid-cols-[1.3fr_1fr] lg:items-stretch">
+                    <FeaturedPost post={latest[0]} lang={lang} basePath={basePath} />
+                    <ul className="flex flex-col gap-3 lg:justify-between">
                       {latest.slice(1).map((p) => (
                         <li key={p.id}>
                           <PostRow post={p} lang={lang} basePath={basePath} />
