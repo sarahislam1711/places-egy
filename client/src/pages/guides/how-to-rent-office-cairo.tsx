@@ -16,7 +16,7 @@ const WORD_COUNT = 2100;
 export default function HowToRentOfficeCairoGuide() {
   return (
     <GuideLayout guide={guide} wordCount={WORD_COUNT}>
-      <p className="lead" style={{ fontSize: "1.15rem" }}>
+      <p className="lead">
         Renting an office in Cairo is straightforward if you follow a
         clean process — and expensive if you don't. This guide walks
         through the actual 7-step sequence PLACES uses with clients,

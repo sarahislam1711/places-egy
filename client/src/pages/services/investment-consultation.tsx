@@ -41,7 +41,7 @@ const WHO: Audience[] = [
 ];
 
 const WHY: Reason[] = [
-  { icon: Scale, title: "Objective advisory", desc: "We don't earn commission on what we recommend. Our advice is based on data, not on closing a deal." },
+  { icon: Scale, title: "Objective advisory", desc: "Our advice is based on data and your goals, not on closing a deal." },
   { icon: BarChart3, title: "Market depth", desc: "We track yield trends, vacancy rates, and capital appreciation across commercial and administrative assets in Egypt." },
   { icon: Handshake, title: "Long-term relationship", desc: "We stay available after your first acquisition, for portfolio reviews and future decisions." },
   { icon: CircleSlash, title: "We say no", desc: "If a unit doesn't fit your investment thesis, we tell you. We don't push deals that don't make sense." },
@@ -68,7 +68,7 @@ const STEPS = [
 
 const COMPARISON = [
   { label: "Who they work across", us: "Multiple developers and projects", them: "One developer's projects only" },
-  { label: "Incentives", us: "We don't earn commission on what we recommend", them: "Aligned with the developer rather than the buyer" },
+  { label: "Incentives", us: "Advice based on your goals and the numbers", them: "Aligned with the developer rather than the buyer" },
   { label: "What you get", us: "Objective comparisons based on data and your criteria", them: "Detailed product knowledge, with limited objectivity" },
   { label: "If the unit doesn't fit", us: "We tell you, and don't push the deal", them: "Their job is to sell that developer's units" },
 ];
@@ -143,7 +143,7 @@ export default function InvestmentConsultation() {
           primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "invest", pageName: "Investment consultation" } }}
           image="/images/investment-consultation.jpg"
           imageAlt="Real estate investment consultation in Egypt"
-          promise={{ title: "Objective advisory", text: "We don't earn commission on what we recommend. Our advice is based on data, not on closing a deal." }}
+          promise={{ title: "Objective advisory", text: "Our advice is based on data and your goals, not on closing a deal." }}
           points={["Yield, vacancy and growth analyzed", "We tell you when a unit doesn't fit", "Available after the acquisition"]}
         />
 

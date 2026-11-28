@@ -16,7 +16,7 @@ const WORD_COUNT = 1620;
 export default function OfficeSizeGuidePage() {
   return (
     <GuideLayout guide={guide} wordCount={WORD_COUNT}>
-      <p className="lead" style={{ fontSize: "1.15rem" }}>
+      <p className="lead">
         A simple rule of thumb: <strong>plan for{" "}
         <HighlightNumber>8–12 m² per full-time employee</HighlightNumber>{" "}
         in Cairo</strong>. That covers workstations, meeting rooms,

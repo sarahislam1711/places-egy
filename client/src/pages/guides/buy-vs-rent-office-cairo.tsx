@@ -17,7 +17,7 @@ const WORD_COUNT = 1950;
 export default function BuyVsRentOfficeCairoGuide() {
   return (
     <GuideLayout guide={guide} wordCount={WORD_COUNT}>
-      <p className="lead" style={{ fontSize: "1.15rem" }}>
+      <p className="lead">
         For Cairo office space in 2026, <strong>renting is the right
         call for most businesses under 50 people</strong>, and{" "}
         <strong>buying starts to make financial sense past a 5–7 year

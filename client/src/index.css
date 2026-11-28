@@ -634,3 +634,21 @@
   .blog-content .blog-faq-item > summary { padding: 1rem; }
   .blog-content .blog-faq-answer { padding: 0 1rem 1rem; }
 }
+
+/* Phone text scale (28 Nov): slightly smaller type on phones only, so pages
+   feel less crowded. Remaps Tailwind's size steps below 768px — every page
+   type (guides, blog, services, hubs, areas) changes together, and the
+   md:/lg: sizes for tablet and desktop are untouched. Body text stays ≥16px. */
+@media (max-width: 767px) {
+  :root {
+    --text-lg: 1.0625rem;  /* 18 → 17px: intros, lead paragraphs */
+    --text-xl: 1.125rem;   /* 20 → 18px */
+    --text-2xl: 1.3125rem; /* 24 → 21px: card + section titles */
+    --text-3xl: 1.625rem;  /* 30 → 26px: section headings, article titles */
+    --text-4xl: 1.875rem;  /* 36 → 30px: page titles */
+    --text-5xl: 2.375rem;  /* 48 → 38px */
+  }
+  .guide-content h2 { font-size: 1.4rem; }       /* 26.4 → 22.4px */
+  .guide-content h3 { font-size: 1.1rem; }       /* 19.2 → 17.6px */
+  .guide-content p.lead { font-size: 1.0625rem; } /* 18.4 → 17px */
+}

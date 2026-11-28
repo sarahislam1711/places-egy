@@ -44,7 +44,7 @@ const WHY: Reason[] = [
   { icon: BellRing, title: "We know the launches", desc: "We track every major developer launch in Egypt, so you never miss a strong opportunity." },
   { icon: SearchCheck, title: "We evaluate before you buy", desc: "We assess the unit, the developer, and the payment plan, not just the brochure." },
   { icon: ClipboardCheck, title: "We manage the process", desc: "From reservation to handover, we manage every step so nothing falls through." },
-  { icon: Scale, title: "Independent perspective", desc: "We're not employed by any developer. Our recommendations are based on the unit, not the commission." },
+  { icon: Scale, title: "Independent perspective", desc: "We're not employed by any developer. Our recommendations are based on the unit, not on who's selling it." },
 ];
 
 const STEPS = [
@@ -206,7 +206,7 @@ export default function PrimaryProperty() {
           primary={{ label: "Talk to an advisor", href: "/contact", form: { intent: "buy", pageName: "Primary property" } }}
           image="/images/hero-main.jpg"
           imageAlt="Primary property in Egypt"
-          promise={{ title: "Independent perspective", text: "We're not employed by any developer. Our recommendations are based on the unit, not the commission." }}
+          promise={{ title: "Independent perspective", text: "We're not employed by any developer. Our recommendations are based on the unit, not on who's selling it." }}
           points={["Pre-launch and off-market access", "Unit, developer and payment plan assessed", "Managed from reservation to handover"]}
         />
 

@@ -29,7 +29,7 @@ const DISTRICT_PRICES = [
 export default function OfficeRentalPricesCairo2026Guide() {
   return (
     <GuideLayout guide={guide} wordCount={WORD_COUNT}>
-      <p className="lead" style={{ fontSize: "1.15rem" }}>
+      <p className="lead">
         Office rents in Cairo range from about{" "}
         <HighlightNumber>EGP 200 per square meter per month</HighlightNumber>{" "}
         in older Downtown buildings to{" "}

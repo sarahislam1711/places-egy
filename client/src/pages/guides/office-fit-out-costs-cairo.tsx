@@ -17,7 +17,7 @@ const WORD_COUNT = 2040;
 export default function OfficeFitOutCostsCairoGuide() {
   return (
     <GuideLayout guide={guide} wordCount={WORD_COUNT}>
-      <p className="lead" style={{ fontSize: "1.15rem" }}>
+      <p className="lead">
         Fitting out a Cairo office in 2026 costs between{" "}
         <HighlightNumber>EGP 3,500 and EGP 12,000 per m²</HighlightNumber>{" "}
         depending on the finish level. A modest professional-services
