@@ -21,6 +21,8 @@ export const SITE_ORIGIN = "https://places-egy.com";
  * Arabic page is complete (every word Arabic) and has been checked.
  */
 export const AR_LIVE: readonly string[] = [
+  // 29 Nov: home page /ar (reviewed in the preview).
+  "/",
   // 29 Nov: the three deal hubs (reviewed in the preview).
   "/rent",
   "/buy",
