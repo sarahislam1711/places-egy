@@ -63,7 +63,8 @@ export default function DealHubPage() {
   const heroStats: Array<{ label: string; value: string | null }> = isAr
     ? [
         { label: dealSlug === "income-property" ? "عقارات مدرة للدخل متاحة" : rentDeal ? "مكاتب إدارية للإيجار" : "مكاتب إدارية للبيع", value: stats ? stats.count.toLocaleString("en-US") : null },
-        { label: copy && copy.areas.length > 2 ? "مناطق أعمال" : "منطقة أعمال", value: copy ? String(copy.areas.length) : null },
+        // Arabic number agreement: 1 منطقة، 2 منطقتا، 3–10 مناطق، 11+ منطقة.
+        { label: !copy ? "مناطق أعمال" : copy.areas.length === 2 ? "منطقتا أعمال" : copy.areas.length >= 3 && copy.areas.length <= 10 ? "مناطق أعمال" : "منطقة أعمال", value: copy ? String(copy.areas.length) : null },
         { label: rentDeal ? "متوسط إيجار المتر شهريًا (ج.م)" : "متوسط سعر المتر (ج.م)", value: stats?.perSqm ? medianFigureAr(dealSlug, stats.perSqm[1]) : stats ? "—" : null },
         { label: "المساحات المتاحة (م²)", value: stats && stats.areaMin && stats.areaMax ? `${stats.areaMin.toLocaleString("en-US")}–${stats.areaMax.toLocaleString("en-US")}` : stats ? "—" : null },
       ]

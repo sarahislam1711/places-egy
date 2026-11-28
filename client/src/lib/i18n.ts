@@ -20,7 +20,12 @@ export const SITE_ORIGIN = "https://places-egy.com";
  * English paths whose Arabic twin is live. Add a path here only when the
  * Arabic page is complete (every word Arabic) and has been checked.
  */
-export const AR_LIVE: readonly string[] = [];
+export const AR_LIVE: readonly string[] = [
+  // 29 Nov: the three deal hubs (reviewed in the preview).
+  "/rent",
+  "/buy",
+  "/income-property",
+];
 
 /** "/ar/rent" → "/rent", "/ar" → "/", English paths unchanged. */
 export function englishPath(path: string): string {
