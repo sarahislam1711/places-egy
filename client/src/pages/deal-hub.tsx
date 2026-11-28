@@ -37,8 +37,10 @@ export default function DealHubPage() {
   const L = (enPath: string) => localHref(enPath, isAr ? "ar" : "en");
   const [shown, setShown] = useState(BATCH);
 
-  const { data: all = [], isLoading } = useQuery<Listing[]>({
+  const { data: all = [], isLoading, isError, refetch, isFetching } = useQuery<Listing[]>({
     queryKey: ["deal-hub-inventory"],
+    // A dropped connection retries, and never turns the page into a 404.
+    retry: 2,
     enabled: !!deal,
     staleTime: 60_000,
     queryFn: async () => {
@@ -101,7 +103,8 @@ export default function DealHubPage() {
     : null;
 
   if (!deal) return <NotFound />;
-  if (!isLoading && rows.length === 0) return <NotFound />;
+  const failed = isError && all.length === 0;
+  if (!isLoading && !failed && rows.length === 0) return <NotFound />;
 
   return (
     <div className="min-h-screen flex flex-col font-sans bg-background" lang={isAr ? "ar" : undefined}>
@@ -262,7 +265,16 @@ export default function DealHubPage() {
             <Home className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
             <span>{isAr ? copyAr?.listHeading ?? heading : copy?.listHeading ?? heading}</span>
           </h2>
-          {isLoading ? (
+          {failed ? (
+            <div className="rounded-2xl border border-border/40 bg-white p-8 text-center">
+              <p className="text-muted-foreground mb-4">
+                {isAr ? "تعذر تحميل الوحدات. تحقق من الاتصال وحاول مرة أخرى." : "We couldn't load the offices. Check your connection and try again."}
+              </p>
+              <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+                {isAr ? "حاول مرة أخرى" : "Try again"}
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="rounded-2xl border border-border/40 bg-white h-80 animate-pulse" />

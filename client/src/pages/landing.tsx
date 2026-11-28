@@ -57,8 +57,10 @@ export default function LandingPage() {
 
   // This location's listings (all deal types, for the sibling links), card
   // fields only: no descriptions, which keeps the download small on mobile.
-  const { data: all = [], isLoading } = useQuery<Listing[]>({
+  const { data: all = [], isLoading, isError, refetch, isFetching } = useQuery<Listing[]>({
     queryKey: ["landing-inventory", loc?.name],
+    // A dropped connection retries, and never turns the page into a 404.
+    retry: 2,
     enabled: !!loc,
     staleTime: 60_000,
     queryFn: async () => {
@@ -99,7 +101,8 @@ export default function LandingPage() {
   });
 
   if (!deal || !loc) return <NotFound />;
-  if (!isLoading && rows.length < LANDING_MIN_UNITS) return <NotFound />;
+  const failed = isError && all.length === 0;
+  if (!isLoading && !failed && rows.length < LANDING_MIN_UNITS) return <NotFound />;
 
   const h1 = isAr ? dealHeadingAr(dealSlug, areaName) : deal.heading(loc.name);
   const txWordAr = dealSlug === "rent" ? "مكاتب للإيجار" : dealSlug === "buy" ? "مكاتب للبيع" : "عقارات مدرة للدخل";
@@ -181,7 +184,16 @@ export default function LandingPage() {
             <Home className="w-6 h-6 md:w-7 md:h-7 text-accent shrink-0" />
             <span>{isAr ? copyAr?.listHeading ?? h1 : copy?.listHeading ?? deal.heading(loc.name)}</span>
           </h2>
-          {isLoading ? (
+          {failed ? (
+            <div className="rounded-2xl border border-border/40 bg-white p-8 text-center">
+              <p className="text-muted-foreground mb-4">
+                {isAr ? "تعذر تحميل الوحدات. تحقق من الاتصال وحاول مرة أخرى." : "We couldn't load the offices. Check your connection and try again."}
+              </p>
+              <Button variant="outline" onClick={() => refetch()} disabled={isFetching}>
+                {isAr ? "حاول مرة أخرى" : "Try again"}
+              </Button>
+            </div>
+          ) : isLoading ? (
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="rounded-2xl border border-border/40 bg-white h-80 animate-pulse" />
