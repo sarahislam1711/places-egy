@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/navigation-menu";
 import { cn } from "@/lib/utils";
 import { NavbarFavoriteButton } from "@/components/NavbarFavoriteButton";
+import { LanguagePicker, LanguagePickerInline } from "@/components/layout/LanguagePicker";
 import { useLang } from "@/lib/ui-text";
 import { englishPath } from "@/lib/i18n";
 
@@ -40,7 +41,7 @@ export function Navbar({ solid = false }: { solid?: boolean } = {}) {
   const [scrolled, setScrolled] = useState(false);
   const [location] = useLocation();
   const [openMobileSection, setOpenMobileSection] = useState<string | null>(null);
-  const { t, href, twin, isAr } = useLang();
+  const { t, href, isAr } = useLang();
   // The Arabic blog lives on WordPress: its own switcher sits on the page.
   const blogPage = /^\/(ar\/)?blog(\/|$)/.test(location);
   const enLocation = englishPath(location);
@@ -147,18 +148,8 @@ export function Navbar({ solid = false }: { solid?: boolean } = {}) {
 
         {/* Column 3 — Desktop CTAs (right-aligned) */}
         <div className="hidden lg:flex items-center gap-3 shrink-0 lg:justify-self-end">
-          {twin && !blogPage && (
-            <Link
-              href={twin}
-              hrefLang={isAr ? "en" : "ar"}
-              lang={isAr ? "en" : "ar"}
-              aria-label={t.switchToLabel}
-              onClick={() => trackEvent("language_switch", { to: isAr ? "en" : "ar", from_path: location })}
-              className="text-sm font-medium text-white/85 hover:text-accent transition-colors px-1"
-            >
-              {t.switchTo}
-            </Link>
-          )}
+          {/* Language picker: every page except the blog (WordPress has its own). */}
+          {!blogPage && <LanguagePicker />}
           <Link href={href("/contact")}>
             <Button variant="outline" size="sm" className="rounded-full px-4 h-9 text-sm font-medium bg-transparent border-white/30 text-white hover:bg-white/10 hover:text-white hover:border-white/50">
               {t.contact}
@@ -193,21 +184,7 @@ export function Navbar({ solid = false }: { solid?: boolean } = {}) {
               {t.browseListings}
             </Button>
           </Link>
-          {twin && !blogPage && (
-            <Link
-              href={twin}
-              hrefLang={isAr ? "en" : "ar"}
-              lang={isAr ? "en" : "ar"}
-              aria-label={t.switchToLabel}
-              onClick={() => {
-                trackEvent("language_switch", { to: isAr ? "en" : "ar", from_path: location });
-                closeMobile();
-              }}
-              className="text-center text-sm font-medium py-2 text-white/85 hover:text-accent"
-            >
-              {t.switchTo}
-            </Link>
-          )}
+          {!blogPage && <LanguagePickerInline onPick={closeMobile} />}
 
           {/* Properties (expandable) */}
           <div className="border-b border-white/10">
