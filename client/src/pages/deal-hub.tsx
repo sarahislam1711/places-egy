@@ -147,8 +147,10 @@ export default function DealHubPage() {
               {heroStats.map((st) => (
                 <div key={st.label} className="flex flex-col-reverse justify-end gap-1">
                   <dt className="text-sm text-white/65 leading-snug">{st.label}</dt>
-                  <dd className="font-serif text-3xl md:text-[2.6rem] font-bold leading-none tracking-[-0.03em] text-white whitespace-nowrap" dir="ltr">
-                    {st.value ?? <span className="inline-block h-9 w-24 rounded bg-white/10 animate-pulse align-middle" />}
+                  <dd className="font-serif text-3xl md:text-[2.6rem] font-bold leading-none tracking-[-0.03em] text-white whitespace-nowrap">
+                    {/* Digits read left to right ("30–9,000") but the figure sits on
+                        the same side as its label in Arabic (right). */}
+                    {st.value ? <span dir="ltr" className="inline-block">{st.value}</span> : <span className="inline-block h-9 w-24 rounded bg-white/10 animate-pulse align-middle" />}
                   </dd>
                 </div>
               ))}
