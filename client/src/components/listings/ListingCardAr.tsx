@@ -88,9 +88,17 @@ export function ListingCardAr({ listing }: { listing: Listing }) {
         </h3>
         <div className="flex items-center gap-1.5 text-muted-foreground text-sm mt-0.5">
           <MapPin className="w-3.5 h-3.5 shrink-0" />
-          <span className="truncate">
-            {areaAr(listing.location)}
-            {project && <span dir="auto"> · {project}</span>}
+          {/* Area, dot and (usually English) project name as separate pieces:
+              inside one span the dot jumped to the wrong side and the two
+              names ran into each other. */}
+          <span className="flex min-w-0 items-center gap-1.5">
+            <span className="shrink-0">{areaAr(listing.location)}</span>
+            {project && (
+              <>
+                <span aria-hidden className="shrink-0 text-muted-foreground/60">·</span>
+                <bdi dir="ltr" className="truncate">{project}</bdi>
+              </>
+            )}
           </span>
         </div>
       </CardHeader>
